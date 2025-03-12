@@ -27,7 +27,7 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-export const Camera = () => {
+export const CameraPage = () => {
   const [image, setImage] = useState<File | null>(null);
   const [imageSrcData, setImageSrcData] = useState("");
   const [uploading, setUploading] = useState(false);

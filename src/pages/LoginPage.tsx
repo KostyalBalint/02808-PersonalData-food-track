@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 
-export const Login = () => {
+export const LoginPage = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
 

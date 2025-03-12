@@ -1,19 +1,32 @@
 import { useState } from "react";
 import {
+  alpha,
   AppBar,
   Box,
   Drawer,
   IconButton,
   List,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
+  Stack,
   Toolbar,
   Typography,
 } from "@mui/material";
-import { Home, Image, Logout, Menu, PhotoCamera } from "@mui/icons-material";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Logout, Menu } from "@mui/icons-material";
+import { Outlet, useNavigate } from "react-router-dom";
 import { auth } from "../firebaseConfig";
+import { pages } from "../pages/pages.ts";
+
+const style = {
+  minHeight: 44,
+  borderRadius: 0.75,
+  typography: "body2",
+  color: "text.secondary",
+  textTransform: "capitalize",
+  fontWeight: "fontWeightMedium",
+};
 
 export const ResponsiveDrawer = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -30,36 +43,39 @@ export const ResponsiveDrawer = () => {
 
   const drawerContent = (
     <List>
-      <ListItem
-        component={Link}
-        to="/home"
-        onClick={() => setMobileOpen(false)}
-      >
-        <ListItemIcon>
-          <Home />
-        </ListItemIcon>
-        <ListItemText primary="Home" />
-      </ListItem>
-      <ListItem
-        component={Link}
-        to="/camera"
-        onClick={() => setMobileOpen(false)}
-      >
-        <ListItemIcon>
-          <PhotoCamera />
-        </ListItemIcon>
-        <ListItemText primary="Camera" />
-      </ListItem>
-      <ListItem
-        component={Link}
-        to="/gallery"
-        onClick={() => setMobileOpen(false)}
-      >
-        <ListItemIcon>
-          <Image />
-        </ListItemIcon>
-        <ListItemText primary="Gallery" />
-      </ListItem>
+      {pages.map((page) => {
+        const active = location.pathname === page.path;
+        return (
+          <ListItem
+            key={page.name}
+            disablePadding
+            onClick={() => {
+              navigate(page.path);
+            }}
+          >
+            <ListItemButton
+              sx={{
+                ...style,
+                ...(active && {
+                  fontWeight: "fontWeightSemiBold",
+                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+                  "&:hover": {
+                    bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16),
+                  },
+                }),
+              }}
+            >
+              <Stack direction="row" gap={2} alignItems="center">
+                <Typography fontSize={22} lineHeight={0}>
+                  <page.icon />
+                </Typography>
+                <ListItemText primary={page.name} />
+              </Stack>
+            </ListItemButton>
+          </ListItem>
+        );
+      })}
+
       <ListItem onClick={handleLogout}>
         <ListItemIcon>
           <Logout />

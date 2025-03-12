@@ -1,44 +1,49 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Login } from "./pages/Login";
-import { Home } from "./pages/Home";
+import { LoginPage } from "./pages/LoginPage.tsx";
+import { HomePage } from "./pages/HomePage.tsx";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./router/Protected.tsx";
-import { Camera } from "./pages/Camera.tsx";
-import { Gallery } from "./pages/Gallery.tsx";
+import { CameraPage } from "./pages/CameraPage.tsx";
+import { GalleryPage } from "./pages/GalleryPage.tsx";
 import { ResponsiveDrawer } from "./components/responsiveDrawer.tsx";
 import { SnackbarProvider } from "notistack";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import theme from "./theme/theme.ts";
 
 function App() {
   return (
-    <SnackbarProvider
-      maxSnack={3}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      autoHideDuration={3000}
-    >
-      <AuthProvider>
-        <Router>
-          <Routes>
-            {/* Public Route */}
-            <Route path="/login" element={<Login />} />
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <SnackbarProvider
+        maxSnack={3}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+        autoHideDuration={3000}
+      >
+        <AuthProvider>
+          <Router>
+            <Routes>
+              {/* Public Route */}
+              <Route path="/login" element={<LoginPage />} />
 
-            {/* Protected Routes */}
-            <Route element={<ProtectedRoute />}>
-              <Route element={<ResponsiveDrawer />}>
-                <Route path="/home" element={<Home />} />
-                <Route path="/camera" element={<Camera />} />
-                <Route path="/gallery" element={<Gallery />} />
+              {/* Protected Routes */}
+              <Route element={<ProtectedRoute />}>
+                <Route element={<ResponsiveDrawer />}>
+                  <Route path="/home" element={<HomePage />} />
+                  <Route path="/camera" element={<CameraPage />} />
+                  <Route path="/gallery" element={<GalleryPage />} />
+                </Route>
               </Route>
-            </Route>
 
-            {/* Default Route */}
-            <Route path="*" element={<Login />} />
-          </Routes>
-        </Router>
-      </AuthProvider>
-    </SnackbarProvider>
+              {/* Default Route */}
+              <Route path="*" element={<LoginPage />} />
+            </Routes>
+          </Router>
+        </AuthProvider>
+      </SnackbarProvider>
+    </ThemeProvider>
   );
 }
 

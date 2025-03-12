@@ -17,7 +17,7 @@ interface ImageData {
   imageUrl: string;
 }
 
-export const Gallery = () => {
+export const GalleryPage = () => {
   const [images, setImages] = useState<ImageData[]>([]);
   const [loading, setLoading] = useState(true);
 
