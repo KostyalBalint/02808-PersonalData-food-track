@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { storage, db, auth } from "../firebaseConfig";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
@@ -14,6 +14,7 @@ import {
 import { useSnackbar } from "notistack";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CloseIcon from "@mui/icons-material/Close";
+import Compressor from "compressorjs";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -37,12 +38,26 @@ export const CameraPage = () => {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0]);
-      setImageSrcData(URL.createObjectURL(e.target.files[0]));
-    }
-  };
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files[0]) {
+        console.log(`Original file size: ${e.target.files[0].size}`);
+        new Compressor(e.target.files[0], {
+          quality: 0.8, // 0.6 can also be used, but its not recommended to go below.
+          maxWidth: 2048,
+          maxHeight: 2048,
+          resize: "contain",
+          mimeType: "image/webp",
+          success: (compressedResult) => {
+            setImage(compressedResult as File);
+            setImageSrcData(URL.createObjectURL(compressedResult));
+            console.log(`Original file size: ${compressedResult.size}`);
+          },
+        });
+      }
+    },
+    [setImage, setImageSrcData],
+  );
 
   const discardFile = () => {
     setImage(null);
