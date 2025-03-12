@@ -1,8 +1,16 @@
 // src/pages/Gallery.tsx
 import { useEffect, useState } from "react";
-import { db, auth } from "../firebaseConfig";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { Container, Typography, Grid, Card, CardMedia } from "@mui/material";
+import { auth, db } from "../firebaseConfig";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  Backdrop,
+  Card,
+  CardMedia,
+  CircularProgress,
+  Container,
+  Grid,
+  Typography,
+} from "@mui/material";
 
 interface ImageData {
   id: string;
@@ -11,6 +19,7 @@ interface ImageData {
 
 export const Gallery = () => {
   const [images, setImages] = useState<ImageData[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -30,11 +39,17 @@ export const Gallery = () => {
       setImages(userImages);
     };
 
-    fetchImages();
+    fetchImages().finally(() => setLoading(false));
   }, []);
 
   return (
     <Container>
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Typography variant="h4" textAlign="center" mt={5}>
         Your Images
       </Typography>
@@ -44,9 +59,9 @@ export const Gallery = () => {
             <Card>
               <CardMedia
                 component="img"
-                height="200"
                 image={img.imageUrl}
                 alt="Uploaded image"
+                loading="lazy"
               />
             </Card>
           </Grid>
