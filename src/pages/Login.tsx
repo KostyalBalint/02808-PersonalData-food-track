@@ -1,30 +1,46 @@
-// src/pages/Login.tsx
 import { signInWithPopup } from "firebase/auth";
-import { Box, Button, Container, Typography } from "@mui/material";
+import { auth, provider } from "../firebaseConfig";
+import {
+  Button,
+  Typography,
+  Container,
+  Box,
+  CircularProgress,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { auth, provider } from "../firebase/firebase.ts";
 
 export const Login = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
-  // Redirect to /home if already logged in
   useEffect(() => {
-    if (user) {
+    if (!loading && user) {
       navigate("/home");
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
   const handleLogin = async () => {
     try {
       await signInWithPopup(auth, provider);
-      navigate("/home"); // Redirect to home after login
     } catch (error) {
       console.error("Login failed:", error);
     }
   };
+
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Container maxWidth="sm">

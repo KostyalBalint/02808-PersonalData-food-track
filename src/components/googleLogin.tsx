@@ -1,6 +1,6 @@
 import { signInWithPopup } from "firebase/auth";
 import { Box, Button, Container, Typography } from "@mui/material";
-import { auth, provider } from "../firebase/firebase.ts";
+import { auth, provider } from "../firebaseConfig.ts";
 
 export const GoogleLogin = () => {
   const handleLogin = async () => {

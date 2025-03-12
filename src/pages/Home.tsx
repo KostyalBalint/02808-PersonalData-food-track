@@ -1,5 +1,5 @@
 import { Button, Typography, Container, Box } from "@mui/material";
-import { auth } from "../firebase/firebase.ts";
+import { auth } from "../firebaseConfig.ts";
 import { useAuth } from "../hooks/useAuth.tsx";
 
 export const Home = () => {
