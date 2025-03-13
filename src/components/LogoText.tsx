@@ -7,6 +7,7 @@ export const LogoText: FC<TypographyProps> = (props) => {
     <Typography
       component="span"
       variant="h1"
+      fontWeight={600}
       sx={{
         backgroundImage: `linear-gradient( to left, #455bed, #181773)`,
         backgroundSize: "100%",
