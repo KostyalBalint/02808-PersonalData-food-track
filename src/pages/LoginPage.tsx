@@ -10,6 +10,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { FcGoogle } from "react-icons/fc";
+import { LoginLayout } from "./layouts/LoginLayout.tsx";
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -43,15 +45,18 @@ export const LoginPage = () => {
   }
 
   return (
-    <Container maxWidth="sm">
-      <Box textAlign="center" mt={5}>
-        <Typography variant="h4" gutterBottom>
-          Login
-        </Typography>
-        <Button variant="contained" color="primary" onClick={handleLogin}>
-          Sign in with Google
-        </Button>
-      </Box>
-    </Container>
+    <LoginLayout>
+      <Container maxWidth="sm">
+        <img src="./login_img.png" alt="" style={{ width: "100%" }} />
+      </Container>
+      <Button
+        variant="outlined"
+        onClick={handleLogin}
+        startIcon={<FcGoogle />}
+        sx={{ mt: 2 }}
+      >
+        Google
+      </Button>
+    </LoginLayout>
   );
 };
