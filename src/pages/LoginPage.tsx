@@ -1,12 +1,6 @@
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../firebaseConfig";
-import {
-  Button,
-  Typography,
-  Container,
-  Box,
-  CircularProgress,
-} from "@mui/material";
+import { Box, Button, CircularProgress, Container } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
