@@ -7,28 +7,10 @@ import {
   Typography,
 } from "@mui/material";
 import { FC, PropsWithChildren } from "react";
+import { LogoText } from "../../components/LogoText.tsx";
 
 type LoginLayoutProps = {
   loading?: boolean;
-};
-
-export const LogoText = () => {
-  return (
-    <Typography
-      component="span"
-      variant="h1"
-      sx={{
-        backgroundImage: `linear-gradient( to left, #455bed, #181773)`,
-        backgroundSize: "100%",
-        backgroundRepeat: "repeat",
-        backgroundClip: "text",
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-      }}
-    >
-      NUTRITION
-    </Typography>
-  );
 };
 
 export const LoginLayout: FC<PropsWithChildren<LoginLayoutProps>> = (props) => {

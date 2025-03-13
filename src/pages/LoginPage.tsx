@@ -40,7 +40,7 @@ export const LoginPage = () => {
 
   return (
     <LoginLayout>
-      <Container maxWidth="sm">
+      <Container maxWidth="md">
         <img src="./login_img.png" alt="" style={{ width: "100%" }} />
       </Container>
       <Button

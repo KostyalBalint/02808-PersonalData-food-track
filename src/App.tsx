@@ -1,14 +1,13 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { LoginPage } from "./pages/LoginPage.tsx";
-import { HomePage } from "./pages/HomePage.tsx";
 import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./router/Protected.tsx";
-import { CameraPage } from "./pages/CameraPage.tsx";
-import { GalleryPage } from "./pages/GalleryPage.tsx";
 import { ResponsiveDrawer } from "./components/responsiveDrawer.tsx";
 import { SnackbarProvider } from "notistack";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import theme from "./theme/theme.ts";
+import { pages } from "./pages/pages.ts";
+import { Page404 } from "./pages/404Page.tsx";
 
 function App() {
   return (
@@ -31,9 +30,10 @@ function App() {
               {/* Protected Routes */}
               <Route element={<ProtectedRoute />}>
                 <Route element={<ResponsiveDrawer />}>
-                  <Route path="/home" element={<HomePage />} />
-                  <Route path="/camera" element={<CameraPage />} />
-                  <Route path="/gallery" element={<GalleryPage />} />
+                  {pages.map((page) => (
+                    <Route path={page.path} element={<page.component />} />
+                  ))}
+                  <Route path="*" element={<Page404 />} />
                 </Route>
               </Route>
 

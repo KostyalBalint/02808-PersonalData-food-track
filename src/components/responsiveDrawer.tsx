@@ -3,21 +3,22 @@ import {
   alpha,
   AppBar,
   Box,
+  Divider,
   Drawer,
   IconButton,
-  List,
   ListItem,
   ListItemButton,
-  ListItemIcon,
   ListItemText,
   Stack,
   Toolbar,
   Typography,
 } from "@mui/material";
-import { Logout, Menu } from "@mui/icons-material";
+import { Menu } from "@mui/icons-material";
 import { Outlet, useNavigate } from "react-router-dom";
 import { auth } from "../firebaseConfig";
 import { pages } from "../pages/pages.ts";
+import { LogoText } from "./LogoText.tsx";
+import { IoLogOutOutline } from "react-icons/io5";
 
 const style = {
   minHeight: 44,
@@ -42,7 +43,8 @@ export const ResponsiveDrawer = () => {
   };
 
   const drawerContent = (
-    <List>
+    <Stack gap={1} p={2} height="100%">
+      <LogoText variant="h6" textAlign="center" />
       {pages.map((page) => {
         const active = location.pathname === page.path;
         return (
@@ -76,18 +78,27 @@ export const ResponsiveDrawer = () => {
         );
       })}
 
-      <ListItem onClick={handleLogout}>
-        <ListItemIcon>
-          <Logout />
-        </ListItemIcon>
-        <ListItemText primary="Logout" />
+      <Divider sx={{ flexGrow: 1 }} />
+      <ListItem onClick={handleLogout} disablePadding>
+        <ListItemButton
+          sx={{
+            ...style,
+          }}
+        >
+          <Stack direction="row" gap={2} alignItems="center">
+            <Typography fontSize={22} lineHeight={0}>
+              <IoLogOutOutline />
+            </Typography>
+            <ListItemText primary="Logout" />
+          </Stack>
+        </ListItemButton>
       </ListItem>
-    </List>
+    </Stack>
   );
 
   return (
     <Box sx={{ display: "flex" }}>
-      <AppBar position="fixed">
+      <AppBar position="fixed" sx={{ display: { xs: "block", md: "none" } }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -97,9 +108,7 @@ export const ResponsiveDrawer = () => {
           >
             <Menu />
           </IconButton>
-          <Typography variant="h6" noWrap>
-            Food Tracker App
-          </Typography>
+          <LogoText variant="h6" />
         </Toolbar>
       </AppBar>
       <Drawer
