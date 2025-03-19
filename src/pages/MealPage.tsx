@@ -22,7 +22,13 @@ import { units } from "../constants.ts";
 import { FaPlus, FaTrashCan } from "react-icons/fa6";
 import { useEffect, useState } from "react";
 import { MealData } from "./GalleryPage/GalleryPage.tsx";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  documentId,
+} from "firebase/firestore";
 import { db } from "../firebaseConfig.ts";
 
 export const MealPage = () => {
@@ -32,7 +38,7 @@ export const MealPage = () => {
   const [meal, setMeal] = useState<MealData | null>(null);
 
   useEffect(() => {
-    const q = query(collection(db, "images"), where("id", "==", id));
+    const q = query(collection(db, "images"), where(documentId(), "==", id));
     getDocs(q).then((querySnapshot) => {
       const userMeals = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -49,17 +55,18 @@ export const MealPage = () => {
     <Container sx={{ mt: 2 }}>
       <Grid2 container spacing={2}>
         <Grid2 size={{ xs: 12, md: 6 }}>
-          <Card>
-            {meal && (
-              <CardHeader title={meal?.name} sx={{ textAlign: "center" }} />
-            )}
-            <CardMedia
-              component="img"
-              image={meal?.imageUrl}
-              alt="Uploaded image"
-              loading="lazy"
-            />
-          </Card>
+          <Container maxWidth={"sm"}>
+            <Card>
+              {meal && (
+                <CardHeader title={meal?.name} sx={{ textAlign: "center" }} />
+              )}
+              <CardMedia
+                component="img"
+                image={meal?.imageUrl}
+                alt="Uploaded image"
+              />
+            </Card>
+          </Container>
         </Grid2>
         <Grid2 size={{ xs: 12, md: 6 }}>
           <Paper sx={{ p: 2 }}>
