@@ -95,7 +95,7 @@ export const CameraPage = () => {
         try {
           const imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
 
-          await addDoc(collection(db, "images"), {
+          await addDoc(collection(db, "meals"), {
             userId: auth.currentUser?.uid,
             imageUrl,
             createdAt: serverTimestamp(),

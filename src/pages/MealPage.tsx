@@ -18,10 +18,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
-import { units } from "../constants.ts";
+import { MealData, units } from "../constants.ts";
 import { FaPlus, FaTrashCan } from "react-icons/fa6";
 import { useEffect, useState } from "react";
-import { MealData } from "./GalleryPage/GalleryPage.tsx";
 import {
   collection,
   getDocs,
@@ -38,7 +37,7 @@ export const MealPage = () => {
   const [meal, setMeal] = useState<MealData | null>(null);
 
   useEffect(() => {
-    const q = query(collection(db, "images"), where(documentId(), "==", id));
+    const q = query(collection(db, "meals"), where(documentId(), "==", id));
     getDocs(q).then((querySnapshot) => {
       const userMeals = querySnapshot.docs.map((doc) => ({
         id: doc.id,

@@ -6,8 +6,8 @@ import {
   ListItem,
   Typography,
 } from "@mui/material";
-import { MealData } from "./GalleryPage.tsx";
 import { useNavigate } from "react-router-dom";
+import { MealData } from "../../constants.ts";
 
 export const MealCard = (props: { meal: MealData }) => {
   const navigate = useNavigate();

@@ -10,13 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { MealCard } from "./MealCard.tsx";
-
-export interface MealData {
-  id: string;
-  name: string;
-  imageUrl: string;
-  ingredients?: { amount: number; unit: string; name: string; id: string }[];
-}
+import { MealData } from "../../constants.ts";
 
 export const GalleryPage = () => {
   const [meals, setMeals] = useState<MealData[]>([]);
@@ -27,7 +21,7 @@ export const GalleryPage = () => {
       if (!auth.currentUser) return;
 
       const q = query(
-        collection(db, "images"),
+        collection(db, "meals"),
         where("userId", "==", auth.currentUser.uid),
       );
       const querySnapshot = await getDocs(q);
