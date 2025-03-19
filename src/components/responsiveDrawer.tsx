@@ -1,19 +1,18 @@
 import { useState } from "react";
 import {
-  alpha,
-  AppBar,
-  Box,
-  Divider,
-  Drawer,
-  IconButton,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Stack,
-  Toolbar,
-  Typography,
+    alpha,
+    BottomNavigation, BottomNavigationAction,
+    Box,
+    Divider,
+    Drawer,
+
+    ListItem,
+    ListItemButton,
+    ListItemText, Paper,
+    Stack,
+
+    Typography,
 } from "@mui/material";
-import { Menu } from "@mui/icons-material";
 import { Outlet, useNavigate } from "react-router-dom";
 import { auth } from "../firebaseConfig";
 import { pages } from "../pages/pages.ts";
@@ -98,19 +97,6 @@ export const ResponsiveDrawer = () => {
 
   return (
     <Box sx={{ display: "flex" }}>
-      <AppBar position="fixed" sx={{ display: { xs: "block", md: "none" } }}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { md: "none" } }}
-          >
-            <Menu />
-          </IconButton>
-          <LogoText variant="h6" />
-        </Toolbar>
-      </AppBar>
       <Drawer
         variant="permanent"
         sx={{
@@ -135,7 +121,7 @@ export const ResponsiveDrawer = () => {
       >
         {drawerContent}
       </Drawer>
-      <Box sx={{ height: "100dvh", width: "100%", display: "flex" }}>
+      <Box sx={{ height: "100dvh", width: "100%", display: "flex", direction:"column" }}>
         <Box
           component="main"
           sx={{
@@ -150,6 +136,22 @@ export const ResponsiveDrawer = () => {
           <Outlet />
         </Box>
       </Box>
+        <Paper
+            sx={{display: { xs: "block", md: "none" },
+                position: "fixed", bottom: 0, left: 0, right: 0 }} elevation={3}>
+
+            <BottomNavigation
+                showLabels
+                onChange={(_, newValue) => {
+                    navigate(pages[newValue].path);
+                }}
+                value={pages.findIndex((page) => location.pathname === page.path)}
+            > {pages.map((page) => (
+                <BottomNavigationAction label={page.name} icon={<page.icon />} />
+            ))
+            }
+            </BottomNavigation>
+        </Paper>
     </Box>
   );
 };
