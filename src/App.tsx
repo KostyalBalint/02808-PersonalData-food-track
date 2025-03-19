@@ -8,6 +8,7 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import theme from "./theme/theme.ts";
 import { pages } from "./pages/pages.ts";
 import { Page404 } from "./pages/404Page.tsx";
+import { MealPage } from "./pages/MealPage.tsx";
 
 function App() {
   return (
@@ -31,8 +32,14 @@ function App() {
               <Route element={<ProtectedRoute />}>
                 <Route element={<ResponsiveDrawer />}>
                   {pages.map((page) => (
-                    <Route path={page.path} element={<page.component />} />
+                    <Route
+                      key={page.path}
+                      path={page.path}
+                      element={<page.component />}
+                    />
                   ))}
+
+                  <Route path="/meal/:id" element={<MealPage />} />
                   <Route path="*" element={<Page404 />} />
                 </Route>
               </Route>

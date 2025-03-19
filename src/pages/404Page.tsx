@@ -23,7 +23,7 @@ export const Page404: React.FC = () => {
       </Typography>
       <Container maxWidth="sm">
         <img
-          src="./undraw_feeling-blue.svg"
+          src="/undraw_feeling-blue.svg"
           alt="Feeling blue"
           style={{ width: "100%" }}
         />

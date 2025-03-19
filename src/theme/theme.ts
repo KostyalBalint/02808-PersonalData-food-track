@@ -3,17 +3,17 @@ import { createTheme } from "@mui/material/styles";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#1976d2", // Primary color (blue)
+      main: "#ffd063", // Secondary color (yellow)
     },
     secondary: {
-      main: "#ffd063", // Secondary color (yellow)
+      main: "#ffa163", // Primary color (blue)
     },
     background: {
       default: "#f4f6f8", // Light background
       paper: "#ffffff",
     },
     text: {
-      primary: "#262626",
+      primary: "#3b3b3b",
       secondary: "#666666",
     },
   },
@@ -34,6 +34,10 @@ const theme = createTheme({
     h4: {
       fontSize: "1.25rem",
       fontWeight: 500,
+    },
+    h5: {
+      fontSize: "1.15rem",
+      fontWeight: 300,
     },
     body1: {
       fontSize: "1rem",

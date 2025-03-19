@@ -13,7 +13,7 @@ export const LoginPage = () => {
 
   useEffect(() => {
     if (!loading && user) {
-      navigate("/home");
+      navigate("/");
     }
   }, [user, loading, navigate]);
 
@@ -31,7 +31,7 @@ export const LoginPage = () => {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        height="100vh"
+        height="100dvh"
       >
         <CircularProgress />
       </Box>

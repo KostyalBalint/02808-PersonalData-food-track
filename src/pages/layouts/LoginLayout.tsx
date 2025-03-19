@@ -18,7 +18,7 @@ export const LoginLayout: FC<PropsWithChildren<LoginLayoutProps>> = (props) => {
     <>
       <Box
         sx={{
-          height: "100vh",
+          height: "100dvh",
           width: "100vw",
           background:
             "url(https://images.pexels.com/photos/793759/pexels-photo-793759.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2)",
@@ -30,7 +30,7 @@ export const LoginLayout: FC<PropsWithChildren<LoginLayoutProps>> = (props) => {
       />
       <Box
         sx={{
-          height: "100vh",
+          height: "100dvh",
           width: "100vw",
           position: "absolute",
         }}

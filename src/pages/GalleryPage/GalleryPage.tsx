@@ -1,24 +1,25 @@
 // src/pages/Gallery.tsx
 import { useEffect, useState } from "react";
-import { auth, db } from "../firebaseConfig";
+import { auth, db } from "../../firebaseConfig.ts";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import {
   Backdrop,
-  Card,
-  CardMedia,
   CircularProgress,
   Container,
   Grid,
   Typography,
 } from "@mui/material";
+import { MealCard } from "./MealCard.tsx";
 
-interface ImageData {
+export interface MealData {
   id: string;
+  name: string;
   imageUrl: string;
+  ingredients?: { amount: number; unit: string; name: string; id: string }[];
 }
 
 export const GalleryPage = () => {
-  const [images, setImages] = useState<ImageData[]>([]);
+  const [meals, setMeals] = useState<MealData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,12 +32,12 @@ export const GalleryPage = () => {
       );
       const querySnapshot = await getDocs(q);
 
-      const userImages = querySnapshot.docs.map((doc) => ({
+      const userMeals = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-      })) as ImageData[];
+      })) as MealData[];
 
-      setImages(userImages);
+      if (userMeals) setMeals(userMeals);
     };
 
     fetchImages().finally(() => setLoading(false));
@@ -54,16 +55,9 @@ export const GalleryPage = () => {
         Your Images
       </Typography>
       <Grid container spacing={3} mt={3}>
-        {images.map((img) => (
-          <Grid item xs={12} sm={6} md={4} key={img.id}>
-            <Card>
-              <CardMedia
-                component="img"
-                image={img.imageUrl}
-                alt="Uploaded image"
-                loading="lazy"
-              />
-            </Card>
+        {meals.map((meal) => (
+          <Grid item xs={12} sm={6} md={4} key={meal.id}>
+            <MealCard meal={meal} />
           </Grid>
         ))}
       </Grid>

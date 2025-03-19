@@ -135,8 +135,17 @@ export const ResponsiveDrawer = () => {
       >
         {drawerContent}
       </Drawer>
-      <Box sx={{ height: "100vh", width: "100%", display: "flex" }}>
-        <Box component="main" sx={{ flexGrow: 1, mt: 8 }}>
+      <Box sx={{ height: "100dvh", width: "100%", display: "flex" }}>
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            mt: {
+              xs: 8,
+              md: 0,
+            },
+          }}
+        >
           {/*The main app content*/}
           <Outlet />
         </Box>

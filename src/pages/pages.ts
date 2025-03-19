@@ -2,7 +2,7 @@ import { FC, JSX } from "react";
 import { HomePage } from "./HomePage.tsx";
 import { IconType } from "react-icons";
 import { CameraPage } from "./CameraPage.tsx";
-import { GalleryPage } from "./GalleryPage.tsx";
+import { GalleryPage } from "./GalleryPage/GalleryPage.tsx";
 import {
   IoCameraOutline,
   IoHomeOutline,
