@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { FcGoogle } from "react-icons/fc";
 import { LoginLayout } from "./layouts/LoginLayout.tsx";
+import logo from "../assets/logo.png";
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -41,10 +42,11 @@ export const LoginPage = () => {
   return (
     <LoginLayout>
       <Container maxWidth="md">
-        <img src="./login_img.png" alt="" style={{ width: "100%" }} />
+        <img src={logo} alt="" style={{ width: "100%" }} />
       </Container>
       <Button
         variant="outlined"
+        color="info"
         onClick={handleLogin}
         startIcon={<FcGoogle />}
         sx={{ mt: 2 }}

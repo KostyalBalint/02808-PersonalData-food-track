@@ -48,7 +48,8 @@ export const LoginLayout: FC<PropsWithChildren<LoginLayoutProps>> = (props) => {
                 xs: "90%",
                 sm: "50%",
                 md: "30%",
-                lg: "20%",
+                lg: "25%",
+                xl: "20%",
               },
               height: "auto",
             }}
