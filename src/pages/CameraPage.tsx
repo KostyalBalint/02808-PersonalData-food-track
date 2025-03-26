@@ -116,64 +116,64 @@ export const CameraPage = () => {
   };
 
   return (
-    <Container
-      maxWidth="md"
-      sx={{ width: "100%", display: "flex", justifyContent: "center", mt: 2 }}
-    >
-      <Box textAlign="center">
-        <Typography variant="h4" gutterBottom>
-          Capture & Upload Image
-        </Typography>
-        {!image && (
-          <Button
-            component="label"
-            role={undefined}
-            variant="contained"
-            tabIndex={-1}
-            startIcon={<CloudUploadIcon />}
-          >
-            Select image
-            <VisuallyHiddenInput
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handleFileChange}
-              multiple
-            />
-          </Button>
-        )}
-        {image && (
-          <Stack gap={2} mb={2}>
-            {imageSrcData && (
-              <Container maxWidth="xs">
-                <img src={imageSrcData} alt="" style={{ width: "100%" }} />
-              </Container>
-            )}
-            <Typography variant="subtitle1">{image.name}</Typography>
-            {uploading && (
-              <LinearProgress variant="determinate" value={uploadProgress} />
-            )}
-            <Stack direction="row" gap={2} justifyContent="center">
+      <Container
+          maxWidth="md"
+          sx={{width: "100%", display: "flex", justifyContent: "center", mt: 2}}
+      >
+        <Box textAlign="center">
+          <Typography variant="h4" gutterBottom>
+            Capture & Upload Image
+          </Typography>
+          {!image && (
               <Button
-                variant="contained"
-                color="error"
-                startIcon={<CloseIcon />}
-                onClick={discardFile}
+                  component="label"
+                  role={undefined}
+                  variant="contained"
+                  tabIndex={-1}
+                  startIcon={<CloudUploadIcon/>}
               >
-                Discard
+                Select image
+                <VisuallyHiddenInput
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleFileChange}
+                    multiple
+                />
               </Button>
-              <Button
-                variant="contained"
-                color="info"
-                onClick={handleUpload}
-                disabled={uploading || !image}
-              >
-                {uploading ? "Uploading..." : "Upload Image"}
-              </Button>
-            </Stack>
-          </Stack>
-        )}
-      </Box>
-    </Container>
+          )}
+          {image && (
+              <Stack gap={2} mb={2}>
+                {imageSrcData && (
+                    <Container maxWidth="xs">
+                      <img src={imageSrcData} alt="" style={{width: "100%"}}/>
+                    </Container>
+                )}
+                <Typography variant="subtitle1">{image.name}</Typography>
+                {uploading && (
+                    <LinearProgress variant="determinate" value={uploadProgress}/>
+                )}
+                <Stack direction="row" gap={2} justifyContent="center">
+                  <Button
+                      variant="contained"
+                      color="error"
+                      startIcon={<CloseIcon/>}
+                      onClick={discardFile}
+                  >
+                    Discard
+                  </Button>
+                  <Button
+                      variant="contained"
+                      color="info"
+                      onClick={handleUpload}
+                      disabled={uploading || !image}
+                  >
+                    {uploading ? "Uploading..." : "Upload Image"}
+                  </Button>
+                </Stack>
+              </Stack>
+          )}
+        </Box>
+      </Container>
   );
 };
