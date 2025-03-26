@@ -2,7 +2,7 @@ import { FC, JSX } from "react";
 import { HomePage } from "./HomePage.tsx";
 import { IconType } from "react-icons";
 import { CameraPage } from "./CameraPage.tsx";
-import { GalleryPage } from "./GalleryPage/GalleryPage.tsx";
+import { MealListPage } from "./GalleryPage/MealListPage.tsx";
 import {
   IoCameraOutline,
   IoHomeOutline,
@@ -30,9 +30,9 @@ export const pages: Page[] = [
     icon: IoCameraOutline,
   },
   {
-    name: "Gallery",
-    path: "/gallery",
-    component: GalleryPage,
+    name: "Meals",
+    path: "/meals",
+    component: MealListPage,
     icon: IoImagesOutline,
   },
 ];

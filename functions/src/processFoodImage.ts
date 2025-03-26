@@ -1,10 +1,13 @@
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { genkit } from "genkit";
 import { googleAI, gemini20Flash } from "@genkit-ai/googleai";
+import { defineSecret } from "firebase-functions/params";
 
 // @ts-expect-error Only type import
 import { MealData } from "../../src/constants";
 import { FoodExtractSchema } from "./foodExtractSchema.js";
+
+const googleAIApiKey = defineSecret("GEMINI_API_KEY");
 
 export const documentCreatedHandler = onDocumentCreated(
   "meals/{mealId}",
@@ -20,6 +23,9 @@ export const documentCreatedHandler = onDocumentCreated(
       output: {
         schema: FoodExtractSchema,
       },
+      config: {
+        apiKey: googleAIApiKey.value(),
+      },
     });
 
     return event.data?.ref.set(
@@ -30,6 +36,7 @@ export const documentCreatedHandler = onDocumentCreated(
           amount: ingredient.amount,
           unit: ingredient.unit,
         })),
+        name: output?.name,
       } as Partial<MealData>,
       {
         merge: true,
