@@ -15,6 +15,7 @@ import { useSnackbar } from "notistack";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CloseIcon from "@mui/icons-material/Close";
 import Compressor from "compressorjs";
+import { useNavigate } from "react-router-dom";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -32,6 +33,8 @@ export const CameraPage = () => {
   const [image, setImage] = useState<File | null>(null);
   const [imageSrcData, setImageSrcData] = useState("");
   const [uploading, setUploading] = useState(false);
+
+  const navigate = useNavigate();
 
   // State for progress
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -53,6 +56,10 @@ export const CameraPage = () => {
             setImageSrcData(URL.createObjectURL(compressedResult));
             console.log(`Original file size: ${compressedResult.size}`);
           },
+          error: (error) => {
+            console.error("Failed to compress image:", error);
+            enqueueSnackbar("Failed to compress image", { variant: "error" });
+          },
         });
       }
     },
@@ -64,7 +71,7 @@ export const CameraPage = () => {
     setImageSrcData("");
   };
 
-  const handleUpload = async () => {
+  const handleUpload = useCallback(async () => {
     if (!image || !auth.currentUser) return;
 
     setUploading(true);
@@ -95,11 +102,13 @@ export const CameraPage = () => {
         try {
           const imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
 
-          await addDoc(collection(db, "meals"), {
+          const doc = await addDoc(collection(db, "meals"), {
             userId: auth.currentUser?.uid,
             imageUrl,
             createdAt: serverTimestamp(),
           });
+
+          navigate(`/meal/${doc.id}`);
 
           enqueueSnackbar("Image uploaded successfully!", {
             variant: "success",
@@ -113,67 +122,66 @@ export const CameraPage = () => {
         }
       },
     );
-  };
-
+  }, [image, enqueueSnackbar, navigate]);
   return (
-      <Container
-          maxWidth="md"
-          sx={{width: "100%", display: "flex", justifyContent: "center", mt: 2}}
-      >
-        <Box textAlign="center">
-          <Typography variant="h4" gutterBottom>
-            Capture & Upload Image
-          </Typography>
-          {!image && (
+    <Container
+      maxWidth="md"
+      sx={{ width: "100%", display: "flex", justifyContent: "center", mt: 2 }}
+    >
+      <Box textAlign="center">
+        <Typography variant="h4" gutterBottom>
+          Capture & Upload Image
+        </Typography>
+        {!image && (
+          <Button
+            component="label"
+            role={undefined}
+            variant="contained"
+            tabIndex={-1}
+            startIcon={<CloudUploadIcon />}
+          >
+            Select image
+            <VisuallyHiddenInput
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileChange}
+              multiple
+            />
+          </Button>
+        )}
+        {image && (
+          <Stack gap={2} mb={2}>
+            {imageSrcData && (
+              <Container maxWidth="xs">
+                <img src={imageSrcData} alt="" style={{ width: "100%" }} />
+              </Container>
+            )}
+            <Typography variant="subtitle1">{image.name}</Typography>
+            {uploading && (
+              <LinearProgress variant="determinate" value={uploadProgress} />
+            )}
+            <Stack direction="row" gap={2} justifyContent="center">
               <Button
-                  component="label"
-                  role={undefined}
-                  variant="contained"
-                  tabIndex={-1}
-                  startIcon={<CloudUploadIcon/>}
+                variant="contained"
+                color="error"
+                startIcon={<CloseIcon />}
+                onClick={discardFile}
               >
-                Select image
-                <VisuallyHiddenInput
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    onChange={handleFileChange}
-                    multiple
-                />
+                Discard
               </Button>
-          )}
-          {image && (
-              <Stack gap={2} mb={2}>
-                {imageSrcData && (
-                    <Container maxWidth="xs">
-                      <img src={imageSrcData} alt="" style={{width: "100%"}}/>
-                    </Container>
-                )}
-                <Typography variant="subtitle1">{image.name}</Typography>
-                {uploading && (
-                    <LinearProgress variant="determinate" value={uploadProgress}/>
-                )}
-                <Stack direction="row" gap={2} justifyContent="center">
-                  <Button
-                      variant="contained"
-                      color="error"
-                      startIcon={<CloseIcon/>}
-                      onClick={discardFile}
-                  >
-                    Discard
-                  </Button>
-                  <Button
-                      variant="contained"
-                      color="info"
-                      onClick={handleUpload}
-                      disabled={uploading || !image}
-                  >
-                    {uploading ? "Uploading..." : "Upload Image"}
-                  </Button>
-                </Stack>
-              </Stack>
-          )}
-        </Box>
-      </Container>
+              <Button
+                variant="contained"
+                color="info"
+                onClick={handleUpload}
+                disabled={uploading || !image}
+              >
+                {uploading ? "Uploading..." : "Upload Image"}
+              </Button>
+            </Stack>
+          </Stack>
+        )}
+      </Box>
+    </Container>
   );
 };

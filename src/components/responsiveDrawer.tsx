@@ -156,13 +156,17 @@ export const ResponsiveDrawer = () => {
         <BottomNavigation
           showLabels
           onChange={(_, newValue) => {
-            navigate(pages[newValue].path);
+            navigate(newValue);
           }}
-          value={pages.findIndex((page) => location.pathname === page.path)}
+          value={location.pathname}
         >
-          {" "}
           {pages.map((page) => (
-            <BottomNavigationAction label={page.name} icon={<page.icon />} />
+            <BottomNavigationAction
+              key={page.path}
+              value={page.path}
+              label={page.name}
+              icon={<page.icon />}
+            />
           ))}
         </BottomNavigation>
       </Paper>
