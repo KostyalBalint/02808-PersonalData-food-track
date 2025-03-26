@@ -1,9 +1,10 @@
 import {
+  Button,
   Card,
   CardContent,
   CardMedia,
   List,
-  ListItem,
+  ListItem, Stack,
   Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +25,10 @@ export const MealCard = (props: { meal: MealData }) => {
         loading="lazy"
       />
       <CardContent>
+        <Stack direction="row" spacing={2} justifyContent="flex-end">
+          <Button variant="outlined" size="medium">Duplicate meal</Button>
+        </Stack>
+
         <Typography variant="h5">Ingredients:</Typography>
         <List>
           {!props.meal.ingredients && <Typography>No ingredients</Typography>}
