@@ -4,7 +4,8 @@ import {
   CardContent,
   CardMedia,
   List,
-  ListItem, Stack,
+  ListItem,
+  Stack,
   Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -26,7 +27,9 @@ export const MealCard = (props: { meal: MealData }) => {
       />
       <CardContent>
         <Stack direction="row" spacing={2} justifyContent="flex-end">
-          <Button variant="outlined" size="medium">Duplicate meal</Button>
+          <Button variant="outlined" size="medium">
+            Duplicate meal
+          </Button>
         </Stack>
 
         <Typography variant="h5">Ingredients:</Typography>
@@ -34,7 +37,7 @@ export const MealCard = (props: { meal: MealData }) => {
           {!props.meal.ingredients && <Typography>No ingredients</Typography>}
           {props.meal.ingredients?.map((ingredient) => (
             <ListItem
-              key={ingredient.id}
+              key={ingredient.name}
               disableGutters
               disablePadding
               sx={{ ml: 2 }}

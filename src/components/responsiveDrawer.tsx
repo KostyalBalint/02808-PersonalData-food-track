@@ -137,6 +137,8 @@ export const ResponsiveDrawer = () => {
               xs: 7,
               md: 0,
             },
+            pb: 2,
+            overflow: "scroll",
           }}
         >
           {/*The main app content*/}

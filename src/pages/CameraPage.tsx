@@ -52,9 +52,10 @@ export const CameraPage = () => {
           resize: "contain",
           mimeType: "image/webp",
           success: (compressedResult) => {
+            console.log(`Original file size: ${e.target.files?.item(0)?.size}`);
+            console.log(`Compressed file size: ${compressedResult.size}`);
             setImage(compressedResult as File);
             setImageSrcData(URL.createObjectURL(compressedResult));
-            console.log(`Original file size: ${compressedResult.size}`);
           },
           error: (error) => {
             console.error("Failed to compress image:", error);
@@ -81,6 +82,7 @@ export const CameraPage = () => {
       `images/${auth.currentUser.uid}/${Date.now()}_${image.name}`,
     );
 
+    console.log(`Uploading image`, image);
     const uploadTask = uploadBytesResumable(imageRef, image);
 
     // Monitor upload progress
