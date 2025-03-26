@@ -1,17 +1,17 @@
 import { useState } from "react";
 import {
-    alpha,
-    BottomNavigation, BottomNavigationAction,
-    Box,
-    Divider,
-    Drawer,
-
-    ListItem,
-    ListItemButton,
-    ListItemText, Paper,
-    Stack,
-
-    Typography,
+  alpha,
+  BottomNavigation,
+  BottomNavigationAction,
+  Box,
+  Divider,
+  Drawer,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Paper,
+  Stack,
+  Typography,
 } from "@mui/material";
 import { Outlet, useNavigate } from "react-router-dom";
 import { auth } from "../firebaseConfig";
@@ -121,13 +121,20 @@ export const ResponsiveDrawer = () => {
       >
         {drawerContent}
       </Drawer>
-      <Box sx={{ height: "100dvh", width: "100%", display: "flex", direction:"column" }}>
+      <Box
+        sx={{
+          height: "100dvh",
+          width: "100%",
+          display: "flex",
+          direction: "column",
+        }}
+      >
         <Box
           component="main"
           sx={{
             flexGrow: 1,
-            mt: {
-              xs: 8,
+            mb: {
+              xs: 7,
               md: 0,
             },
           }}
@@ -136,22 +143,29 @@ export const ResponsiveDrawer = () => {
           <Outlet />
         </Box>
       </Box>
-        <Paper
-            sx={{display: { xs: "block", md: "none" },
-                position: "fixed", bottom: 0, left: 0, right: 0 }} elevation={3}>
-
-            <BottomNavigation
-                showLabels
-                onChange={(_, newValue) => {
-                    navigate(pages[newValue].path);
-                }}
-                value={pages.findIndex((page) => location.pathname === page.path)}
-            > {pages.map((page) => (
-                <BottomNavigationAction label={page.name} icon={<page.icon />} />
-            ))
-            }
-            </BottomNavigation>
-        </Paper>
+      <Paper
+        sx={{
+          display: { xs: "block", md: "none" },
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+        }}
+        elevation={3}
+      >
+        <BottomNavigation
+          showLabels
+          onChange={(_, newValue) => {
+            navigate(pages[newValue].path);
+          }}
+          value={pages.findIndex((page) => location.pathname === page.path)}
+        >
+          {" "}
+          {pages.map((page) => (
+            <BottomNavigationAction label={page.name} icon={<page.icon />} />
+          ))}
+        </BottomNavigation>
+      </Paper>
     </Box>
   );
 };
