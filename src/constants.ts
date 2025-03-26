@@ -5,4 +5,5 @@ export interface MealData {
   name: string;
   imageUrl: string;
   ingredients?: { amount: number; unit: string; name: string; id: string }[];
+  errorMessage?: string;
 }

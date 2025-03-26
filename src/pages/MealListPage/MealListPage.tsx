@@ -1,7 +1,7 @@
 // src/pages/Gallery.tsx
 import { useEffect, useState } from "react";
 import { auth, db } from "../../firebaseConfig.ts";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import {
   Backdrop,
   CircularProgress,
@@ -11,10 +11,13 @@ import {
 } from "@mui/material";
 import { MealCard } from "./MealCard.tsx";
 import { MealData } from "../../constants.ts";
+import { useSnackbar } from "notistack";
 
 export const MealListPage = () => {
   const [meals, setMeals] = useState<MealData[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -23,6 +26,7 @@ export const MealListPage = () => {
       const q = query(
         collection(db, "meals"),
         where("userId", "==", auth.currentUser.uid),
+        orderBy("createdAt", "desc"),
       );
       const querySnapshot = await getDocs(q);
 
@@ -34,7 +38,12 @@ export const MealListPage = () => {
       if (userMeals) setMeals(userMeals);
     };
 
-    fetchImages().finally(() => setLoading(false));
+    fetchImages()
+      .catch((e) => {
+        console.error(e);
+        enqueueSnackbar("Failed to fetch meals", { variant: "error" });
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   return (

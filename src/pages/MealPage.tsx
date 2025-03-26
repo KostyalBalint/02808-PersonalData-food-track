@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Card,
   CardHeader,
@@ -23,15 +24,16 @@ import { FaPlus, FaTrashCan } from "react-icons/fa6";
 import { useCallback, useEffect, useState } from "react";
 import {
   collection,
+  deleteDoc,
+  doc,
+  documentId,
   onSnapshot,
   query,
   where,
-  documentId,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig.ts";
 import { ConfirmationModal } from "../components/ConfirmationModal.tsx";
-import { getStorage, ref, deleteObject } from "firebase/storage";
-import { deleteDoc, doc } from "firebase/firestore";
+import { deleteObject, getStorage, ref } from "firebase/storage";
 
 export const MealPage = () => {
   const { id } = useParams();
@@ -92,8 +94,11 @@ export const MealPage = () => {
   return (
     <Container sx={{ mt: 2 }}>
       <Grid2 container spacing={2}>
+        {meal?.errorMessage && (
+          <Alert severity="error">{meal?.errorMessage}</Alert>
+        )}
         <Grid2 size={{ xs: 12, md: 6 }}>
-          <Container maxWidth={"sm"}>
+          <Container maxWidth={"sm"} sx={{ px: 0 }}>
             <Card>
               {meal && (
                 <CardHeader title={meal?.name} sx={{ textAlign: "center" }} />

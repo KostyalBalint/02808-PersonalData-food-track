@@ -1,7 +1,7 @@
 import { FC, JSX } from "react";
 import { HomePage } from "./HomePage.tsx";
 import { IconType } from "react-icons";
-import { CameraPage } from "./CameraPage.tsx";
+import { CameraPage } from "./CameraPage/CameraPage.tsx";
 import { MealListPage } from "./MealListPage/MealListPage.tsx";
 import {
   IoCameraOutline,
