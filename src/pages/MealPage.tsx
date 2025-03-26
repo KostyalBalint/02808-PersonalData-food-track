@@ -23,7 +23,7 @@ import { FaPlus, FaTrashCan } from "react-icons/fa6";
 import { useCallback, useEffect, useState } from "react";
 import {
   collection,
-  getDocs,
+  onSnapshot,
   query,
   where,
   documentId,
@@ -46,16 +46,18 @@ export const MealPage = () => {
 
   useEffect(() => {
     const q = query(collection(db, "meals"), where(documentId(), "==", id));
-    getDocs(q).then((querySnapshot) => {
+    // Set up a real-time listener using onSnapshot
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const userMeals = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       })) as MealData[];
 
-      console.log(querySnapshot);
-
       setMeal(userMeals[0]);
     });
+
+    // Return a cleanup function to unsubscribe from the listener
+    return () => unsubscribe();
   }, []);
 
   const handleDeleteClick = () => {

@@ -7,7 +7,9 @@ import {
   IoCameraOutline,
   IoHomeOutline,
   IoImagesOutline,
+  IoSettingsOutline,
 } from "react-icons/io5";
+import { SettingsPage } from "./Settings.tsx";
 
 interface Page {
   name: string;
@@ -34,5 +36,11 @@ export const pages: Page[] = [
     path: "/meals",
     component: MealListPage,
     icon: IoImagesOutline,
+  },
+  {
+    name: "Settings",
+    path: "/settings",
+    component: SettingsPage,
+    icon: IoSettingsOutline,
   },
 ];
