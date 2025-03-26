@@ -99,7 +99,7 @@ export const MealPage = () => {
               <CardMedia
                 component="img"
                 image={meal?.imageUrl}
-                alt="Uploaded image"
+                alt="Uploaded images"
               />
             </Card>
           </Container>
