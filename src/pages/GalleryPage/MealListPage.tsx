@@ -12,7 +12,7 @@ import {
 import { MealCard } from "./MealCard.tsx";
 import { MealData } from "../../constants.ts";
 
-export const GalleryPage = () => {
+export const MealListPage = () => {
   const [meals, setMeals] = useState<MealData[]>([]);
   const [loading, setLoading] = useState(true);
 
