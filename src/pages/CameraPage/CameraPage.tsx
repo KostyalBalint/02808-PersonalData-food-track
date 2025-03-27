@@ -290,6 +290,20 @@ export const CameraPage: React.FC = () => {
               <VideoPreview ref={videoRef} autoPlay playsInline muted />
               <CanvasPreview ref={canvasRef} />
 
+              <Button
+                variant="contained"
+                color="secondary"
+                disabled={loading}
+                onClick={switchCamera}
+                sx={{
+                  position: "absolute",
+                  top: 16,
+                  right: 16,
+                }}
+              >
+                <SwitchCameraIcon />
+              </Button>
+
               <Stack
                 direction="row"
                 spacing={2}
@@ -309,16 +323,6 @@ export const CameraPage: React.FC = () => {
                   onClick={capturePhoto}
                 >
                   Capture
-                </Button>
-
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  disabled={loading}
-                  startIcon={<SwitchCameraIcon />}
-                  onClick={switchCamera}
-                >
-                  Switch Camera
                 </Button>
               </Stack>
             </>

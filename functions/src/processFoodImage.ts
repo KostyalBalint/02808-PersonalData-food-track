@@ -74,9 +74,9 @@ const processImage = async (meal: MealData) => {
 const LIMIT = 10; // Adjust this value to set the concurrency limit
 const limit = pLimit(LIMIT);
 
-export const reindexAllImages = https.onRequest(
+export const reindexAllImages = https.onCall(
   { cors: true, invoker: "private", timeoutSeconds: 120 },
-  async (req, res) => {
+  async () => {
     try {
       const mealsSnapshot = await db.collection("meals").get();
 
@@ -98,14 +98,14 @@ export const reindexAllImages = https.onRequest(
 
       await batch.commit();
 
-      res.status(200).json({
+      return {
         message: "All images have been reindexed.",
-      });
+      };
     } catch (error) {
-      res.status(500).json({
+      return {
         message: "An error occurred during reindexing.",
         error: (error as Error).message,
-      });
+      };
     }
   },
 );

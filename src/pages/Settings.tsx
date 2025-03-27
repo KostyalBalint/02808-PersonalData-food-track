@@ -9,7 +9,7 @@ export const SettingsPage = () => {
 
   const [loading, setLoading] = useState(false);
 
-  const reindexImages = httpsCallable(functions, "addMessage");
+  const reindexImages = httpsCallable(functions, "reindexAllImages");
 
   const { enqueueSnackbar } = useSnackbar();
 

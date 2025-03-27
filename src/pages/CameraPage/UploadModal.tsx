@@ -395,13 +395,6 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                   ? "Upload in progress..."
                   : "Drag and drop images here or click to browse"}
               </Typography>
-              <Typography
-                variant="caption"
-                color="textSecondary"
-                sx={{ mt: 0.5 }}
-              >
-                Images will be uploaded as a single meal
-              </Typography>
 
               <VisuallyHiddenInput
                 ref={fileInputRef}

@@ -5,7 +5,6 @@ import {
   CardHeader,
   CardMedia,
   Container,
-  Divider,
   FormControl,
   Grid2,
   IconButton,
@@ -29,11 +28,13 @@ import {
   documentId,
   onSnapshot,
   query,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig.ts";
 import { ConfirmationModal } from "../components/ConfirmationModal.tsx";
 import { deleteObject, getStorage, ref } from "firebase/storage";
+import { v4 as uuidv4 } from "uuid";
 
 export const MealPage = () => {
   const { id } = useParams();
@@ -47,6 +48,8 @@ export const MealPage = () => {
   const storage = getStorage();
 
   useEffect(() => {
+    if (!id) return;
+
     const q = query(collection(db, "meals"), where(documentId(), "==", id));
     // Set up a real-time listener using onSnapshot
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -60,7 +63,7 @@ export const MealPage = () => {
 
     // Return a cleanup function to unsubscribe from the listener
     return () => unsubscribe();
-  }, []);
+  }, [id]);
 
   const handleDeleteClick = () => {
     setModalOpen(true);
@@ -91,6 +94,90 @@ export const MealPage = () => {
     }
     setModalOpen(false);
   }, [meal, navigate, storage]);
+
+  // Handle ingredient changes
+  const handleIngredientChange = useCallback(
+    async (
+      ingredientId: string,
+      field: "amount" | "unit" | "name",
+      value: string | number,
+    ) => {
+      if (!meal || !id) return;
+
+      try {
+        // Update locally first for immediate UI response
+        const updatedIngredients = meal.ingredients?.map((ingredient) =>
+          ingredient.id === ingredientId
+            ? { ...ingredient, [field]: value }
+            : ingredient,
+        );
+
+        setMeal({
+          ...meal,
+          ingredients: updatedIngredients,
+        });
+
+        // Update in Firestore
+        const mealDocRef = doc(db, "meals", id);
+        await updateDoc(mealDocRef, {
+          ingredients: updatedIngredients,
+        });
+      } catch (error) {
+        console.error("Error updating ingredient:", error);
+        // Optionally revert the local state if the update fails
+      }
+    },
+    [meal, id],
+  );
+
+  // Delete an ingredient
+  const handleDeleteIngredient = useCallback(
+    async (ingredientId: string) => {
+      if (!meal || !id) return;
+
+      try {
+        const updatedIngredients = meal.ingredients?.filter(
+          (ingredient) => ingredient.id !== ingredientId,
+        );
+
+        // Update in Firestore
+        const mealDocRef = doc(db, "meals", id);
+        await updateDoc(mealDocRef, {
+          ingredients: updatedIngredients,
+        });
+      } catch (error) {
+        console.error("Error deleting ingredient:", error);
+      }
+    },
+    [meal, id],
+  );
+
+  // Add a new ingredient
+  const handleAddIngredient = useCallback(async () => {
+    if (!meal || !id) return;
+
+    const newIngredient = {
+      id: uuidv4(),
+      amount: 1,
+      unit: units[0],
+      name: "New Ingredient",
+    };
+
+    try {
+      const updatedIngredients = meal.ingredients
+        ? [...meal.ingredients, newIngredient]
+        : [newIngredient];
+
+      // Update in Firestore
+      const mealDocRef = doc(db, "meals", id);
+      await updateDoc(mealDocRef, {
+        ingredients: updatedIngredients,
+      });
+    } catch (error) {
+      console.error("Error adding ingredient:", error);
+    }
+  }, [meal, id]);
+
   return (
     <Container sx={{ mt: 2 }}>
       <Grid2 container spacing={2}>
@@ -118,25 +205,42 @@ export const MealPage = () => {
             </Typography>
             <Stack gap={2}>
               {meal?.ingredients?.map((ingredient) => (
-                <>
-                  <ListItem key={ingredient.id} disableGutters disablePadding>
-                    <Stack direction="row" spacing={1}>
+                <div key={ingredient.id}>
+                  <ListItem disableGutters disablePadding>
+                    <Stack direction="row" spacing={1} sx={{ width: "100%" }}>
                       <TextField
-                        defaultValue={ingredient.amount}
+                        value={ingredient.amount}
                         size="small"
                         label="Amount"
+                        type="number"
+                        onChange={(e) =>
+                          handleIngredientChange(
+                            ingredient.id,
+                            "amount",
+                            Number(e.target.value),
+                          )
+                        }
+                        sx={{ width: "80px" }} // Narrower amount field
                       />
-                      <FormControl sx={{ m: 1, minWidth: 120 }}>
-                        <InputLabel id="unit-selector-label">Unit</InputLabel>
+                      <FormControl sx={{ width: "100px" }}>
+                        {" "}
+                        {/* Narrower unit field */}
+                        <InputLabel id={`unit-selector-label-${ingredient.id}`}>
+                          Unit
+                        </InputLabel>
                         <Select
-                          labelId="unit-selector-label"
-                          id="unit-selector"
+                          labelId={`unit-selector-label-${ingredient.id}`}
+                          id={`unit-selector-${ingredient.id}`}
                           value={ingredient.unit}
-                          //onChange={handleChange}
-                          //input={<TextField size="small" label="Unit" />}
+                          onChange={(e) =>
+                            handleIngredientChange(
+                              ingredient.id,
+                              "unit",
+                              e.target.value,
+                            )
+                          }
                           size="small"
                           label="Unit"
-                          //MenuProps={MenuProps}
                         >
                           {units.map((unit) => (
                             <MenuItem key={unit} value={unit}>
@@ -146,20 +250,35 @@ export const MealPage = () => {
                         </Select>
                       </FormControl>
                       <TextField
-                        defaultValue={ingredient.name}
+                        value={ingredient.name}
                         size="small"
                         label="Name"
+                        sx={{ flexGrow: 1 }} // Takes up all remaining space
+                        onChange={(e) =>
+                          handleIngredientChange(
+                            ingredient.id,
+                            "name",
+                            e.target.value,
+                          )
+                        }
                       />
-                      <IconButton color="error" size="small">
+                      <IconButton
+                        color="error"
+                        size="small"
+                        onClick={() => handleDeleteIngredient(ingredient.id)}
+                      >
                         <FaTrashCan />
                       </IconButton>
                     </Stack>
                   </ListItem>
-                  <Divider />
-                </>
+                </div>
               ))}
               <ListItem disableGutters disablePadding>
-                <Button startIcon={<FaPlus />} variant="contained">
+                <Button
+                  startIcon={<FaPlus />}
+                  variant="contained"
+                  onClick={handleAddIngredient}
+                >
                   Add new ingredient
                 </Button>
               </ListItem>
