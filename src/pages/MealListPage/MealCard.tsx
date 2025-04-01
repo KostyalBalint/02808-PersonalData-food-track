@@ -3,20 +3,22 @@ import {
   Card,
   CardContent,
   CardMedia,
+  Chip,
   List,
   ListItem,
   Stack,
   Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { MealData } from "../../constants.ts";
+import { MealData } from "../../../functions/src/constants.ts";
+import { format } from "date-fns";
 
 export const MealCard = (props: { meal: MealData }) => {
   const navigate = useNavigate();
 
   return (
     <Card
-      sx={{ cursor: "pointer" }}
+      sx={{ cursor: "pointer", position: "relative" }}
       onClick={() => navigate(`/meal/${props.meal.id}`)}
     >
       <CardMedia
@@ -24,6 +26,19 @@ export const MealCard = (props: { meal: MealData }) => {
         image={props.meal.imageUrl}
         alt="Uploaded image"
         loading="lazy"
+        sx={{ aspectRatio: 1 }}
+      />
+      <Chip
+        label={format(props.meal.createdAt.toDate(), "HH:mm")}
+        size="small"
+        color="primary"
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          zIndex: 1,
+          m: 1,
+        }}
       />
       <CardContent>
         <Stack direction="row" spacing={2} justifyContent="flex-end">

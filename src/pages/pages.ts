@@ -9,7 +9,7 @@ import {
   IoImagesOutline,
   IoSettingsOutline,
 } from "react-icons/io5";
-import { SettingsPage } from "./Settings.tsx";
+import { SettingsPage } from "./Admin/Settings.tsx";
 
 interface Page {
   name: string;

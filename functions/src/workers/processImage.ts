@@ -1,21 +1,13 @@
-import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { genkit } from "genkit";
-import { gemini20ProExp0205, googleAI } from "@genkit-ai/googleai";
+import { gemini20Flash, googleAI } from "@genkit-ai/googleai";
+import { FoodExtractSchema } from "../foodExtractSchema.js";
 import { defineSecret } from "firebase-functions/params";
-import { https } from "firebase-functions/v2";
-import admin from "firebase-admin";
-import pLimit from "p-limit";
-
-// @ts-expect-error Only type import
-import { MealData } from "../../src/constants";
-import { FoodExtractSchema } from "./foodExtractSchema.js";
+import { v4 as uuid } from "uuid";
+import { MealData } from "../constants.js";
 
 const googleAIApiKey = defineSecret("GEMINI_API_KEY");
-admin.initializeApp();
-const db = admin.firestore();
-
 // Function to process an image and return the extracted data
-const processImage = async (meal: MealData) => {
+export const processImage = async (meal: MealData) => {
   const ai = genkit({ plugins: [googleAI()] });
 
   const { output } = await ai.generate({
@@ -58,7 +50,7 @@ const processImage = async (meal: MealData) => {
 
 8. **User Feedback**:
    - Allow users to provide feedback on accuracy to continually improve the model's responses.`,
-    model: gemini20ProExp0205,
+    model: gemini20Flash,
     prompt: { media: { url: meal.imageUrl } },
     output: {
       schema: FoodExtractSchema,
@@ -68,56 +60,11 @@ const processImage = async (meal: MealData) => {
     },
   });
 
-  return output;
+  return {
+    ...output,
+    ingredients: output?.ingredients.map((ingredient) => ({
+      ...ingredient,
+      id: uuid(),
+    })),
+  };
 };
-
-const LIMIT = 10; // Adjust this value to set the concurrency limit
-const limit = pLimit(LIMIT);
-
-export const reindexAllImages = https.onCall(
-  { cors: true, invoker: "private", timeoutSeconds: 120 },
-  async () => {
-    try {
-      const mealsSnapshot = await db.collection("meals").get();
-
-      const tasks = mealsSnapshot.docs.map((doc) => {
-        return limit(async () => {
-          const meal = doc.data() as MealData;
-          const processedData = await processImage(meal);
-          console.log("Processed data for meal:", meal.id);
-          return { docRef: doc.ref, processedData };
-        });
-      });
-
-      const results = await Promise.all(tasks);
-
-      const batch = db.batch();
-      results.forEach(({ docRef, processedData }) => {
-        batch.set(docRef, processedData, { merge: true });
-      });
-
-      await batch.commit();
-
-      return {
-        message: "All images have been reindexed.",
-      };
-    } catch (error) {
-      return {
-        message: "An error occurred during reindexing.",
-        error: (error as Error).message,
-      };
-    }
-  },
-);
-
-export const documentCreatedHandler = onDocumentCreated(
-  "meals/{mealId}",
-  async (event) => {
-    const meal = event.data?.data() as MealData;
-    const processedData = await processImage(meal);
-
-    return event.data?.ref.set(processedData ?? {}, {
-      merge: true,
-    });
-  },
-);

@@ -18,7 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
-import { MealData, units } from "../constants.ts";
+import { MealData, units } from "../../functions/src/constants.ts";
 import { FaPlus, FaTrashCan } from "react-icons/fa6";
 import { useCallback, useEffect, useState } from "react";
 import {
