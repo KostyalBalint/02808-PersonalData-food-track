@@ -12,6 +12,8 @@ const firebaseConfig = {
   storageBucket: "food-track-7bec0.firebasestorage.app",
   messagingSenderId: "1008407401936",
   appId: "1:1008407401936:web:f8ff46e7ce5ca9ae0595d5",
+  databaseURL:
+    "https://food-track-7bec0-default-rtdb.europe-west1.firebasedatabase.app/",
 };
 
 const app = initializeApp(firebaseConfig);

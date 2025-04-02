@@ -57,13 +57,13 @@ export const pages: Page[] = [
   },
   {
     name: "Admin Settings",
-    path: "/settings",
+    path: "/admin/settings",
     component: SettingsPage,
     icon: IoSettingsOutline,
     roles: ["ADMIN"],
   },
   {
-    name: "Admin Users",
+    name: "User management",
     path: "/admin/users",
     component: AdminPage,
     icon: IoPeopleOutline,

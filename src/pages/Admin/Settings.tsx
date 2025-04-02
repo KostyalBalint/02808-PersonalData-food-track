@@ -1,16 +1,17 @@
-import { Container, Typography } from "@mui/material";
-import ReindexImages from "./ImageReindexTool.tsx";
+import { Container, Stack, Typography } from "@mui/material";
+import ReindexDashboard from "./ReindexDashboard.tsx";
 
 export const SettingsPage = () => {
   // Call your reindexAllImages Cloud Function
 
   return (
     <Container sx={{ mt: 2 }}>
-      <Typography textAlign="center" variant="h4">
-        Settings
-      </Typography>
-
-      <ReindexImages />
+      <Stack gap={2}>
+        <Typography textAlign="center" variant="h4">
+          Settings
+        </Typography>
+        <ReindexDashboard />
+      </Stack>
     </Container>
   );
 };
