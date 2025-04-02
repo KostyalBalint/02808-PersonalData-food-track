@@ -13,3 +13,41 @@ service firebase.storage {
     }
   }
 }
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users Collection
+    match /users/{userId} {
+      // Helper function to check if the requesting user is an admin
+      function isAdmin() {
+        // Assumes the requesting user's profile exists and has a role field
+        // Checks the requesting user's own document in Firestore
+        return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN';
+      }
+
+       // Allow reading own profile
+       allow read: if request.auth != null && request.auth.uid == userId;
+
+       // Allow ADMINs to read any user profile (for the Admin page list)
+       allow get: if request.auth != null && isAdmin(); // 'get' allows reading single doc
+       allow list: if request.auth != null && isAdmin(); // 'list' allows querying collection
+
+       // Allow creating own profile document if it doesn't exist yet
+       // This happens in the AuthProvider when a user logs in first time
+       allow create: if request.auth != null && request.auth.uid == userId;
+
+       // Allow updating own profile *except* the role field
+       allow update: if request.auth != null && request.auth.uid == userId
+                      && request.resource.data.role == resource.data.role; // Role cannot be changed by self
+
+      // Allow ADMINs to update any user's profile (specifically the role)
+      allow update: if request.auth != null && isAdmin();
+
+      // Generally disallow deleting user profile documents from client-side
+      allow delete: if false; // Or: if request.auth != null && isAdmin();
+    }
+
+    // Add rules for other collections as needed
+  }
+}
