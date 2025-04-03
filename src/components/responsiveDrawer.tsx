@@ -18,6 +18,7 @@ import { auth } from "../firebaseConfig";
 import { pages } from "../pages/pages.ts";
 import { LogoText } from "./LogoText.tsx";
 import { IoLogOutOutline } from "react-icons/io5";
+import { useAuth } from "../context/AuthContext.tsx";
 
 const style = {
   minHeight: 44,
@@ -32,9 +33,19 @@ export const ResponsiveDrawer = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
 
+  const { userProfile } = useAuth();
+
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
+
+  const accessiblePages = pages
+    .filter((page) => {
+      if (!page.roles) return true; // Page accessible to all logged-in users if roles array is omitted/empty
+      if (!userProfile) return false; // Should not happen if ProtectedRoute works, but good check
+      return page.roles.includes(userProfile.role);
+    })
+    .filter((page) => page.path !== "/not-authorized"); // Don't show Not Authorized in menu
 
   const handleLogout = async () => {
     await auth.signOut();
@@ -44,8 +55,10 @@ export const ResponsiveDrawer = () => {
   const drawerContent = (
     <Stack gap={1} p={2} height="100%">
       <LogoText variant="h6" textAlign="center" />
-      {pages.map((page) => {
+      {accessiblePages.map((page) => {
         const active = location.pathname === page.path;
+        const onlyAdminPage =
+          page.roles?.length === 1 && page.roles[0] === "ADMIN";
         return (
           <ListItem
             key={page.name}
@@ -62,6 +75,13 @@ export const ResponsiveDrawer = () => {
                   bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
                   "&:hover": {
                     bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16),
+                  },
+                }),
+
+                ...(onlyAdminPage && {
+                  bgcolor: (theme) => alpha(theme.palette.warning.main, 0.15),
+                  "&:hover": {
+                    bgcolor: (theme) => alpha(theme.palette.warning.main, 0.26),
                   },
                 }),
               }}
@@ -162,7 +182,7 @@ export const ResponsiveDrawer = () => {
           }}
           value={location.pathname}
         >
-          {pages.map((page) => (
+          {accessiblePages.map((page) => (
             <BottomNavigationAction
               key={page.path}
               value={page.path}

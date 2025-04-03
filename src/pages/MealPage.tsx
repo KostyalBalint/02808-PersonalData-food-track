@@ -18,7 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
-import { MealData, units } from "../constants.ts";
+import { MealData, units } from "../../functions/src/constants.ts";
 import { FaPlus, FaTrashCan } from "react-icons/fa6";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -35,6 +35,7 @@ import { db } from "../firebaseConfig.ts";
 import { ConfirmationModal } from "../components/ConfirmationModal.tsx";
 import { deleteObject, getStorage, ref } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
+import { DqqQuestionnaire } from "../components/DqqCalculator/DqqQuestionnaire.tsx";
 
 export const MealPage = () => {
   const { id } = useParams();
@@ -287,13 +288,21 @@ export const MealPage = () => {
         </Grid2>
         <Grid2 size={{ xs: 12 }}>
           <Paper sx={{ p: 2 }}>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={handleDeleteClick}
-            >
-              Delete
-            </Button>
+            {meal && <DqqQuestionnaire mealId={meal?.id} />}
+          </Paper>
+        </Grid2>
+
+        <Grid2 size={{ xs: 12 }}>
+          <Paper sx={{ p: 2 }}>
+            <Stack direction="row" gap={2}>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleDeleteClick}
+              >
+                Delete
+              </Button>
+            </Stack>
           </Paper>
         </Grid2>
         <ConfirmationModal

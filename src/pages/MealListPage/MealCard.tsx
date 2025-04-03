@@ -1,15 +1,17 @@
 import {
-  Button,
+  Box,
   Card,
   CardContent,
+  CardHeader,
   CardMedia,
+  Chip,
   List,
   ListItem,
-  Stack,
   Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { MealData } from "../../constants.ts";
+import { MealData } from "../../../functions/src/constants.ts";
+import { format } from "date-fns";
 
 export const MealCard = (props: { meal: MealData }) => {
   const navigate = useNavigate();
@@ -19,20 +21,30 @@ export const MealCard = (props: { meal: MealData }) => {
       sx={{ cursor: "pointer" }}
       onClick={() => navigate(`/meal/${props.meal.id}`)}
     >
-      <CardMedia
-        component="img"
-        image={props.meal.imageUrl}
-        alt="Uploaded image"
-        loading="lazy"
-      />
+      <CardHeader title={props.meal.name} />
+      <Box sx={{ position: "relative" }}>
+        <CardMedia
+          component="img"
+          image={props.meal.imageUrl}
+          alt="Uploaded image"
+          loading="lazy"
+          sx={{ aspectRatio: 1 }}
+        />
+        <Chip
+          label={format(props.meal.createdAt.toDate(), "HH:mm")}
+          size="small"
+          color="primary"
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            zIndex: 1,
+            m: 1,
+          }}
+        />
+      </Box>
       <CardContent>
-        <Stack direction="row" spacing={2} justifyContent="flex-end">
-          <Button variant="outlined" size="medium">
-            Duplicate meal
-          </Button>
-        </Stack>
-
-        <Typography variant="h5">Ingredients:</Typography>
+        <Typography variant="h6">Ingredients:</Typography>
         <List>
           {!props.meal.ingredients && <Typography>No ingredients</Typography>}
           {props.meal.ingredients?.map((ingredient) => (

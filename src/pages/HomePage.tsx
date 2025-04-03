@@ -1,8 +1,8 @@
-import { Card, CardHeader, Container, Grid2 } from "@mui/material";
-import { useAuth } from "../hooks/useAuth.tsx";
+import { Card, CardHeader, Chip, Container, Grid2, Stack } from "@mui/material";
 import { FoodPyramid } from "../components/FoodPyramid/FoodPyramid.tsx";
 import { useEffect, useRef, useState } from "react";
 import useSize from "@react-hook/size";
+import { useAuth } from "../context/AuthContext";
 
 export interface CategoryAmounts {
   Grains: number;
@@ -14,7 +14,9 @@ export interface CategoryAmounts {
 }
 
 export const HomePage = () => {
-  const { user } = useAuth();
+  const { currentUser, userProfile } = useAuth();
+
+  console.log(userProfile);
 
   const aimedAmountsByCategory: CategoryAmounts = {
     Grains: 300, // g
@@ -242,7 +244,14 @@ export const HomePage = () => {
       <Grid2 container spacing={2}>
         <Grid2 size={{ xs: 12 }}>
           <Card>
-            <CardHeader title={`Hi, ${user?.displayName}`} />
+            <CardHeader
+              title={
+                <Stack direction="row" gap={2} alignItems={"center"}>
+                  Hi, {currentUser?.displayName}
+                  <Chip label={userProfile?.role} />
+                </Stack>
+              }
+            ></CardHeader>
           </Card>
         </Grid2>
         <Grid2 size={{ xs: 12, md: 6 }}>
