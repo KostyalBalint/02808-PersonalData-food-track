@@ -35,7 +35,7 @@ import { db } from "../firebaseConfig.ts";
 import { ConfirmationModal } from "../components/ConfirmationModal.tsx";
 import { deleteObject, getStorage, ref } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
-import { DqqQuestionnaire } from "../components/DqqCalculator/DqqQuestionnaire.tsx";
+import { DqqQuestionerForm } from "../components/DqqCalculator/DqqQuestionerForm.tsx";
 
 export const MealPage = () => {
   const { id } = useParams();
@@ -186,8 +186,8 @@ export const MealPage = () => {
           <Alert severity="error">{meal?.errorMessage}</Alert>
         )}
         <Grid2 size={{ xs: 12, md: 6 }}>
-          <Container maxWidth={"sm"} sx={{ px: 0 }}>
-            <Card>
+          <Container maxWidth={"sm"} disableGutters>
+            <Card sx={{ m: 0 }}>
               {meal && (
                 <CardHeader title={meal?.name} sx={{ textAlign: "center" }} />
               )}
@@ -195,6 +195,7 @@ export const MealPage = () => {
                 component="img"
                 image={meal?.imageUrl}
                 alt="Uploaded images"
+                sx={{ aspectRatio: "3/4" }}
               />
             </Card>
           </Container>
@@ -287,9 +288,7 @@ export const MealPage = () => {
           </Paper>
         </Grid2>
         <Grid2 size={{ xs: 12 }}>
-          <Paper sx={{ p: 2 }}>
-            {meal && <DqqQuestionnaire mealId={meal?.id} />}
-          </Paper>
+          {meal && <DqqQuestionerForm mealId={meal.id} />}
         </Grid2>
 
         <Grid2 size={{ xs: 12 }}>
