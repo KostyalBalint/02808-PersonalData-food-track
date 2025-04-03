@@ -1,14 +1,17 @@
 import { FC } from "react";
+import {CategoryAmounts} from "../../pages/HomePage.tsx";
 
-type FoodPyramidProps = {
-  pyramidWidth?: number;
-  pyramidData: {
-    id: number;
+type PyramidData = {
+    key: keyof CategoryAmounts;
     name: string;
     percentage: number;
     color: string;
     subtitle: string;
-  }[];
+}
+
+type FoodPyramidProps = {
+  pyramidWidth?: number;
+  pyramidData: PyramidData[];
 };
 
 export const FoodPyramid: FC<FoodPyramidProps> = ({
@@ -92,7 +95,7 @@ export const FoodPyramid: FC<FoodPyramidProps> = ({
 
           return (
             <div
-              key={category.id}
+              key={category.key}
               className="absolute flex items-center justify-center"
               style={{
                 width: `${bottomWidth}px`,
@@ -169,7 +172,7 @@ export const FoodPyramid: FC<FoodPyramidProps> = ({
                   <div>
                     <div className="font-medium">{category.name}</div>
                   </div>
-                  <div className="font-bold">{category.percentage}%</div>
+                  <div className="font-bold">{category.percentage.toFixed(2)}%</div>
                 </div>
               </div>
             </div>
