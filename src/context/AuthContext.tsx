@@ -10,12 +10,14 @@ import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { Role } from "../pages/pages.ts";
 import { auth, db } from "../firebaseConfig.ts";
+import { DqqDemographics } from "../components/DqqCalculator/dqqQuestions.ts";
 
-interface UserProfile {
+export interface UserProfile {
   uid: string;
   email: string | null;
   displayName: string | null;
   role: Role;
+  demographics?: DqqDemographics;
   // Add other profile fields as needed
 }
 

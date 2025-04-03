@@ -10,9 +10,9 @@ import {
   IoSettingsOutline,
 } from "react-icons/io5";
 import { SettingsPage } from "./Admin/Settings.tsx";
-import DQICalculator from "../components/DQICalculator.tsx";
 import { HomePage } from "./HomePage.tsx";
 import AdminPage from "./Admin/AdminPage.tsx";
+import { UserSettings } from "./UserSettings.tsx";
 
 export type Role = "ADMIN" | "CONTROLL" | "SUBJECT";
 
@@ -49,9 +49,9 @@ export const pages: Page[] = [
     roles: ["ADMIN", "CONTROLL", "SUBJECT"],
   },
   {
-    name: "DQI Calculator",
-    path: "/dqi",
-    component: DQICalculator,
+    name: "Settings",
+    path: "/settings",
+    component: UserSettings,
     icon: IoSettingsOutline,
     roles: ["ADMIN", "CONTROLL", "SUBJECT"],
   },
