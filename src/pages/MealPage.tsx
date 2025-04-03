@@ -6,7 +6,7 @@ import {
   CardMedia,
   Container,
   FormControl,
-  Grid2,
+  Grid,
   IconButton,
   InputLabel,
   ListItem,
@@ -181,11 +181,11 @@ export const MealPage = () => {
 
   return (
     <Container sx={{ mt: 2 }}>
-      <Grid2 container spacing={2}>
+      <Grid container spacing={2}>
         {meal?.errorMessage && (
           <Alert severity="error">{meal?.errorMessage}</Alert>
         )}
-        <Grid2 size={{ xs: 12, md: 6 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Container maxWidth={"sm"} disableGutters>
             <Card sx={{ m: 0 }}>
               {meal && (
@@ -199,8 +199,8 @@ export const MealPage = () => {
               />
             </Card>
           </Container>
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 6 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h4" mb={2}>
               Ingredients:
@@ -286,12 +286,12 @@ export const MealPage = () => {
               </ListItem>
             </Stack>
           </Paper>
-        </Grid2>
-        <Grid2 size={{ xs: 12 }}>
+        </Grid>
+        <Grid size={{ xs: 12 }}>
           {meal && <DqqQuestionerForm mealId={meal.id} />}
-        </Grid2>
+        </Grid>
 
-        <Grid2 size={{ xs: 12 }}>
+        <Grid size={{ xs: 12 }}>
           <Paper sx={{ p: 2 }}>
             <Stack direction="row" gap={2}>
               <Button
@@ -303,7 +303,7 @@ export const MealPage = () => {
               </Button>
             </Stack>
           </Paper>
-        </Grid2>
+        </Grid>
         <ConfirmationModal
           open={isModalOpen}
           onClose={handleModalClose}
@@ -311,7 +311,7 @@ export const MealPage = () => {
           title="Delete Meal"
           description="Are you sure you want to delete this meal? This action cannot be undone."
         />
-      </Grid2>
+      </Grid>
     </Container>
   );
 };

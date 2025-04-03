@@ -148,14 +148,10 @@ export function DqqQuestionnaire({
       )}
 
       <Grid container spacing={4}>
-        {/* Questions Section - Render the Form Component */}
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <DqqQuestionerForm
             mealId={mealId}
-            disabled={!demographicsComplete || isLoading} // Disable form if no demos or still loading
-            // Pass optional callbacks if needed by the parent component for fine-grained status
-            // onSaveStatusChange={...}
-            // onError={...}
+            disabled={!demographicsComplete || isLoading}
           />
         </Grid>
       </Grid>

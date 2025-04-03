@@ -1,4 +1,4 @@
-import { Card, CardHeader, Chip, Container, Grid2, Stack } from "@mui/material";
+import { Card, CardHeader, Chip, Container, Grid, Stack } from "@mui/material";
 import { FoodPyramid } from "../components/FoodPyramid/FoodPyramid.tsx";
 import { useRef, useState } from "react";
 import useSize from "@react-hook/size";
@@ -70,8 +70,8 @@ export const HomePage = () => {
 
   return (
     <Container sx={{ mt: 2 }}>
-      <Grid2 container spacing={2}>
-        <Grid2 size={{ xs: 12 }}>
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 12 }}>
           <Card>
             <CardHeader
               title={
@@ -82,8 +82,8 @@ export const HomePage = () => {
               }
             ></CardHeader>
           </Card>
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 6 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card ref={target}>
             <CardHeader title="Your food pyramid" />
             <FoodPyramid
@@ -91,8 +91,8 @@ export const HomePage = () => {
               pyramidWidth={pyramidWidth}
             />
           </Card>
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 6 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card>
             {/* Controls section - moved below the pyramid */}
             <div className="w-full m-4 max-w-lg bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -124,8 +124,8 @@ export const HomePage = () => {
               ))}
             </div>
           </Card>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Container>
   );
 };

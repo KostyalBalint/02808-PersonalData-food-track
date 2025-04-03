@@ -234,7 +234,11 @@ export function DemographicsForm({
           </Alert>
         )}
         <Grid container spacing={2}>
-          <Grid item xs={6}>
+          <Grid
+            size={{
+              xs: 6,
+            }}
+          >
             <TextField
               fullWidth
               label="Age (years)"
@@ -249,7 +253,11 @@ export function DemographicsForm({
               disabled={isSaving}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid
+            size={{
+              xs: 6,
+            }}
+          >
             <FormControl
               component="fieldset"
               size="small"

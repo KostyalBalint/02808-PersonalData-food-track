@@ -1,5 +1,5 @@
 import { DqqResultsDisplay } from "../../components/DqqCalculator/DqqResultsDisplay.tsx";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   calculateDqqIndicators,
   DqqResultsState,
@@ -9,7 +9,7 @@ import {
   initialAnswersState,
   initialDemographicsState,
 } from "../../components/DqqCalculator/dqqQuestions.ts";
-import { Container } from "@mui/material";
+import { Container, Grid } from "@mui/material";
 import {
   collection,
   onSnapshot,
@@ -19,6 +19,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig.ts";
 import { MealData } from "../../../functions/src/constants.ts";
+import DqqTimeChart, { DqqTimeChartDataPoint } from "./DqqTimeChart.tsx";
 
 export const AnalyzePage = () => {
   const { demographicsComplete, userProfile } = useAuth();
@@ -26,6 +27,10 @@ export const AnalyzePage = () => {
 
   const [results, setResults] = useState<Partial<DqqResultsState>[]>([]);
   const [meals, setMeals] = useState<MealData[]>([] as MealData[]);
+
+  const [selectedResult, setSelectedResult] = useState<
+    Partial<DqqResultsState>
+  >(calculateDqqIndicators(initialAnswersState, demographics));
 
   const { currentUser } = useAuth();
 
@@ -52,20 +57,7 @@ export const AnalyzePage = () => {
   }, [currentUser]);
 
   useEffect(() => {
-    if (!demographicsComplete) {
-      console.log(
-        "DqqQuestionnaire: Demographics incomplete, clearing results.",
-      );
-      setResults([]); // Clear results if demographics are missing
-      return;
-    }
-
-    if (!meals.length) {
-      console.log("DqqQuestionnaire: No meals found.");
-      setResults([]); // Clear results if no meals are found
-      return;
-    }
-
+    if (!meals) return;
     setResults(
       meals.map((meal) =>
         calculateDqqIndicators(meal.dqqData?.answers, demographics),
@@ -74,15 +66,47 @@ export const AnalyzePage = () => {
   }, [meals]);
 
   useEffect(() => {
-    console.log(results);
+    console.log({ results });
   }, [results]);
+
+  const chartData = results.map(
+    (result, id) =>
+      ({
+        resultId: id,
+        ncdProtectScore: (result.ncdp ?? 0) + (result.gdr ?? NaN),
+        gdrScore: result.gdr,
+        ncdRiskScore: (result.gdr ?? 0) - (result.ncdr ?? NaN),
+        timestamp: meals[id].createdAt.toDate(),
+      }) as DqqTimeChartDataPoint,
+  );
+
+  const onChartHover = useCallback(
+    (dataPoint: DqqTimeChartDataPoint | null) => {
+      if (!dataPoint) return;
+      setSelectedResult(results[dataPoint.resultId]);
+    },
+    [results],
+  );
 
   return (
     <Container sx={{ mt: 5 }}>
-      <DqqResultsDisplay
-        results={calculateDqqIndicators(initialAnswersState, demographics)}
-        demographicsComplete={demographicsComplete}
-      />
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <DqqTimeChart
+            data={chartData}
+            title="Patient Health Scores Over Time"
+            onHover={onChartHover}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          {selectedResult && (
+            <DqqResultsDisplay
+              results={selectedResult}
+              demographicsComplete={demographicsComplete}
+            />
+          )}
+        </Grid>
+      </Grid>
     </Container>
   );
 };

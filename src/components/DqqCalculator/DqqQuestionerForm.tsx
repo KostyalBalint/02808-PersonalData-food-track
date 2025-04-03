@@ -7,7 +7,7 @@ import {
   CardContent,
   Checkbox,
   FormControlLabel,
-  Grid2,
+  Grid,
   Typography,
 } from "@mui/material";
 import { db } from "../../firebaseConfig"; // Adjust path
@@ -187,10 +187,10 @@ export function DqqQuestionerForm({
             {isLoading && <Typography>Loading questions...</Typography>}
             {!isLoading && (
               // Wrap the items in a Grid container
-              <Grid2 container spacing={1}>
+              <Grid container spacing={1}>
                 {dqqQuestions.map((q) => (
                   // Each item is a Grid item
-                  <Grid2
+                  <Grid
                     size={{
                       xs: 12,
                       md: 6,
@@ -210,9 +210,9 @@ export function DqqQuestionerForm({
                       // Ensure label takes up available space if needed and aligns items
                       sx={{ display: "flex", width: "100%", mb: 0, mr: 0 }}
                     />
-                  </Grid2>
+                  </Grid>
                 ))}
-              </Grid2>
+              </Grid>
             )}
           </fieldset>
         </Box>
