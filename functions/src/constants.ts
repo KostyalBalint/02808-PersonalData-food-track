@@ -1,7 +1,12 @@
 import { Timestamp } from "firebase/firestore";
-import { DqqAnswersMap } from "../../src/components/DqqCalculator/dqqQuestions.js";
 
 export const units = ["Pcs", "grams", "liter"];
+
+type DqqQuestionKey = `DQQ${number}`; // Matches keys like DQQ1, DQQ2, ..., DQQ99
+
+export type DqqAnswersMap = {
+  [K in DqqQuestionKey]?: boolean; // All keys are optional initially, store as boolean
+};
 
 export interface MealData {
   id: string;

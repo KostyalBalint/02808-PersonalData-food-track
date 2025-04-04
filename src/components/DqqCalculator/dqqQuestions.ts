@@ -1,6 +1,5 @@
 // src/components/DqqCalculator/dqqQuestions.ts
 
-// Interface for a single DQQ question item
 export interface DqqQuestion {
   key: string;
   label: string;
@@ -101,13 +100,6 @@ export interface MealDqqData {
   answers?: DqqAnswersMap; // Optional answers
   lastUpdated?: any; // Firestore ServerTimestamp on write
   // Add any other DQQ related metadata if needed later
-}
-
-// Type for the data structure within the meal document
-export interface MealDocument {
-  dqqData?: MealDqqData; // All DQQ stuff nested here
-  // Other potential top-level meal properties (e.g., mealName, date)
-  mealName?: string;
 }
 
 // --- Initial States ---
