@@ -37,32 +37,32 @@ export const HomePage = () => {
     Grains: {
       amount: 0,
       min: 0,
-      max: aimedAmountsByCategory.Grains * 2,
+      max: aimedAmountsByCategory.Grains * 5,
     },
     Vegetables: {
       amount: 0,
       min: 0,
-      max: aimedAmountsByCategory.Vegetables * 2,
+      max: aimedAmountsByCategory.Vegetables * 5,
     },
     Fruits: {
       amount: 0,
       min: 0,
-      max: aimedAmountsByCategory.Fruits * 2,
+      max: aimedAmountsByCategory.Fruits * 5,
     },
     Protein: {
       amount: 0,
       min: 0,
-      max: aimedAmountsByCategory.Protein * 2,
+      max: aimedAmountsByCategory.Protein * 5,
     },
     Dairy: {
       amount: 0,
       min: 0,
-      max: aimedAmountsByCategory.Dairy * 2,
+      max: aimedAmountsByCategory.Dairy * 5,
     },
     FatsAndSweets: {
       amount: 0,
       min: 0,
-      max: aimedAmountsByCategory.FatsAndSweets * 2,
+      max: aimedAmountsByCategory.FatsAndSweets * 5,
     },
   });
 
