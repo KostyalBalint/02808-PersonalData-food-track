@@ -26,8 +26,8 @@ import {
   DqqQuestionKey,
   dqqQuestions,
   initialAnswersState,
-  MealDocument,
 } from "./dqqQuestions.ts";
+import { MealData } from "../../../functions/src/constants.ts";
 
 interface DqqQuestionerFormProps {
   mealId: string;
@@ -48,7 +48,7 @@ export function DqqQuestionerForm({
   const [error, setError] = useState<string | null>(null);
 
   const mealDocRef = useMemo(
-    () => doc(db, "meals", mealId) as DocumentReference<MealDocument>,
+    () => doc(db, "meals", mealId) as DocumentReference<MealData>,
     [mealId],
   );
 
@@ -66,7 +66,7 @@ export function DqqQuestionerForm({
 
     const unsubscribe = onSnapshot(
       mealDocRef,
-      (docSnap: DocumentSnapshot<MealDocument>) => {
+      (docSnap: DocumentSnapshot<MealData>) => {
         const fetchedAnswers =
           docSnap.data()?.dqqData?.answers ?? initialAnswersState;
         // Only update local state if it differs and we are not currently saving

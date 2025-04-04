@@ -416,7 +416,14 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
           <Grid container gap={2}>
             {selectedFiles.map((fileData) => (
-              <Grid item xs={12} sm={6} md={4} key={fileData.id}>
+              <Grid
+                size={{
+                  xs: 12,
+                  sm: 6,
+                  md: 4,
+                }}
+                key={fileData.id}
+              >
                 <Card>
                   <CardMedia
                     component="img"
