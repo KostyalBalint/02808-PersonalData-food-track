@@ -19,8 +19,8 @@ import {
   DqqAnswersMap,
   initialAnswersState,
   initialDemographicsState,
-  MealDocument,
-} from "./dqqQuestions.ts"; // Import the new display
+} from "./dqqQuestions.ts";
+import { MealData } from "../../../functions/src/constants.ts"; // Import the new display
 
 interface DqqQuestionnaireProps {
   mealId: string;
@@ -40,7 +40,7 @@ export function DqqQuestionnaire({
   const [error, setError] = useState<string | null>(null); // For fetch/init errors
 
   const mealDocRef = useMemo(
-    () => doc(db, "meals", mealId) as DocumentReference<MealDocument>,
+    () => doc(db, "meals", mealId) as DocumentReference<MealData>,
     [mealId],
   );
 
@@ -66,7 +66,7 @@ export function DqqQuestionnaire({
     // Listener for the meal document to get answers
     const unsubscribe = onSnapshot(
       mealDocRef,
-      (docSnap: DocumentSnapshot<MealDocument>) => {
+      (docSnap: DocumentSnapshot<MealData>) => {
         const data = docSnap.data();
         const fetchedDqqData = data?.dqqData;
         const currentAnswers = fetchedDqqData?.answers ?? initialAnswersState;

@@ -6,10 +6,11 @@ import {
 } from "../../components/DqqCalculator/calculateDqqIndicators.ts";
 import { useAuth } from "../../context/AuthContext.tsx";
 import {
+  DqqAnswersMap,
   initialAnswersState,
   initialDemographicsState,
 } from "../../components/DqqCalculator/dqqQuestions.ts";
-import { Container, Grid } from "@mui/material";
+import { Container, Grid, Paper, Typography } from "@mui/material";
 import {
   collection,
   onSnapshot,
@@ -20,17 +21,32 @@ import {
 import { db } from "../../firebaseConfig.ts";
 import { MealData } from "../../../functions/src/constants.ts";
 import DqqTimeChart, { DqqTimeChartDataPoint } from "./DqqTimeChart.tsx";
+import { format } from "date-fns";
+import { mergeMultipleDQQ } from "../../components/DqqCalculator/mergeMultipleDQQ.ts";
+import { ChartToggleWrapper } from "./ChartToggleWrapper.tsx";
 
 export const AnalyzePage = () => {
   const { demographicsComplete, userProfile } = useAuth();
   const demographics = userProfile?.demographics ?? initialDemographicsState;
 
-  const [results, setResults] = useState<Partial<DqqResultsState>[]>([]);
+  const [results, setResults] = useState<
+    {
+      results: Partial<DqqResultsState>;
+      meals: MealData[];
+      timestamp: string;
+    }[]
+  >([]);
   const [meals, setMeals] = useState<MealData[]>([] as MealData[]);
 
-  const [selectedResult, setSelectedResult] = useState<
-    Partial<DqqResultsState>
-  >(calculateDqqIndicators(initialAnswersState, demographics));
+  const [selectedResult, setSelectedResult] = useState<{
+    results: Partial<DqqResultsState>;
+    meals: MealData[];
+    timestamp: string;
+  }>({
+    results: calculateDqqIndicators(initialAnswersState, demographics),
+    meals: [],
+    timestamp: "",
+  });
 
   const { currentUser } = useAuth();
 
@@ -58,10 +74,39 @@ export const AnalyzePage = () => {
 
   useEffect(() => {
     if (!meals) return;
+
+    // Group meals by day
+    const mealsByDay = meals.reduce(
+      (acc, meal) => {
+        const date = meal.createdAt.toDate();
+        const dayKey = format(date, "yyyy-MM-dd");
+
+        if (!acc[dayKey]) {
+          acc[dayKey] = [];
+        }
+
+        acc[dayKey].push(meal);
+        return acc;
+      },
+      {} as Record<string, MealData[]>,
+    );
+
     setResults(
-      meals.map((meal) =>
-        calculateDqqIndicators(meal.dqqData?.answers, demographics),
-      ),
+      Object.keys(mealsByDay).map((dayKey) => {
+        const mealsForDay = mealsByDay[dayKey];
+
+        const answer = mergeMultipleDQQ(
+          mealsForDay
+            .map((meal) => meal.dqqData?.answers)
+            .map((a) => a) as DqqAnswersMap[],
+        );
+
+        return {
+          results: calculateDqqIndicators(answer, demographics),
+          timestamp: dayKey,
+          meals: mealsForDay,
+        };
+      }),
     );
   }, [meals]);
 
@@ -73,10 +118,11 @@ export const AnalyzePage = () => {
     (result, id) =>
       ({
         resultId: id,
-        ncdProtectScore: (result.ncdp ?? 0) + (result.gdr ?? NaN),
-        gdrScore: result.gdr,
-        ncdRiskScore: (result.gdr ?? 0) - (result.ncdr ?? NaN),
-        timestamp: meals[id].createdAt.toDate(),
+        ncdProtectScore: result.results.ncdp,
+        gdrScore: result.results.gdr,
+        ncdRiskScore: result.results.ncdr,
+        timestamp: result.timestamp,
+        mealCount: result.meals.length,
       }) as DqqTimeChartDataPoint,
   );
 
@@ -89,19 +135,48 @@ export const AnalyzePage = () => {
   );
 
   return (
-    <Container sx={{ mt: 5 }}>
+    <Container sx={{ mt: 2 }}>
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <DqqTimeChart
-            data={chartData}
-            title="Patient Health Scores Over Time"
-            onHover={onChartHover}
-          />
+        <Grid size={{ xs: 12, md: 8, xl: 6 }}>
+          <Paper sx={{ py: 2, pr: 2 }}>
+            <ChartToggleWrapper
+              title="DQQ Scores over time" // Pass title to the wrapper
+              initialChartType="line" // Optional: set default
+              // lineLabel="Trend" // Optional: customize labels
+              // barLabel="Daily Scores" // Optional: customize labels
+            >
+              {/* DqqTimeChart is now the child */}
+              {chartData.length > 0 ? (
+                <DqqTimeChart
+                  data={chartData}
+                  onHover={onChartHover}
+                  // chartType prop is now provided by ChartToggleWrapper
+                  chartType="line" // Only add this bc. TS
+                />
+              ) : (
+                // Display message within the wrapper if no data
+                <Typography sx={{ mt: 4, textAlign: "center" }}>
+                  No data available to display chart.
+                </Typography>
+              )}
+            </ChartToggleWrapper>
+          </Paper>
+          {/*
+            <Paper>
+                <Grid container spacing={1}>
+                  {selectedResult.meals.map((meal) => (
+                    <Grid size={{ xs: 12, md: 6, lg: 4 }} key={meal.id}>
+                      <MealCard meal={meal} />
+                    </Grid>
+                  ))}
+                </Grid>
+              </Paper>
+             */}
         </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid size={{ xs: 12, md: 4, xl: 6 }}>
           {selectedResult && (
             <DqqResultsDisplay
-              results={selectedResult}
+              results={selectedResult.results}
               demographicsComplete={demographicsComplete}
             />
           )}
