@@ -16,12 +16,22 @@ import {
   Container,
   Divider,
   Grid,
+  Paper,
   Typography,
 } from "@mui/material";
 import { MealCard } from "./MealCard.tsx";
 import { MealData } from "../../../functions/src/constants.ts";
 import { useSnackbar } from "notistack";
 import { format } from "date-fns";
+import { DqqScoreBarDisplay } from "../../components/DqqCalculator/DqqResultsDisplay.tsx";
+import { mergeMultipleDQQ } from "../../components/DqqCalculator/mergeMultipleDQQ.ts";
+import { DqqAnswersMap } from "../../components/DqqCalculator/dqqQuestions.ts";
+import {
+  calculateDqqIndicators,
+  DqqResultsState,
+} from "../../components/DqqCalculator/calculateDqqIndicators.ts";
+import { useAuth } from "../../context/AuthContext.tsx";
+import { ProtectedComponent } from "../../context/ProtectedComponent.tsx";
 
 export const MealListPage = () => {
   const [meals, setMeals] = useState<MealData[]>([]);
@@ -31,24 +41,54 @@ export const MealListPage = () => {
   const observer = useRef<IntersectionObserver | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
 
+  const [mealsWithDQQ, setMealsWithDQQ] = useState<
+    {
+      results: Partial<DqqResultsState>;
+      timestamp: string;
+      meals: MealData[];
+    }[]
+  >([]);
+
   const { enqueueSnackbar } = useSnackbar();
   const MEALS_PER_PAGE = 6;
 
-  // Group meals by day
-  const mealsByDay = meals.reduce(
-    (acc, meal) => {
-      const date = meal.createdAt.toDate();
-      const dayKey = format(date, "yyyy-MM-dd");
+  const { userProfile } = useAuth();
 
-      if (!acc[dayKey]) {
-        acc[dayKey] = [];
-      }
+  useEffect(() => {
+    // Group meals by day
+    const mealsByDay = meals.reduce(
+      (acc, meal) => {
+        const date = meal.createdAt.toDate();
+        const dayKey = format(date, "yyyy-MM-dd");
 
-      acc[dayKey].push(meal);
-      return acc;
-    },
-    {} as Record<string, MealData[]>,
-  );
+        if (!acc[dayKey]) {
+          acc[dayKey] = [];
+        }
+
+        acc[dayKey].push(meal);
+        return acc;
+      },
+      {} as Record<string, MealData[]>,
+    );
+
+    const _mealsWithDQQ = Object.keys(mealsByDay).map((dayKey) => {
+      const mealsForDay = mealsByDay[dayKey];
+
+      const answer = mergeMultipleDQQ(
+        mealsForDay
+          .map((meal) => meal.dqqData?.answers)
+          .map((a) => a) as DqqAnswersMap[],
+      );
+
+      return {
+        results: calculateDqqIndicators(answer, userProfile?.demographics),
+        timestamp: dayKey,
+        meals: mealsForDay,
+      };
+    });
+
+    setMealsWithDQQ(_mealsWithDQQ);
+  }, [meals]);
 
   const fetchMeals = useCallback(
     async (isInitialFetch = false) => {
@@ -164,16 +204,31 @@ export const MealListPage = () => {
         Your Meals
       </Typography>
 
-      {Object.entries(mealsByDay).map(([day, dayMeals], index) => (
-        <Box key={day} mb={4}>
+      {mealsWithDQQ.map((mealGroup, index) => (
+        <Box key={mealGroup.timestamp} mb={4}>
           {index > 0 && <Divider sx={{ my: 3 }} />}
 
-          <Typography variant="h6" component="h2" fontWeight="bold" mb={2}>
-            {formatDateDisplay(day)}
-          </Typography>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12 }}>
+              <Paper sx={{ p: 2 }}>
+                <Grid container direction={{ xs: "column", md: "row" }}>
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <Typography variant="h6" component="h2" fontWeight="bold">
+                      {formatDateDisplay(mealGroup.timestamp)}
+                    </Typography>
+                  </Grid>
+                  <ProtectedComponent allowedRoles={["SUBJECT", "ADMIN"]}>
+                    <Grid size={{ xs: 12, md: 4 }}>
+                      <Box>
+                        <DqqScoreBarDisplay results={mealGroup.results} />
+                      </Box>
+                    </Grid>
+                  </ProtectedComponent>
+                </Grid>
+              </Paper>
+            </Grid>
 
-          <Grid container spacing={3}>
-            {dayMeals.map((meal) => (
+            {mealGroup.meals.map((meal) => (
               <Grid
                 size={{
                   xs: 12,

@@ -11,7 +11,8 @@ import {
 } from "@mui/material";
 import { IndicatorRow } from "./IndicatorRow";
 import { DqqResultsState } from "./calculateDqqIndicators.ts";
-import { InfoTooltip } from "../InfoTooltip.tsx"; // Adjust path
+import { InfoTooltip } from "../InfoTooltip.tsx";
+import { FC } from "react"; // Adjust path
 
 // Keep the definition of rows needed for display
 const extraIndicatorRows = [
@@ -77,27 +78,6 @@ export function DqqResultsDisplay({
 }: DqqResultsDisplayProps) {
   const theme = useTheme();
 
-  // Helper function to safely get scores
-  const getScore = (key: keyof DqqResultsState): number => {
-    const value = results[key];
-    return typeof value === "number" && !isNaN(value) ? value : 0;
-  };
-
-  const gdrScore = getScore("gdr");
-  const ncdRiskScore = getScore("ncdr");
-  const ncdProtectScore = getScore("ncdp");
-
-  // Define max scores for bar width calculation
-  const maxRiskScore = 8;
-  const maxProtectScore = 9;
-
-  // Calculate bar widths
-  const riskWidthPercent = Math.min(50, (ncdRiskScore / maxRiskScore) * 50);
-  const protectWidthPercent = Math.min(
-    50,
-    (ncdProtectScore / maxProtectScore) * 50,
-  );
-
   return (
     <Card variant="outlined" sx={{ height: "100%" }}>
       <CardContent
@@ -119,135 +99,7 @@ export function DqqResultsDisplay({
         ) : (
           <>
             {/* --- Top Scores --- */}
-            <Box
-              sx={{
-                textAlign: "center",
-                mb: 1,
-                borderBottom: `1px solid ${theme.palette.divider}`,
-                pb: 2,
-              }}
-            >
-              <Stack
-                direction="row"
-                justifyContent="center"
-                alignItems="center"
-              >
-                <Typography
-                  variant="h5"
-                  component="p"
-                  sx={{ fontWeight: "medium" }}
-                >
-                  GDR Score
-                </Typography>
-                <InfoTooltip size="small">
-                  <Typography variant="body2">
-                    <Typography
-                      variant="subtitle2"
-                      component="span"
-                      fontWeight="bold"
-                    >
-                      Definition
-                    </Typography>
-                    <br />
-                    The global dietary recommendations (GDR) score has two
-                    components, NCD-Protect and NCD-Risk. It is based on food
-                    consumption from nine health-protective food groups
-                    (NCD-Protect) and eight food groups to limit or avoid
-                    (NCD-Risk) during the previous day or night. The score
-                    ranges from 0 to 18 with higher scores indicating more
-                    recommendations met.
-                    <br />
-                    <br />
-                    <Typography
-                      variant="subtitle2"
-                      component="span"
-                      fontWeight="bold"
-                    >
-                      Relevance
-                    </Typography>
-                    <br />A higher Global Dietary Recommendations (GDR) score
-                    reflects meeting global dietary recommendations of the WHO."
-                  </Typography>
-                </InfoTooltip>
-                <Typography
-                  variant="h5"
-                  component="p"
-                  sx={{ fontWeight: "medium" }}
-                >
-                  {gdrScore.toFixed(1)}
-                </Typography>
-              </Stack>
-              <Grid
-                container
-                spacing={1}
-                justifyContent="center"
-                alignItems="center"
-              >
-                <Grid
-                  size={{ xs: 6 }}
-                  sx={{
-                    textAlign: "right",
-                    pr: 1,
-                    borderRight: `1px solid ${theme.palette.divider}`,
-                  }}
-                >
-                  <Typography variant="body1">
-                    NCD-Risk Score - {ncdRiskScore.toFixed(1)}
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 6 }} sx={{ textAlign: "left", pl: 1 }}>
-                  <Typography variant="body1">
-                    NCD-Protect Score - {ncdProtectScore.toFixed(1)}
-                  </Typography>
-                </Grid>
-              </Grid>
-            </Box>
-
-            {/* --- Bar Chart --- */}
-            <Box
-              sx={{
-                display: "flex",
-                width: "100%",
-                height: 15,
-                my: 2,
-                backgroundColor: theme.palette.grey[300],
-                position: "relative",
-              }}
-            >
-              {/* Risk Bar */}
-              <Box
-                sx={{
-                  height: "100%",
-                  width: `${riskWidthPercent}%`,
-                  backgroundColor: theme.palette.error.light,
-                  transition: "width 0.3s ease-in-out",
-                  position: "absolute",
-                  right: "50%",
-                }}
-              />
-              {/* Protect Bar */}
-              <Box
-                sx={{
-                  height: "100%",
-                  width: `${protectWidthPercent}%`,
-                  backgroundColor: theme.palette.success.light,
-                  transition: "width 0.3s ease-in-out",
-                  position: "absolute",
-                  left: "50%",
-                }}
-              />
-              {/* Center Divider */}
-              <Divider
-                orientation="vertical"
-                flexItem
-                sx={{
-                  position: "absolute",
-                  left: "50%",
-                  height: "100%",
-                  bgcolor: "rgba(0, 0, 0, 0.3)",
-                }}
-              />
-            </Box>
+            <DqqScoreBarDisplay results={results} />
 
             {/* --- Indicator List --- */}
             <Box
@@ -281,3 +133,151 @@ export function DqqResultsDisplay({
     </Card>
   );
 }
+
+export const DqqScoreBarDisplay: FC<{ results: Partial<DqqResultsState> }> = ({
+  results,
+}) => {
+  // Helper function to safely get scores
+  const getScore = (key: keyof DqqResultsState): number => {
+    const value = results[key];
+    return typeof value === "number" && !isNaN(value) ? value : 0;
+  };
+
+  const gdrScore = getScore("gdr");
+  const ncdRiskScore = getScore("ncdr");
+  const ncdProtectScore = getScore("ncdp");
+
+  // Define max scores for bar width calculation
+  const maxRiskScore = 8;
+  const maxProtectScore = 9;
+
+  // Calculate bar widths
+  const riskWidthPercent = Math.min(50, (ncdRiskScore / maxRiskScore) * 50);
+  const protectWidthPercent = Math.min(
+    50,
+    (ncdProtectScore / maxProtectScore) * 50,
+  );
+
+  const theme = useTheme();
+
+  return (
+    <>
+      <Box
+        sx={{
+          textAlign: "center",
+          mb: 1,
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          pb: 2,
+        }}
+      >
+        <Stack
+          direction="row"
+          justifyContent="center"
+          alignItems="center"
+          gap={0.5}
+        >
+          <Typography variant="h5" component="p" sx={{ fontWeight: "medium" }}>
+            GDR Score
+          </Typography>
+          <InfoTooltip size="small">
+            <Typography variant="body2">
+              <Typography
+                variant="subtitle2"
+                component="span"
+                fontWeight="bold"
+              >
+                Definition
+              </Typography>
+              <br />
+              The global dietary recommendations (GDR) score has two components,
+              NCD-Protect and NCD-Risk. It is based on food consumption from
+              nine health-protective food groups (NCD-Protect) and eight food
+              groups to limit or avoid (NCD-Risk) during the previous day or
+              night. The score ranges from 0 to 18 with higher scores indicating
+              more recommendations met.
+              <br />
+              <br />
+              <Typography
+                variant="subtitle2"
+                component="span"
+                fontWeight="bold"
+              >
+                Relevance
+              </Typography>
+              <br />A higher Global Dietary Recommendations (GDR) score reflects
+              meeting global dietary recommendations of the WHO."
+            </Typography>
+          </InfoTooltip>
+          <Typography variant="h5" component="p" sx={{ fontWeight: "medium" }}>
+            {gdrScore.toFixed(1)}
+          </Typography>
+        </Stack>
+        <Grid container spacing={1} justifyContent="center" alignItems="center">
+          <Grid
+            size={{ xs: 6 }}
+            sx={{
+              textAlign: "right",
+              pr: 1,
+              borderRight: `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            <Typography variant="body1">
+              NCD-Risk Score {ncdRiskScore.toFixed(1)}
+            </Typography>
+          </Grid>
+          <Grid size={{ xs: 6 }} sx={{ textAlign: "left", pl: 1 }}>
+            <Typography variant="body1">
+              NCD-Protect Score {ncdProtectScore.toFixed(1)}
+            </Typography>
+          </Grid>
+        </Grid>
+      </Box>
+
+      {/* --- Bar Chart --- */}
+      <Box
+        sx={{
+          display: "flex",
+          width: "100%",
+          height: 15,
+          my: 2,
+          backgroundColor: theme.palette.grey[300],
+          position: "relative",
+        }}
+      >
+        {/* Risk Bar */}
+        <Box
+          sx={{
+            height: "100%",
+            width: `${riskWidthPercent}%`,
+            backgroundColor: theme.palette.error.light,
+            transition: "width 0.3s ease-in-out",
+            position: "absolute",
+            right: "50%",
+          }}
+        />
+        {/* Protect Bar */}
+        <Box
+          sx={{
+            height: "100%",
+            width: `${protectWidthPercent}%`,
+            backgroundColor: theme.palette.success.light,
+            transition: "width 0.3s ease-in-out",
+            position: "absolute",
+            left: "50%",
+          }}
+        />
+        {/* Center Divider */}
+        <Divider
+          orientation="vertical"
+          flexItem
+          sx={{
+            position: "absolute",
+            left: "50%",
+            height: "100%",
+            bgcolor: "rgba(0, 0, 0, 0.3)",
+          }}
+        />
+      </Box>
+    </>
+  );
+};

@@ -257,13 +257,9 @@ export const CameraPage: React.FC = () => {
   return (
     <Container
       maxWidth="md"
-      sx={{ width: "100%", display: "flex", justifyContent: "center", mt: 2 }}
+      sx={{ width: "100%", display: "flex", justifyContent: "center", mt: 5 }}
     >
       <Box textAlign="center" width="100%">
-        <Typography variant="h4" gutterBottom>
-          Capture & Upload Image
-        </Typography>
-
         {/* Camera view - always visible when no image is captured */}
 
         <CameraContainer>

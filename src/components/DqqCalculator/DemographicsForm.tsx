@@ -212,82 +212,80 @@ export function DemographicsForm({
   }
 
   return (
-    <Card variant="outlined" sx={{ mb: 3 }}>
-      <CardContent>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 1,
+    <>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 1,
+        }}
+      >
+        <Typography variant="h6" component="h2">
+          Participant Demographics
+        </Typography>
+        {isSaving && <CircularProgress size={20} />}
+      </Box>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      <Grid container spacing={2}>
+        <Grid
+          size={{
+            xs: 6,
           }}
         >
-          <Typography variant="h6" component="h2">
-            Participant Demographics
-          </Typography>
-          {isSaving && <CircularProgress size={20} />}
-        </Box>
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-        <Grid container spacing={2}>
-          <Grid
-            size={{
-              xs: 6,
-            }}
-          >
-            <TextField
-              fullWidth
-              label="Age (years)"
-              name="Age"
-              type="text"
-              inputMode="numeric"
-              value={localAge}
-              onChange={handleAgeChange}
-              variant="outlined"
-              size="small"
-              required
-              disabled={isSaving}
-            />
-          </Grid>
-          <Grid
-            size={{
-              xs: 6,
-            }}
-          >
-            <FormControl
-              component="fieldset"
-              size="small"
-              required
-              disabled={isSaving}
-            >
-              <FormLabel component="legend">Gender</FormLabel>
-              <RadioGroup
-                row
-                name="Gender"
-                value={localGender ?? ""}
-                onChange={handleGenderChange}
-              >
-                <FormControlLabel
-                  value="1"
-                  control={<Radio size="small" />}
-                  label="Female"
-                />
-                <FormControlLabel
-                  value="0"
-                  control={<Radio size="small" />}
-                  label="Male"
-                />
-              </RadioGroup>
-              {!localGender && <FormHelperText error>Required</FormHelperText>}{" "}
-              {/* Indicate required */}
-            </FormControl>
-          </Grid>
+          <TextField
+            fullWidth
+            label="Age (years)"
+            name="Age"
+            type="text"
+            inputMode="numeric"
+            value={localAge}
+            onChange={handleAgeChange}
+            variant="outlined"
+            size="small"
+            required
+            disabled={isSaving}
+          />
         </Grid>
-      </CardContent>
-    </Card>
+        <Grid
+          size={{
+            xs: 6,
+          }}
+        >
+          <FormControl
+            component="fieldset"
+            size="small"
+            required
+            disabled={isSaving}
+          >
+            <FormLabel component="legend">Gender</FormLabel>
+            <RadioGroup
+              row
+              name="Gender"
+              value={localGender ?? ""}
+              onChange={handleGenderChange}
+            >
+              <FormControlLabel
+                value="1"
+                control={<Radio size="small" />}
+                label="Female"
+              />
+              <FormControlLabel
+                value="0"
+                control={<Radio size="small" />}
+                label="Male"
+              />
+            </RadioGroup>
+            {!localGender && <FormHelperText error>Required</FormHelperText>}{" "}
+            {/* Indicate required */}
+          </FormControl>
+        </Grid>
+      </Grid>
+    </>
   );
 }
