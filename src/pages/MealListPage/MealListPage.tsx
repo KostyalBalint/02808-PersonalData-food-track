@@ -174,7 +174,15 @@ export const MealListPage = () => {
 
           <Grid container spacing={3}>
             {dayMeals.map((meal) => (
-              <Grid item xs={12} sm={6} md={4} xl={3} key={meal.id}>
+              <Grid
+                size={{
+                  xs: 12,
+                  sm: 6,
+                  md: 4,
+                  xl: 3,
+                }}
+                key={meal.id}
+              >
                 <MealCard meal={meal} />
               </Grid>
             ))}

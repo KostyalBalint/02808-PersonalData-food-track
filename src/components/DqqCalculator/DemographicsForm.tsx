@@ -52,7 +52,7 @@ export function DemographicsForm({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { userProfile } = useAuth();
+  const { userProfile, reFetchUserProfile } = useAuth();
 
   const userDocRef = useMemo(
     () =>
@@ -109,6 +109,7 @@ export function DemographicsForm({
           "DemographicsForm: Data updated from Firestore",
           fetchedDemographics,
         );
+        reFetchUserProfile();
       },
       (err: FirestoreError) => {
         console.error("DemographicsForm: Error fetching data:", err);
@@ -232,13 +233,12 @@ export function DemographicsForm({
             {error}
           </Alert>
         )}
-
-        <Alert severity="info" sx={{ mb: 2 }}>
-          You must refresh the page after changing the demographics info
-        </Alert>
-
         <Grid container spacing={2}>
-          <Grid item xs={6}>
+          <Grid
+            size={{
+              xs: 6,
+            }}
+          >
             <TextField
               fullWidth
               label="Age (years)"
@@ -253,7 +253,11 @@ export function DemographicsForm({
               disabled={isSaving}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid
+            size={{
+              xs: 6,
+            }}
+          >
             <FormControl
               component="fieldset"
               size="small"

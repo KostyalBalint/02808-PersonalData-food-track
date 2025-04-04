@@ -13,6 +13,7 @@ import { SettingsPage } from "./Admin/Settings.tsx";
 import { HomePage } from "./HomePage.tsx";
 import AdminPage from "./Admin/AdminPage.tsx";
 import { UserSettings } from "./UserSettings.tsx";
+import { AnalyzePage } from "./Analyze/AnalyzePage.tsx";
 
 export type Role = "ADMIN" | "CONTROLL" | "SUBJECT";
 
@@ -47,6 +48,13 @@ export const pages: Page[] = [
     component: MealListPage,
     icon: IoImagesOutline,
     roles: ["ADMIN", "CONTROLL", "SUBJECT"],
+  },
+  {
+    name: "Meal Analysis",
+    path: "/analyze",
+    component: AnalyzePage,
+    icon: IoImagesOutline,
+    roles: ["ADMIN", "SUBJECT"],
   },
   {
     name: "Settings",

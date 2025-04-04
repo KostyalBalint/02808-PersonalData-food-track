@@ -6,7 +6,7 @@ import {
   CardMedia,
   Container,
   FormControl,
-  Grid2,
+  Grid,
   IconButton,
   InputLabel,
   ListItem,
@@ -35,7 +35,7 @@ import { db } from "../firebaseConfig.ts";
 import { ConfirmationModal } from "../components/ConfirmationModal.tsx";
 import { deleteObject, getStorage, ref } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
-import { DqqQuestionnaire } from "../components/DqqCalculator/DqqQuestionnaire.tsx";
+import { DqqQuestionerForm } from "../components/DqqCalculator/DqqQuestionerForm.tsx";
 
 export const MealPage = () => {
   const { id } = useParams();
@@ -181,13 +181,13 @@ export const MealPage = () => {
 
   return (
     <Container sx={{ mt: 2 }}>
-      <Grid2 container spacing={2}>
+      <Grid container spacing={2}>
         {meal?.errorMessage && (
           <Alert severity="error">{meal?.errorMessage}</Alert>
         )}
-        <Grid2 size={{ xs: 12, md: 6 }}>
-          <Container maxWidth={"sm"} sx={{ px: 0 }}>
-            <Card>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Container maxWidth={"sm"} disableGutters>
+            <Card sx={{ m: 0 }}>
               {meal && (
                 <CardHeader title={meal?.name} sx={{ textAlign: "center" }} />
               )}
@@ -195,11 +195,12 @@ export const MealPage = () => {
                 component="img"
                 image={meal?.imageUrl}
                 alt="Uploaded images"
+                sx={{ aspectRatio: "3/4" }}
               />
             </Card>
           </Container>
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 6 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h4" mb={2}>
               Ingredients:
@@ -285,14 +286,12 @@ export const MealPage = () => {
               </ListItem>
             </Stack>
           </Paper>
-        </Grid2>
-        <Grid2 size={{ xs: 12 }}>
-          <Paper sx={{ p: 2 }}>
-            {meal && <DqqQuestionnaire mealId={meal?.id} />}
-          </Paper>
-        </Grid2>
+        </Grid>
+        <Grid size={{ xs: 12 }}>
+          {meal && <DqqQuestionerForm mealId={meal.id} />}
+        </Grid>
 
-        <Grid2 size={{ xs: 12 }}>
+        <Grid size={{ xs: 12 }}>
           <Paper sx={{ p: 2 }}>
             <Stack direction="row" gap={2}>
               <Button
@@ -304,7 +303,7 @@ export const MealPage = () => {
               </Button>
             </Stack>
           </Paper>
-        </Grid2>
+        </Grid>
         <ConfirmationModal
           open={isModalOpen}
           onClose={handleModalClose}
@@ -312,7 +311,7 @@ export const MealPage = () => {
           title="Delete Meal"
           description="Are you sure you want to delete this meal? This action cannot be undone."
         />
-      </Grid2>
+      </Grid>
     </Container>
   );
 };

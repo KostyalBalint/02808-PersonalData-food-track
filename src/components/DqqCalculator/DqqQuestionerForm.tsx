@@ -1,24 +1,25 @@
 // src/components/DqqCalculator/DqqQuestionerForm.tsx
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  Alert,
   Box,
   Card,
   CardContent,
   Checkbox,
   FormControlLabel,
+  Grid,
   Typography,
-  Alert,
 } from "@mui/material";
 import { db } from "../../firebaseConfig"; // Adjust path
 import {
   doc,
-  updateDoc,
-  serverTimestamp,
-  onSnapshot,
   DocumentReference,
   DocumentSnapshot,
   FieldValue,
   FirestoreError,
+  onSnapshot,
+  serverTimestamp,
+  updateDoc,
 } from "firebase/firestore";
 import {
   DqqAnswersMap,
@@ -154,13 +155,13 @@ export function DqqQuestionerForm({
           }}
         >
           <Typography variant="h6" component="h2">
-            Food Consumption (Yesterday)
+            Diet Quality Questionnaire
           </Typography>
           {/* Optional: Show saving indicator here if needed */}
           {/* {isSaving && <CircularProgress size={20} />} */}
         </Box>
-        <Typography variant="body2" color="textSecondary" paragraph>
-          Check the box if the food/drink was consumed in the last 24 hours.
+        <Typography variant="body2" color="textSecondary">
+          Check the box if the food/drink was part of this meal
         </Typography>
 
         {/* Local Error Display */}
@@ -175,7 +176,7 @@ export function DqqQuestionerForm({
           sx={{
             flexGrow: 1,
             overflowY: "auto",
-            pr: 1,
+            p: 2,
             opacity: disabled || isLoading ? 0.5 : 1, // Disable visually
           }}
         >
@@ -184,22 +185,35 @@ export function DqqQuestionerForm({
             style={{ border: "none", padding: 0, margin: 0 }}
           >
             {isLoading && <Typography>Loading questions...</Typography>}
-            {!isLoading &&
-              dqqQuestions.map((q) => (
-                <FormControlLabel
-                  key={q.key}
-                  control={
-                    <Checkbox
-                      checked={!!answers?.[q.key as DqqQuestionKey]}
-                      onChange={handleCheckboxChange}
-                      name={q.key}
-                      size="small"
+            {!isLoading && (
+              // Wrap the items in a Grid container
+              <Grid container spacing={1}>
+                {dqqQuestions.map((q) => (
+                  // Each item is a Grid item
+                  <Grid
+                    size={{
+                      xs: 12,
+                      md: 6,
+                    }}
+                    key={q.key}
+                  >
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={!!answers?.[q.key as DqqQuestionKey]}
+                          onChange={handleCheckboxChange}
+                          name={q.key}
+                          size="small"
+                        />
+                      }
+                      label={q.label}
+                      // Ensure label takes up available space if needed and aligns items
+                      sx={{ display: "flex", width: "100%", mb: 0, mr: 0 }}
                     />
-                  }
-                  label={q.label}
-                  sx={{ display: "flex", mb: 0.5, mr: 0 }}
-                />
-              ))}
+                  </Grid>
+                ))}
+              </Grid>
+            )}
           </fieldset>
         </Box>
       </CardContent>

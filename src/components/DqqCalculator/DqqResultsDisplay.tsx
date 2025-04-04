@@ -143,8 +143,7 @@ export function DqqResultsDisplay({
                 alignItems="center"
               >
                 <Grid
-                  item
-                  xs={6}
+                  size={{ xs: 6 }}
                   sx={{
                     textAlign: "right",
                     pr: 1,
@@ -155,7 +154,7 @@ export function DqqResultsDisplay({
                     NCD-Risk Score - {ncdRiskScore.toFixed(1)}
                   </Typography>
                 </Grid>
-                <Grid item xs={6} sx={{ textAlign: "left", pl: 1 }}>
+                <Grid size={{ xs: 6 }} sx={{ textAlign: "left", pl: 1 }}>
                   <Typography variant="body1">
                     NCD-Protect Score - {ncdProtectScore.toFixed(1)}
                   </Typography>

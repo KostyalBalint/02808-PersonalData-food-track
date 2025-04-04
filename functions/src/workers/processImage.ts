@@ -23,6 +23,7 @@ export const processImage = async (meal: MealData) => {
 - **Units**: Specify the units of measurement for each ingredient
 - **Calories**: Calculate and return the approximate caloric content for each identified ingredient
 - **Categories**: Classify each ingredient into appropriate food categories (Grains, Vegetables, Fruits, Protein, Dairy, Fats and Sweets)
+- **DQQ Indicators**: Provide boolean values for each of the DQQ indicators based on the identified ingredients, indicating whether each food group is present in the meal.
 
 ### Instructions:
 
@@ -66,5 +67,9 @@ export const processImage = async (meal: MealData) => {
       ...ingredient,
       id: uuid(),
     })),
+    dqqData: {
+      answers: output?.dqqData,
+      createdAt: new Date(),
+    },
   };
 };

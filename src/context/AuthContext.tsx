@@ -2,15 +2,20 @@
 import React, {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { Role } from "../pages/pages.ts";
 import { auth, db } from "../firebaseConfig.ts";
-import { DqqDemographics } from "../components/DqqCalculator/dqqQuestions.ts";
+import {
+  DqqDemographics,
+  initialDemographicsState,
+} from "../components/DqqCalculator/dqqQuestions.ts";
 
 export interface UserProfile {
   uid: string;
@@ -26,6 +31,8 @@ interface AuthContextProps {
   userProfile: UserProfile | null;
   loading: boolean;
   isAdmin: boolean; // Convenience flag
+  demographicsComplete: boolean;
+  reFetchUserProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -78,11 +85,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const isAdmin = userProfile?.role === "ADMIN";
 
+  const currentDemographics =
+    userProfile?.demographics ?? initialDemographicsState;
+
+  const demographicsComplete = useMemo(() => {
+    return (
+      currentDemographics?.Age !== null &&
+      currentDemographics?.Age !== undefined &&
+      !isNaN(Number(currentDemographics?.Age)) &&
+      currentDemographics?.Gender !== null &&
+      currentDemographics?.Gender !== undefined
+    );
+  }, [currentDemographics]);
+
+  const reFetchUserProfile = useCallback(async () => {
+    console.log("Re-fetching user profile from Firestore...");
+    if (currentUser) {
+      const userRef = doc(db, "users", currentUser.uid);
+      const docSnap = await getDoc(userRef);
+      if (docSnap.exists()) {
+        setUserProfile(docSnap.data() as UserProfile);
+      } else {
+        console.error("User profile not found in Firestore.");
+      }
+    }
+  }, []);
+
   const value = {
     currentUser,
     userProfile,
     loading,
     isAdmin,
+    demographicsComplete,
+    reFetchUserProfile,
   };
 
   return (

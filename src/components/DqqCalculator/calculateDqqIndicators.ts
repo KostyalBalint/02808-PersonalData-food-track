@@ -102,8 +102,6 @@ export const calculateDqqIndicators = (
     mddw = num(fgds >= 5);
   }
 
-  console.log({ Gender, Age, fgds, mddw });
-
   // ... rest of the calculations ...
   const all5a = num(DQQ.DQQ5 || DQQ.DQQ6 || DQQ.DQQ7);
   // ... calculate all5b, all5c, all5d, all5e ...
