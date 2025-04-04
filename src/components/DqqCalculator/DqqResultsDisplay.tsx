@@ -5,11 +5,13 @@ import {
   CardContent,
   Divider,
   Grid,
+  Stack,
   Typography,
   useTheme,
 } from "@mui/material";
 import { IndicatorRow } from "./IndicatorRow";
-import { DqqResultsState } from "./calculateDqqIndicators.ts"; // Adjust path
+import { DqqResultsState } from "./calculateDqqIndicators.ts";
+import { InfoTooltip } from "../InfoTooltip.tsx"; // Adjust path
 
 // Keep the definition of rows needed for display
 const extraIndicatorRows = [
@@ -101,10 +103,6 @@ export function DqqResultsDisplay({
       <CardContent
         sx={{ display: "flex", flexDirection: "column", height: "100%" }}
       >
-        <Typography variant="h6" gutterBottom component="h2">
-          Calculated Indicators
-        </Typography>
-
         {!demographicsComplete ? (
           <Box
             sx={{
@@ -129,13 +127,56 @@ export function DqqResultsDisplay({
                 pb: 2,
               }}
             >
-              <Typography
-                variant="h5"
-                component="p"
-                sx={{ mb: 1, fontWeight: "medium" }}
+              <Stack
+                direction="row"
+                justifyContent="center"
+                alignItems="center"
               >
-                GDR Score - {gdrScore.toFixed(1)}
-              </Typography>
+                <Typography
+                  variant="h5"
+                  component="p"
+                  sx={{ fontWeight: "medium" }}
+                >
+                  GDR Score
+                </Typography>
+                <InfoTooltip size="small">
+                  <Typography variant="body2">
+                    <Typography
+                      variant="subtitle2"
+                      component="span"
+                      fontWeight="bold"
+                    >
+                      Definition
+                    </Typography>
+                    <br />
+                    The global dietary recommendations (GDR) score has two
+                    components, NCD-Protect and NCD-Risk. It is based on food
+                    consumption from nine health-protective food groups
+                    (NCD-Protect) and eight food groups to limit or avoid
+                    (NCD-Risk) during the previous day or night. The score
+                    ranges from 0 to 18 with higher scores indicating more
+                    recommendations met.
+                    <br />
+                    <br />
+                    <Typography
+                      variant="subtitle2"
+                      component="span"
+                      fontWeight="bold"
+                    >
+                      Relevance
+                    </Typography>
+                    <br />A higher Global Dietary Recommendations (GDR) score
+                    reflects meeting global dietary recommendations of the WHO."
+                  </Typography>
+                </InfoTooltip>
+                <Typography
+                  variant="h5"
+                  component="p"
+                  sx={{ fontWeight: "medium" }}
+                >
+                  {gdrScore.toFixed(1)}
+                </Typography>
+              </Stack>
               <Grid
                 container
                 spacing={1}

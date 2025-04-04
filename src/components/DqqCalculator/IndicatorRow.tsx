@@ -45,7 +45,7 @@ export const IndicatorRow: React.FC<IndicatorRowProps> = ({
     chipLabel === "Yes" ? "success" : chipLabel === "No" ? "info" : "default";
   // Custom chip styling to better match the image if needed
   const chipSx = {
-    width: 70, // Fixed width for alignment
+    width: 50, // Fixed width for alignment
     fontWeight: "bold",
     color:
       chipLabel === "Yes"
@@ -60,8 +60,7 @@ export const IndicatorRow: React.FC<IndicatorRowProps> = ({
       display="flex"
       justifyContent="space-between"
       alignItems="center"
-      py={1} // Add some vertical padding
-      mb={0.5} // Spacing between rows
+      py={0.5} // Add some vertical padding
     >
       <Box display="flex" alignItems="center">
         <Typography
@@ -70,7 +69,9 @@ export const IndicatorRow: React.FC<IndicatorRowProps> = ({
         >
           {id}
         </Typography>
-        <Typography variant="body1">{label}</Typography>
+        <Typography variant="body1" fontSize={12}>
+          {label}
+        </Typography>
       </Box>
       <Chip label={chipLabel} color={chipColor} size="small" sx={chipSx} />
     </Box>
