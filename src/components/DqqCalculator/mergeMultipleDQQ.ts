@@ -3,8 +3,12 @@ export const mergeMultipleDQQ = <
 >(
   inputArray: T[],
 ): { [P in keyof T]: boolean } => {
+  const filteredArray = inputArray.filter(
+    (array) => array !== undefined && array !== null,
+  );
+
   // Handle the edge case of an empty input array
-  if (inputArray.length === 0) {
+  if (filteredArray.length === 0) {
     // We cannot determine keys from an empty array, so return an empty object.
     // The type assertion is necessary because the return type expects keys from T.
     return {} as { [P in keyof T]: boolean };
@@ -13,7 +17,7 @@ export const mergeMultipleDQQ = <
   // Get the keys from the first object (assuming all objects have the same keys)
   // Use Reflect.ownKeys for broader key type support (string | symbol) if needed,
   // but Object.keys is fine for string keys often implied by Record<string, ...>.
-  const keys = Object.keys(inputArray[0]) as Array<keyof T>;
+  const keys = Object.keys(filteredArray[0]) as Array<keyof T>;
 
   // Initialize the result object. We start with all keys set to false.
   // This correctly handles cases where all values for a key are false or undefined.
@@ -23,7 +27,7 @@ export const mergeMultipleDQQ = <
   }
 
   // Iterate through each object in the input array
-  for (const obj of inputArray) {
+  for (const obj of filteredArray) {
     // Iterate through each key
     for (const key of keys) {
       // If the current object has `true` for this key, set the

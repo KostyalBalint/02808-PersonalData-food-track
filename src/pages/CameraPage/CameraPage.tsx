@@ -30,6 +30,8 @@ import SwitchCameraIcon from "@mui/icons-material/SwitchCamera";
 import Compressor from "compressorjs";
 import { useNavigate } from "react-router-dom";
 import { UploadModal } from "./UploadModal.tsx";
+import EditIcon from "@mui/icons-material/Edit";
+import { CreateMealWithoutImage } from "./CreateMealWithoutImage.tsx";
 
 const CameraContainer = styled(Box)(({ theme }) => ({
   width: "100%",
@@ -55,6 +57,8 @@ export const CameraPage: React.FC = () => {
   const [image, setImage] = useState<File | null>(null);
   const [imageSrcData, setImageSrcData] = useState<string>("");
   const [uploading, setUploading] = useState<boolean>(false);
+  const [createMealWithoutImageModalOpen, setCreateMealWithoutImageModalOpen] =
+    useState<boolean>(false);
   const [cameraActive, setCameraActive] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [facingMode, setFacingMode] = useState<"user" | "environment">(
@@ -329,15 +333,35 @@ export const CameraPage: React.FC = () => {
         </CameraContainer>
 
         {!image && (
-          <Button
-            sx={{ mt: 2 }}
-            variant="contained"
-            color="info"
-            startIcon={<CloudUploadIcon />}
-            onClick={handleOpenUploadModal}
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           >
-            Select multiple images
-          </Button>
+            <Button
+              sx={{ mt: 2 }}
+              variant="contained"
+              color="info"
+              startIcon={<CloudUploadIcon />}
+              onClick={handleOpenUploadModal}
+            >
+              Select multiple images
+            </Button>
+            <Button
+              sx={{ mt: 2 }}
+              variant="contained"
+              color="info"
+              startIcon={<EditIcon />}
+              onClick={() => {
+                setCreateMealWithoutImageModalOpen(true);
+              }}
+            >
+              Create meal without image
+            </Button>
+          </Stack>
         )}
 
         {/* Captured image preview and controls */}
@@ -373,6 +397,11 @@ export const CameraPage: React.FC = () => {
         <UploadModal
           open={uploadModalOpen}
           onClose={() => setUploadModalOpen(false)}
+          onUpload={handleUploadComplete}
+        />
+        <CreateMealWithoutImage
+          open={createMealWithoutImageModalOpen}
+          onClose={() => setCreateMealWithoutImageModalOpen(false)}
           onUpload={handleUploadComplete}
         />
       </Box>

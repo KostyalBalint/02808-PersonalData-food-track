@@ -1,15 +1,18 @@
 import {
   Alert,
+  Box,
   Button,
   Card,
   CardHeader,
   CardMedia,
+  Chip,
   Container,
   FormControl,
   Grid,
   IconButton,
   InputLabel,
   ListItem,
+  Menu,
   MenuItem,
   Paper,
   Select,
@@ -20,7 +23,7 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 import { MealData, units } from "../../functions/src/constants.ts";
 import { FaPlus, FaTrashCan } from "react-icons/fa6";
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   collection,
   deleteDoc,
@@ -28,6 +31,7 @@ import {
   documentId,
   onSnapshot,
   query,
+  Timestamp,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -36,6 +40,12 @@ import { ConfirmationModal } from "../components/ConfirmationModal.tsx";
 import { deleteObject, getStorage, ref } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 import { DqqQuestionerForm } from "../components/DqqCalculator/DqqQuestionerForm.tsx";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { useSnackbar } from "notistack";
+import dayjs, { Dayjs } from "dayjs";
+import { MealNameChangingModal } from "../components/MealNameChangingModal.tsx";
+import { DatePickerModal } from "../components/DatePickerModal.tsx";
+import { format } from "date-fns";
 
 export const MealPage = () => {
   const { id } = useParams();
@@ -47,6 +57,54 @@ export const MealPage = () => {
 
   const [isModalOpen, setModalOpen] = useState(false);
   const storage = getStorage();
+
+  const [isEditModalOpen, setEditModalOpen] = useState(false);
+  const [isDateModalOpen, setIsDateModalOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const { enqueueSnackbar } = useSnackbar();
+
+  const handleRename = (name: string) => {
+    setAnchorEl(null);
+    setEditModalOpen(false);
+    if (!meal || !id) return;
+    // your edit logic here
+    const mealDocRef = doc(db, "meals", meal.id);
+    updateDoc(mealDocRef, { name: name })
+      .then(() => {
+        enqueueSnackbar("Meal updated successfully", { variant: "success" });
+      })
+      .catch(() => {
+        enqueueSnackbar("Error while updating meals", { variant: "error" });
+      });
+  };
+
+  const handleDateChange = (date: Dayjs) => {
+    setAnchorEl(null);
+    setEditModalOpen(false);
+    if (!meal || !id) return;
+    // your edit logic here
+    const mealDocRef = doc(db, "meals", meal.id);
+    updateDoc(mealDocRef, { createdAt: Timestamp.fromDate(date.toDate()) })
+      .then(() => {
+        enqueueSnackbar("Meal updated successfully", { variant: "success" });
+      })
+      .catch(() => {
+        enqueueSnackbar("Error while updating meals", { variant: "error" });
+      });
+  };
+
+  const handleMealChangingModalClose = () => {
+    setEditModalOpen(false);
+  };
+
+  const handleDateModalClose = () => {
+    console.log("Date modal closed");
+    setIsDateModalOpen(false);
+  };
+
+  const handleDateModalOpen = () => {
+    setIsDateModalOpen(true);
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -60,6 +118,7 @@ export const MealPage = () => {
       })) as MealData[];
 
       setMeal(userMeals[0]);
+      console.log("Fetched meal data:", userMeals[0]);
     });
 
     // Return a cleanup function to unsubscribe from the listener
@@ -189,14 +248,59 @@ export const MealPage = () => {
           <Container maxWidth={"sm"} disableGutters>
             <Card sx={{ m: 0 }}>
               {meal && (
-                <CardHeader title={meal?.name} sx={{ textAlign: "center" }} />
+                <CardHeader
+                  title={meal?.name}
+                  sx={{ textAlign: "center" }}
+                  action={
+                    <>
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevents navigation
+                          setAnchorEl(e.currentTarget);
+                        }}
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
+                      <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={() => setAnchorEl(null)}
+                        onClick={(e) => e.stopPropagation()} // Prevent menu clicks from triggering navigation
+                      >
+                        <MenuItem onClick={() => setEditModalOpen(true)}>
+                          Change meal name
+                        </MenuItem>
+                        <MenuItem onClick={handleDateModalOpen}>
+                          Change time
+                        </MenuItem>
+                        <MenuItem onClick={handleDeleteClick}>Delete</MenuItem>
+                      </Menu>
+                    </>
+                  }
+                />
               )}
-              <CardMedia
-                component="img"
-                image={meal?.imageUrl}
-                alt="Uploaded images"
-                sx={{ aspectRatio: "3/4" }}
-              />
+              <Box sx={{ position: "relative" }}>
+                <CardMedia
+                  component="img"
+                  image={meal?.imageUrl}
+                  alt="Uploaded images"
+                  sx={{ aspectRatio: "3/4" }}
+                />
+                {meal && (
+                  <Chip
+                    label={format(meal.createdAt.toDate(), "HH:mm")}
+                    size="small"
+                    color="primary"
+                    sx={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      zIndex: 1,
+                      m: 1,
+                    }}
+                  />
+                )}
+              </Box>
             </Card>
           </Container>
         </Grid>
@@ -310,6 +414,25 @@ export const MealPage = () => {
           onConfirm={handleModalConfirm}
           title="Delete Meal"
           description="Are you sure you want to delete this meal? This action cannot be undone."
+        />
+        <MealNameChangingModal
+          open={isEditModalOpen}
+          onClose={handleMealChangingModalClose}
+          onConfirm={(name) => {
+            handleRename(name);
+            //Save the new name to the database
+          }}
+          title={"Edit meal's name"}
+          originalMealName={meal != null ? meal.name : ""}
+        />
+        <DatePickerModal
+          originalDate={dayjs(meal && meal.createdAt.toDate(), "HH:mm")}
+          open={isDateModalOpen}
+          onClose={handleDateModalClose}
+          onConfirm={(date: Dayjs) => {
+            handleDateChange(date);
+            //Save the new name to the database
+          }}
         />
       </Grid>
     </Container>
