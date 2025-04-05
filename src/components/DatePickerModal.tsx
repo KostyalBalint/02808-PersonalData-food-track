@@ -58,7 +58,7 @@ export const DatePickerModal: FC<MealDatePickerModalProps> = ({
           </Button>
           <Button
             variant="contained"
-            color="error"
+            color="info"
             onClick={() => {
               handleConfirm();
               onClose();

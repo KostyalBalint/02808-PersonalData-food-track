@@ -68,7 +68,7 @@ export const MealNameChangingModal: FC<MealNameChangingModalProps> = ({
           <Button variant="outlined" onClick={onClose}>
             Cancel
           </Button>
-          <Button variant="contained" color="error" onClick={handleConfirm}>
+          <Button variant="contained" color="info" onClick={handleConfirm}>
             Confirm
           </Button>
         </Stack>
