@@ -194,12 +194,13 @@ export const ResponsiveDrawer = () => {
           value={location.pathname}
         >
           {accessiblePages.map((page) => (
-            <BottomNavigationAction
-              key={page.path}
-              value={page.path}
-              label={page.name}
-              icon={<page.icon />}
-            />
+            <FeatureFlagGuard flagKey={page.featureFlag} key={page.path}>
+              <BottomNavigationAction
+                value={page.path}
+                label={page.name}
+                icon={<page.icon />}
+              />
+            </FeatureFlagGuard>
           ))}
         </BottomNavigation>
       </Paper>
