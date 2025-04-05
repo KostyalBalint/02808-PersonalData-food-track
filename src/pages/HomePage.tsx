@@ -6,6 +6,8 @@ import {
   FoodPyramidWrapper,
 } from "../components/FoodPyramid/FoodPyramidWrapper.tsx";
 import { ProtectedComponent } from "../context/ProtectedComponent.tsx";
+import FoodRecommendations from "../components/FoodRecommendations.tsx";
+import FeatureFlagGuard from "../components/FeatureFlags/FeatureFlagGuard.tsx";
 
 export const HomePage = () => {
   const { currentUser, userProfile } = useAuth();
@@ -87,60 +89,72 @@ export const HomePage = () => {
           </Card>
         </Grid>
         <ProtectedComponent allowedRoles={["SUBJECT", "ADMIN"]}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <FoodPyramidWrapper
-              aimedAmountsByCategory={aimedAmountsByCategory}
-              consumedByCategory={{
-                Grains: consumedByCategory.Grains.amount,
-                Vegetables: consumedByCategory.Vegetables.amount,
-                Fruits: consumedByCategory.Fruits.amount,
-                Protein: consumedByCategory.Protein.amount,
-                Dairy: consumedByCategory.Dairy.amount,
-                FatsAndSweets: consumedByCategory.FatsAndSweets.amount,
-              }}
-            />
+          <Grid size={{ xs: 12 }}>
+            <FeatureFlagGuard flagKey="meal-recommendations">
+              <FoodRecommendations />
+            </FeatureFlagGuard>
           </Grid>
+        </ProtectedComponent>
+        <ProtectedComponent allowedRoles={["SUBJECT", "ADMIN"]}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <Card>
-              {/* Controls section - moved below the pyramid */}
-              <div className="w-full m-4 max-w-lg bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <h3 className="font-semibold mb-3">
-                  Adjust Food Group Percentages
-                </h3>
-                {Object.keys(consumedByCategory).map((categoryKey) => {
-                  //as keyof CategoryAmounts
-                  const category =
-                    consumedByCategory[categoryKey as keyof CategoryAmounts];
-                  return (
-                    <div
-                      key={`control-${categoryKey}`}
-                      className="mb-3 flex items-center"
-                    >
-                      <div className="w-32 mr-2 font-medium text-sm">
-                        {categoryKey}:
+            <FeatureFlagGuard flagKey="food-pyramid">
+              <FoodPyramidWrapper
+                aimedAmountsByCategory={aimedAmountsByCategory}
+                consumedByCategory={{
+                  Grains: consumedByCategory.Grains.amount,
+                  Vegetables: consumedByCategory.Vegetables.amount,
+                  Fruits: consumedByCategory.Fruits.amount,
+                  Protein: consumedByCategory.Protein.amount,
+                  Dairy: consumedByCategory.Dairy.amount,
+                  FatsAndSweets: consumedByCategory.FatsAndSweets.amount,
+                }}
+              />
+            </FeatureFlagGuard>
+          </Grid>
+
+          <Grid size={{ xs: 12, md: 6 }}>
+            <FeatureFlagGuard flagKey="food-pyramid">
+              <Card>
+                {/* Controls section - moved below the pyramid */}
+                <div className="w-full m-4 max-w-lg bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <h3 className="font-semibold mb-3">
+                    Adjust Food Group Percentages
+                  </h3>
+                  {Object.keys(consumedByCategory).map((categoryKey) => {
+                    //as keyof CategoryAmounts
+                    const category =
+                      consumedByCategory[categoryKey as keyof CategoryAmounts];
+                    return (
+                      <div
+                        key={`control-${categoryKey}`}
+                        className="mb-3 flex items-center"
+                      >
+                        <div className="w-32 mr-2 font-medium text-sm">
+                          {categoryKey}:
+                        </div>
+                        <input
+                          type="range"
+                          min={category.min}
+                          max={category.max}
+                          value={category.amount}
+                          onChange={(e) => {
+                            //updatePercentage(category.id, Number(e.target.value))
+                            updateConsumedAmount(
+                              categoryKey as keyof CategoryAmounts,
+                              Number(e.target.value),
+                            );
+                          }}
+                          className="flex-grow mr-2"
+                        />
+                        <span className="w-10 text-right font-bold">
+                          {category.amount}
+                        </span>
                       </div>
-                      <input
-                        type="range"
-                        min={category.min}
-                        max={category.max}
-                        value={category.amount}
-                        onChange={(e) => {
-                          //updatePercentage(category.id, Number(e.target.value))
-                          updateConsumedAmount(
-                            categoryKey as keyof CategoryAmounts,
-                            Number(e.target.value),
-                          );
-                        }}
-                        className="flex-grow mr-2"
-                      />
-                      <span className="w-10 text-right font-bold">
-                        {category.amount}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </Card>
+                    );
+                  })}
+                </div>
+              </Card>
+            </FeatureFlagGuard>
           </Grid>
         </ProtectedComponent>
       </Grid>

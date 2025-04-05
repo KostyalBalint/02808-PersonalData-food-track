@@ -1,11 +1,10 @@
 import { genkit } from "genkit";
 import { gemini20Flash, googleAI } from "@genkit-ai/googleai";
 import { FoodExtractSchema } from "../foodExtractSchema.js";
-import { defineSecret } from "firebase-functions/params";
 import { v4 as uuid } from "uuid";
 import { MealData } from "../constants.js";
+import { googleAIApiKey } from "../index.js";
 
-const googleAIApiKey = defineSecret("GEMINI_API_KEY");
 // Function to process an image and return the extracted data
 export const processImage = async (meal: MealData) => {
   const ai = genkit({ plugins: [googleAI()] });

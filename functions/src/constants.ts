@@ -20,3 +20,17 @@ export interface MealData {
   };
   errorMessage?: string;
 }
+
+// Match the structure stored by the backend function
+export interface Suggestion {
+  mealName: string;
+  reasoning: string;
+  // foodGroups?: string[]; // Uncomment if added
+}
+
+export interface RecommendationDoc {
+  id: string; // Firestore document ID
+  userId: string;
+  createdAt: Timestamp; // Firestore Timestamp
+  suggestions: Suggestion[];
+}

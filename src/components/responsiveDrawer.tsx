@@ -19,6 +19,7 @@ import { pages } from "../pages/pages.ts";
 import { LogoText } from "./LogoText.tsx";
 import { IoLogOutOutline } from "react-icons/io5";
 import { useAuth } from "../context/AuthContext.tsx";
+import { InstallPWAButton } from "./InstallPWAButton.tsx";
 
 const style = {
   minHeight: 44,
@@ -96,8 +97,8 @@ export const ResponsiveDrawer = () => {
           </ListItem>
         );
       })}
-
       <Divider sx={{ flexGrow: 1 }} />
+      <InstallPWAButton />
       <ListItem onClick={handleLogout} disablePadding>
         <ListItemButton
           sx={{

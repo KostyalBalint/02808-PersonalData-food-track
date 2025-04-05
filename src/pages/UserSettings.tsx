@@ -16,6 +16,7 @@ import { IoLogOutOutline } from "react-icons/io5";
 import { auth } from "../firebaseConfig.ts";
 import { useNavigate } from "react-router-dom";
 import { grey } from "@mui/material/colors";
+import { InstallPWAButton } from "../components/InstallPWAButton.tsx";
 
 const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
   color: theme.palette.getContrastText(grey[200]),
@@ -55,6 +56,7 @@ export const UserSettings = () => {
                 <ListItemText primary="Logout" />
               </Stack>
             </ColorButton>
+            <InstallPWAButton />
           </Stack>
         </CardContent>
       </Card>

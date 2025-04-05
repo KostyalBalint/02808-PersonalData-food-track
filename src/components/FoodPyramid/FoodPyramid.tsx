@@ -1,13 +1,13 @@
 import { FC } from "react";
-import {CategoryAmounts} from "../../pages/HomePage.tsx";
+import { CategoryAmounts } from "./FoodPyramidWrapper.tsx";
 
 type PyramidData = {
-    key: keyof CategoryAmounts;
-    name: string;
-    percentage: number;
-    color: string;
-    subtitle: string;
-}
+  key: keyof CategoryAmounts;
+  name: string;
+  percentage: number;
+  color: string;
+  subtitle: string;
+};
 
 type FoodPyramidProps = {
   pyramidWidth?: number;
@@ -172,7 +172,9 @@ export const FoodPyramid: FC<FoodPyramidProps> = ({
                   <div>
                     <div className="font-medium">{category.name}</div>
                   </div>
-                  <div className="font-bold">{category.percentage.toFixed(2)}%</div>
+                  <div className="font-bold">
+                    {category.percentage.toFixed(2)}%
+                  </div>
                 </div>
               </div>
             </div>
