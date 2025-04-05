@@ -9,6 +9,8 @@ import { pages } from "./pages/pages.ts";
 import { Page404 } from "./pages/404Page.tsx";
 import { MealPage } from "./pages/MealPage.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
+import { PWAInstallProvider } from "./context/PWAInstallContext.tsx";
+import { InstallPWAPrompt } from "./components/InstallPWAPrompt.tsx";
 
 function App() {
   return (
@@ -22,33 +24,36 @@ function App() {
         }}
         autoHideDuration={3000}
       >
-        <AuthProvider>
-          <Router>
-            <Routes>
-              {/* Public Route */}
-              <Route path="/login" element={<LoginPage />} />
+        <PWAInstallProvider>
+          <InstallPWAPrompt />
+          <AuthProvider>
+            <Router>
+              <Routes>
+                {/* Public Route */}
+                <Route path="/login" element={<LoginPage />} />
 
-              {/* Protected Routes */}
+                {/* Protected Routes */}
 
-              <Route element={<ResponsiveDrawer />}>
-                {pages.map((page) => (
-                  <Route
-                    element={<ProtectedRoute allowedRoles={page.roles} />}
-                    key={page.path}
-                  >
-                    <Route path={page.path} element={<page.component />} />
-                  </Route>
-                ))}
+                <Route element={<ResponsiveDrawer />}>
+                  {pages.map((page) => (
+                    <Route
+                      element={<ProtectedRoute allowedRoles={page.roles} />}
+                      key={page.path}
+                    >
+                      <Route path={page.path} element={<page.component />} />
+                    </Route>
+                  ))}
 
-                <Route path="/meal/:id" element={<MealPage />} />
-                <Route path="*" element={<Page404 />} />
-              </Route>
+                  <Route path="/meal/:id" element={<MealPage />} />
+                  <Route path="*" element={<Page404 />} />
+                </Route>
 
-              {/* Default Route */}
-              <Route path="*" element={<LoginPage />} />
-            </Routes>
-          </Router>
-        </AuthProvider>
+                {/* Default Route */}
+                <Route path="*" element={<LoginPage />} />
+              </Routes>
+            </Router>
+          </AuthProvider>
+        </PWAInstallProvider>
       </SnackbarProvider>
     </ThemeProvider>
   );

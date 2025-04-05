@@ -10,10 +10,11 @@ const manifestForPlugIn: Partial<VitePWAOptions> = {
   manifest: {
     name: "Food Track",
     short_name: "FoodTrack",
+    description: "Track your food intake and get personalized recommendations.",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",
-    theme_color: "#ffd063",
+    theme_color: "#ffebb1",
     icons: [
       {
         src: "/android-chrome-192x192.png",
