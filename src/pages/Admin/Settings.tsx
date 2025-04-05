@@ -1,8 +1,10 @@
-import { Container, Stack, Typography } from "@mui/material";
+import { Container, Paper, Stack, Typography } from "@mui/material";
 import ReindexDashboard from "./ReindexDashboard.tsx";
+import TriggerRecommendationButton from "./TriggerRecommendationButton.tsx";
+import { useSnackbar } from "notistack";
 
 export const SettingsPage = () => {
-  // Call your reindexAllImages Cloud Function
+  const { enqueueSnackbar } = useSnackbar();
 
   return (
     <Container sx={{ mt: 2 }}>
@@ -11,6 +13,23 @@ export const SettingsPage = () => {
           Settings
         </Typography>
         <ReindexDashboard />
+        <Paper>
+          <Typography variant="h5"></Typography>
+          <TriggerRecommendationButton
+            onError={(e) =>
+              enqueueSnackbar({
+                variant: "error",
+                message: `Error: ${e}`,
+              })
+            }
+            onSuccess={() =>
+              enqueueSnackbar({
+                variant: "success",
+                message: "Recommendations generated successfully.",
+              })
+            }
+          />
+        </Paper>
       </Stack>
     </Container>
   );

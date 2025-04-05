@@ -6,6 +6,7 @@ import {
   FoodPyramidWrapper,
 } from "../components/FoodPyramid/FoodPyramidWrapper.tsx";
 import { ProtectedComponent } from "../context/ProtectedComponent.tsx";
+import FoodRecommendations from "../components/FoodRecommendations.tsx";
 
 export const HomePage = () => {
   const { currentUser, userProfile } = useAuth();
@@ -86,6 +87,11 @@ export const HomePage = () => {
             ></CardHeader>
           </Card>
         </Grid>
+        <ProtectedComponent allowedRoles={["SUBJECT", "ADMIN"]}>
+          <Grid size={{ xs: 12 }}>
+            <FoodRecommendations />
+          </Grid>
+        </ProtectedComponent>
         <ProtectedComponent allowedRoles={["SUBJECT", "ADMIN"]}>
           <Grid size={{ xs: 12, md: 6 }}>
             <FoodPyramidWrapper
