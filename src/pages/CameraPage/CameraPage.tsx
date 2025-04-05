@@ -337,6 +337,7 @@ export const CameraPage: React.FC = () => {
             direction="row"
             spacing={2}
             sx={{
+              paddingTop: 2,
               justifyContent: "center",
               alignItems: "center",
             }}
