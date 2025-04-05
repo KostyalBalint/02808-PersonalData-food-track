@@ -90,7 +90,9 @@ export const HomePage = () => {
         </Grid>
         <ProtectedComponent allowedRoles={["SUBJECT", "ADMIN"]}>
           <Grid size={{ xs: 12 }}>
-            <FoodRecommendations />
+            <FeatureFlagGuard flagKey="meal-recommendations">
+              <FoodRecommendations />
+            </FeatureFlagGuard>
           </Grid>
         </ProtectedComponent>
         <ProtectedComponent allowedRoles={["SUBJECT", "ADMIN"]}>
