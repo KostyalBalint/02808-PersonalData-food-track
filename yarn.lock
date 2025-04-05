@@ -2882,6 +2882,11 @@ common-tags@^1.8.0:
   resolved "https://registry.npmjs.org/common-tags/-/common-tags-1.8.2.tgz"
   integrity sha512-gk/Z852D2Wtb//0I+kRFNKKE9dIIVirjoqPoA1wJU+XePVXZfGeBpk45+A1rKO4Q43prqWBNY/MiIeRLbPWUaA==
 
+compare-versions@^4.1.2:
+  version "4.1.4"
+  resolved "https://registry.yarnpkg.com/compare-versions/-/compare-versions-4.1.4.tgz#3571f4d610924d4414846a4183d386c8f3d51112"
+  integrity sha512-FemMreK9xNyL8gQevsdRMrvO4lFCkQP7qbuktn1q8ndcNk1+0mz7lgE7b/sNvbhVgY4w6tMN1FDp6aADjqw2rw==
+
 compressorjs@^1.2.1:
   version "1.2.1"
   resolved "https://registry.npmjs.org/compressorjs/-/compressorjs-1.2.1.tgz"
@@ -5133,6 +5138,13 @@ raw-body@2.5.2:
     http-errors "2.0.0"
     iconv-lite "0.4.24"
     unpipe "1.0.0"
+
+react-cache-buster@^0.1.8:
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/react-cache-buster/-/react-cache-buster-0.1.8.tgz#5245e09fb69c246682e86eb4ddf47f925cd1bdaa"
+  integrity sha512-N7BMnz2MUC++oXUzcYXsGn0WsIBDe5rRyT8W6O7L32CjcbgnuxhxNjc9T+Y56zdlSdY5nde3PTmZSktFv3V9IQ==
+  dependencies:
+    compare-versions "^4.1.2"
 
 react-chartjs-2@^5.3.0:
   version "5.3.0"

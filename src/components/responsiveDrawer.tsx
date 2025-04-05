@@ -21,6 +21,7 @@ import { IoLogOutOutline } from "react-icons/io5";
 import { useAuth } from "../context/AuthContext.tsx";
 import { InstallPWAButton } from "./InstallPWAButton.tsx";
 import FeatureFlagGuard from "./FeatureFlags/FeatureFlagGuard.tsx";
+import { version } from "../../package.json";
 
 const style = {
   minHeight: 44,
@@ -103,6 +104,10 @@ export const ResponsiveDrawer = () => {
         );
       })}
       <Divider sx={{ flexGrow: 1 }} />
+      <Typography
+        variant="body2"
+        color="text.secondary"
+      >{`Version: ${version}`}</Typography>
       <InstallPWAButton />
       <ListItem onClick={handleLogout} disablePadding>
         <ListItemButton

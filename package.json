@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run generate-meta-tag && tsc -b && vite build",
+    "generate-meta-tag": "node ./node_modules/react-cache-buster/dist/generate-meta-tag.js",
     "serve": "PORT=4433 serve dist",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -28,6 +29,7 @@
     "notistack": "^3.0.2",
     "prettier": "^3.5.3",
     "react": "^19.0.0",
+    "react-cache-buster": "^0.1.8",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",

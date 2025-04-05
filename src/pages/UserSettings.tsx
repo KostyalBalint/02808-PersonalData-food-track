@@ -17,6 +17,7 @@ import { auth } from "../firebaseConfig.ts";
 import { useNavigate } from "react-router-dom";
 import { grey } from "@mui/material/colors";
 import { InstallPWAButton } from "../components/InstallPWAButton.tsx";
+import { version } from "../../package.json";
 
 const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
   color: theme.palette.getContrastText(grey[200]),
@@ -57,6 +58,11 @@ export const UserSettings = () => {
               </Stack>
             </ColorButton>
             <InstallPWAButton />
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mt: 2, textAlign: "right", width: "100%" }}
+            >{`Version: ${version}`}</Typography>
           </Stack>
         </CardContent>
       </Card>

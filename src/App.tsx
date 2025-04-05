@@ -11,51 +11,62 @@ import { MealPage } from "./pages/MealPage.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { PWAInstallProvider } from "./context/PWAInstallContext.tsx";
 import { InstallPWAPrompt } from "./components/InstallPWAPrompt.tsx";
+import CacheBuster from "react-cache-buster";
+import { version } from "../package.json";
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <SnackbarProvider
-        maxSnack={3}
-        anchorOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
-        autoHideDuration={3000}
-      >
-        <PWAInstallProvider>
-          <InstallPWAPrompt />
-          <AuthProvider>
-            <Router>
-              <Routes>
-                {/* Public Route */}
-                <Route path="/login" element={<LoginPage />} />
+    <CacheBuster
+      currentVersion={version}
+      onCacheClear={() => {
+        console.log("Cache cleared");
+      }}
+      isVerboseMode={false} //If true, the library writes verbose logs to console.
+      metaFileDirectory={"."} //If public assets are hosted somewhere other than root on your server.
+    >
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <SnackbarProvider
+          maxSnack={3}
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+          autoHideDuration={3000}
+        >
+          <PWAInstallProvider>
+            <InstallPWAPrompt />
+            <AuthProvider>
+              <Router>
+                <Routes>
+                  {/* Public Route */}
+                  <Route path="/login" element={<LoginPage />} />
 
-                {/* Protected Routes */}
+                  {/* Protected Routes */}
 
-                <Route element={<ResponsiveDrawer />}>
-                  {pages.map((page) => (
-                    <Route
-                      element={<ProtectedRoute allowedRoles={page.roles} />}
-                      key={page.path}
-                    >
-                      <Route path={page.path} element={<page.component />} />
-                    </Route>
-                  ))}
+                  <Route element={<ResponsiveDrawer />}>
+                    {pages.map((page) => (
+                      <Route
+                        element={<ProtectedRoute allowedRoles={page.roles} />}
+                        key={page.path}
+                      >
+                        <Route path={page.path} element={<page.component />} />
+                      </Route>
+                    ))}
 
-                  <Route path="/meal/:id" element={<MealPage />} />
-                  <Route path="*" element={<Page404 />} />
-                </Route>
+                    <Route path="/meal/:id" element={<MealPage />} />
+                    <Route path="*" element={<Page404 />} />
+                  </Route>
 
-                {/* Default Route */}
-                <Route path="*" element={<LoginPage />} />
-              </Routes>
-            </Router>
-          </AuthProvider>
-        </PWAInstallProvider>
-      </SnackbarProvider>
-    </ThemeProvider>
+                  {/* Default Route */}
+                  <Route path="*" element={<LoginPage />} />
+                </Routes>
+              </Router>
+            </AuthProvider>
+          </PWAInstallProvider>
+        </SnackbarProvider>
+      </ThemeProvider>
+    </CacheBuster>
   );
 }
 
