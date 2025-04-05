@@ -2,6 +2,7 @@ import { Container, Paper, Stack, Typography } from "@mui/material";
 import ReindexDashboard from "./ReindexDashboard.tsx";
 import TriggerRecommendationButton from "./TriggerRecommendationButton.tsx";
 import { useSnackbar } from "notistack";
+import FeatureFlagManager from "../../components/FeatureFlags/FeatureFlagManager.tsx";
 
 export const SettingsPage = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -29,6 +30,9 @@ export const SettingsPage = () => {
               })
             }
           />
+        </Paper>
+        <Paper>
+          <FeatureFlagManager />
         </Paper>
       </Stack>
     </Container>
