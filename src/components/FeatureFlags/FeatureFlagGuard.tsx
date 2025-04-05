@@ -15,7 +15,7 @@ const FEATURE_FLAGS_COLLECTION = "featureFlags";
 
 interface FeatureFlagGuardProps {
   /** The specific feature flag key to check (must be defined in FeatureFlagKeys type) */
-  flagKey: FeatureFlagKeys;
+  flagKey?: FeatureFlagKeys;
   /** Content to render if the feature flag is enabled (or in dev mode) */
   children: ReactNode;
   /** Optional: Rendered while the flag value is loading (in production) */
@@ -88,6 +88,10 @@ const FeatureFlagGuard: React.FC<FeatureFlagGuardProps> = ({
     return () => unsubscribe();
     // Re-run effect if flagKey changes or if the mode somehow changes (unlikely during runtime)
   }, [flagKey, isDevelopment]);
+
+  if (!flagKey) {
+    return children;
+  }
 
   // --- Development Rendering ---
   if (isDevelopment) {

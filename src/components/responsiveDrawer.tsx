@@ -20,6 +20,7 @@ import { LogoText } from "./LogoText.tsx";
 import { IoLogOutOutline } from "react-icons/io5";
 import { useAuth } from "../context/AuthContext.tsx";
 import { InstallPWAButton } from "./InstallPWAButton.tsx";
+import FeatureFlagGuard from "./FeatureFlags/FeatureFlagGuard.tsx";
 
 const style = {
   minHeight: 44,
@@ -61,40 +62,44 @@ export const ResponsiveDrawer = () => {
         const onlyAdminPage =
           page.roles?.length === 1 && page.roles[0] === "ADMIN";
         return (
-          <ListItem
-            key={page.name}
-            disablePadding
-            onClick={() => {
-              navigate(page.path);
-            }}
-          >
-            <ListItemButton
-              sx={{
-                ...style,
-                ...(active && {
-                  fontWeight: "fontWeightSemiBold",
-                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
-                  "&:hover": {
-                    bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16),
-                  },
-                }),
-
-                ...(onlyAdminPage && {
-                  bgcolor: (theme) => alpha(theme.palette.warning.main, 0.15),
-                  "&:hover": {
-                    bgcolor: (theme) => alpha(theme.palette.warning.main, 0.26),
-                  },
-                }),
+          <FeatureFlagGuard flagKey={page.featureFlag} key={page.path}>
+            <ListItem
+              key={page.name}
+              disablePadding
+              onClick={() => {
+                navigate(page.path);
               }}
             >
-              <Stack direction="row" gap={2} alignItems="center">
-                <Typography fontSize={22} lineHeight={0}>
-                  <page.icon />
-                </Typography>
-                <ListItemText primary={page.name} />
-              </Stack>
-            </ListItemButton>
-          </ListItem>
+              <ListItemButton
+                sx={{
+                  ...style,
+                  ...(active && {
+                    fontWeight: "fontWeightSemiBold",
+                    bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+                    "&:hover": {
+                      bgcolor: (theme) =>
+                        alpha(theme.palette.primary.main, 0.16),
+                    },
+                  }),
+
+                  ...(onlyAdminPage && {
+                    bgcolor: (theme) => alpha(theme.palette.warning.main, 0.15),
+                    "&:hover": {
+                      bgcolor: (theme) =>
+                        alpha(theme.palette.warning.main, 0.26),
+                    },
+                  }),
+                }}
+              >
+                <Stack direction="row" gap={2} alignItems="center">
+                  <Typography fontSize={22} lineHeight={0}>
+                    <page.icon />
+                  </Typography>
+                  <ListItemText primary={page.name} />
+                </Stack>
+              </ListItemButton>
+            </ListItem>
+          </FeatureFlagGuard>
         );
       })}
       <Divider sx={{ flexGrow: 1 }} />

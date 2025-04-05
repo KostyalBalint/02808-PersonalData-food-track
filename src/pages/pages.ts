@@ -8,12 +8,14 @@ import {
   IoImagesOutline,
   IoPeopleOutline,
   IoSettingsOutline,
+  IoAnalyticsOutline,
 } from "react-icons/io5";
 import { SettingsPage } from "./Admin/Settings.tsx";
 import { HomePage } from "./HomePage.tsx";
 import AdminPage from "./Admin/AdminPage.tsx";
 import { UserSettings } from "./UserSettings.tsx";
 import { AnalyzePage } from "./Analyze/AnalyzePage.tsx";
+import { FeatureFlagKeys } from "../components/FeatureFlags/types/featureFlagKeys.ts";
 
 export type Role = "ADMIN" | "CONTROLL" | "SUBJECT";
 
@@ -25,6 +27,7 @@ export interface Page {
   component: (() => JSX.Element) | FC;
   icon: IconType;
   roles?: Role[]; // Add roles array - Optional: if undefined, maybe accessible by all logged-in users? Or specify explicitly.
+  featureFlag?: FeatureFlagKeys; // Optional feature flag for conditional rendering
 }
 
 export const pages: Page[] = [
@@ -53,8 +56,9 @@ export const pages: Page[] = [
     name: "Meal Analysis",
     path: "/analyze",
     component: AnalyzePage,
-    icon: IoImagesOutline,
+    icon: IoAnalyticsOutline,
     roles: ["ADMIN", "SUBJECT"],
+    featureFlag: "meal-analysis", // Example feature flag
   },
   {
     name: "Settings",

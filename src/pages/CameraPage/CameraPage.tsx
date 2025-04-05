@@ -254,7 +254,7 @@ export const CameraPage: React.FC = () => {
     if (mealId) {
       navigate(`/meal/${mealId}`);
     } else {
-      navigate("/");
+      navigate("/camera");
     }
   };
 

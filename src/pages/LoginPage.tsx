@@ -14,7 +14,7 @@ export const LoginPage = () => {
 
   useEffect(() => {
     if (!loading && currentUser) {
-      navigate("/");
+      navigate("/camera");
     }
   }, [currentUser, loading, navigate]);
 

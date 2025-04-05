@@ -1,4 +1,12 @@
-import { Card, CardHeader, Chip, Container, Grid, Stack } from "@mui/material";
+import {
+  Card,
+  CardHeader,
+  Chip,
+  Container,
+  Grid,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -88,6 +96,23 @@ export const HomePage = () => {
             ></CardHeader>
           </Card>
         </Grid>
+        <FeatureFlagGuard flagKey="why-home-empty-inform">
+          <Grid size={{ xs: 12 }}>
+            <Card sx={{ width: "100%" }}>
+              <CardHeader title="Why is this page empty?" />
+              <Typography
+                p={2}
+                variant="body2"
+                color="text.secondary"
+                gutterBottom
+                sx={{ width: "100%" }}
+              >
+                We have features coming up here. As the experiment progresses,
+                you can access more features here.
+              </Typography>
+            </Card>
+          </Grid>
+        </FeatureFlagGuard>
         <ProtectedComponent allowedRoles={["SUBJECT", "ADMIN"]}>
           <Grid size={{ xs: 12 }}>
             <FeatureFlagGuard flagKey="meal-recommendations">
