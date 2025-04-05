@@ -35,6 +35,7 @@ import {
 } from "../../components/DqqCalculator/calculateDqqIndicators.ts";
 import { useAuth } from "../../context/AuthContext.tsx";
 import { ProtectedComponent } from "../../context/ProtectedComponent.tsx";
+import FeatureFlagGuard from "../../components/FeatureFlags/FeatureFlagGuard.tsx";
 
 // Helper to convert Firestore doc to MealData
 const docToMealData = (doc: QueryDocumentSnapshot<DocumentData>): MealData =>
@@ -351,17 +352,19 @@ export const MealListPage = () => {
                   </Grid>
                   {/* Ensure DqqScoreBarDisplay takes up appropriate space */}
                   <ProtectedComponent allowedRoles={["SUBJECT", "ADMIN"]}>
-                    {/* Check if results object is not empty before rendering */}
-                    {mealGroup.results &&
-                      Object.keys(mealGroup.results).length > 0 && (
-                        <Grid size={{ xs: 12, md: 8 }}>
-                          {" "}
-                          {/* Use item prop and adjust size */}
-                          <Box>
-                            <DqqScoreBarDisplay results={mealGroup.results} />
-                          </Box>
-                        </Grid>
-                      )}
+                    <FeatureFlagGuard flagKey="meal-list-dqq">
+                      {/* Check if results object is not empty before rendering */}
+                      {mealGroup.results &&
+                        Object.keys(mealGroup.results).length > 0 && (
+                          <Grid size={{ xs: 12, md: 8 }}>
+                            {" "}
+                            {/* Use item prop and adjust size */}
+                            <Box>
+                              <DqqScoreBarDisplay results={mealGroup.results} />
+                            </Box>
+                          </Grid>
+                        )}
+                    </FeatureFlagGuard>
                   </ProtectedComponent>
                 </Grid>
               </Paper>
