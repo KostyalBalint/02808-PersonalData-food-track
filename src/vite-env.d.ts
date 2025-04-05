@@ -9,4 +9,8 @@ declare global {
   interface Navigator {
     standalone?: boolean; // For iOS Safari PWA detection
   }
+
+  interface Window {
+    MSStream: any; // For iOS Safari PWA detection
+  }
 }

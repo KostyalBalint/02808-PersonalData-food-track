@@ -9,14 +9,19 @@ import React, {
 } from "react";
 import { BeforeInstallPromptEvent } from "../types/pwa";
 
-// Import the type if you defined it separately
-// If you declared it globally, you might not need this import.
-// import { BeforeInstallPromptEvent } from '../types/pwa';
+// Types (ensure navigator.standalone is declared if needed)
+// ...
 
 interface PWAInstallContextType {
+  // Standard install prompt state
   canInstall: boolean;
-  isAppInstalled: boolean;
   triggerInstallPrompt: () => Promise<void>;
+
+  // General installation status and platform info
+  isAppInstalled: boolean;
+  isIOS: boolean;
+  // Flag specifically for showing manual install instructions on iOS Safari
+  showIOSInstallInstructions: boolean;
 }
 
 const PWAInstallContext = createContext<PWAInstallContextType | undefined>(
@@ -31,6 +36,16 @@ export const usePWAInstall = (): PWAInstallContextType => {
   return context;
 };
 
+// --- Helper function to detect iOS ---
+const checkIsIOS = (): boolean => {
+  return (
+    (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      // Handle iPad pretending to be Mac OS
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)) &&
+    !window.MSStream
+  );
+};
+
 interface PWAInstallProviderProps {
   children: ReactNode;
 }
@@ -41,33 +56,43 @@ export const PWAInstallProvider: React.FC<PWAInstallProviderProps> = ({
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [showIOSInstallInstructions, setShowIOSInstallInstructions] =
+    useState(false);
 
-  // Check if the app is installed
+  // --- Check Platform and Installation Status ---
   useEffect(() => {
+    const isCurrentlyIOS = checkIsIOS();
+    setIsIOS(isCurrentlyIOS);
+
     // Check standard PWA display mode
     const mediaQuery = window.matchMedia("(display-mode: standalone)");
-    // Check iOS specific property
+    // Check iOS specific property (true when launched from home screen)
     const isSafariStandalone = window.navigator.standalone === true;
 
     const checkInstallation = () => {
-      if (mediaQuery.matches || isSafariStandalone) {
-        console.log("App is installed.");
-        setIsAppInstalled(true);
-        setDeferredPrompt(null); // No need for prompt if installed
-      } else {
-        console.log("App is not installed.");
-        setIsAppInstalled(false);
+      const installed = mediaQuery.matches || isSafariStandalone;
+      console.log(`App installed status: ${installed}`);
+      setIsAppInstalled(installed);
+
+      // Determine if we should show iOS install instructions
+      const shouldShowIOSInstructions = isCurrentlyIOS && !installed;
+      console.log(`Should show iOS instructions: ${shouldShowIOSInstructions}`);
+      setShowIOSInstallInstructions(shouldShowIOSInstructions);
+
+      if (installed) {
+        setDeferredPrompt(null); // No prompt needed if installed
       }
     };
 
-    checkInstallation(); // Initial check
-    mediaQuery.addEventListener("change", checkInstallation); // Listen for changes
+    checkInstallation();
+    mediaQuery.addEventListener("change", checkInstallation);
 
-    // Listen for the appinstalled event
     const handleAppInstalled = () => {
-      console.log("App installed successfully!");
+      console.log("App installed event received!");
       setIsAppInstalled(true);
-      setDeferredPrompt(null); // Clear the prompt event
+      setShowIOSInstallInstructions(false); // Hide instructions if installed
+      setDeferredPrompt(null);
     };
     window.addEventListener("appinstalled", handleAppInstalled);
 
@@ -75,68 +100,72 @@ export const PWAInstallProvider: React.FC<PWAInstallProviderProps> = ({
       mediaQuery.removeEventListener("change", checkInstallation);
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
-  }, []);
+  }, []); // Run once on mount
 
-  // Listen for the beforeinstallprompt event
+  // --- Listener for standard 'beforeinstallprompt' ---
   useEffect(() => {
     const handleBeforeInstallPrompt = (event: Event) => {
-      // Prevent the default mini-infobar (important!)
+      // Prevent mini-infobar (only relevant on non-iOS)
       event.preventDefault();
-      console.log("beforeinstallprompt event fired");
-      // Store the event so it can be triggered later.
-      // Type assertion needed as Event type doesn't have prompt() by default
+      console.log("beforeinstallprompt event fired (non-iOS)");
       setDeferredPrompt(event as BeforeInstallPromptEvent);
-      // Ensure we know it's not installed if this event fires
-      setIsAppInstalled(false);
+      setIsAppInstalled(false); // Explicitly set false if prompt appears
+      setShowIOSInstallInstructions(false); // Not iOS if this fires
     };
 
-    // Only add listener if not installed
-    if (!isAppInstalled) {
+    // Only add listener if NOT iOS and NOT already installed
+    if (!isIOS && !isAppInstalled) {
       window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       console.log("Added beforeinstallprompt listener.");
     } else {
-      console.log("Skipping beforeinstallprompt listener as app is installed.");
+      console.log(
+        "Skipping beforeinstallprompt listener (is iOS or already installed).",
+      );
     }
 
     return () => {
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt,
-      );
-      console.log("Removed beforeinstallprompt listener.");
+      // Check again before removing, just in case
+      if (!isIOS) {
+        window.removeEventListener(
+          "beforeinstallprompt",
+          handleBeforeInstallPrompt,
+        );
+        console.log("Removed beforeinstallprompt listener.");
+      }
     };
-  }, [isAppInstalled]); // Rerun if installation status changes
+    // Rerun if isIOS or isAppInstalled changes
+  }, [isIOS, isAppInstalled]);
 
+  // --- Trigger Standard Install Prompt ---
   const triggerInstallPrompt = useCallback(async () => {
+    if (isIOS) {
+      console.log(
+        "Install prompt cannot be triggered programmatically on iOS.",
+      );
+      return;
+    }
     if (!deferredPrompt) {
-      console.log("Install prompt not available.");
+      console.log("Standard install prompt not available.");
       return;
     }
 
-    console.log("Triggering install prompt...");
-    deferredPrompt.prompt(); // Show the browser's install dialog
-
-    // Wait for the user to respond to the prompt
+    console.log("Triggering standard install prompt...");
+    deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    console.log(`User response to the install prompt: ${outcome}`);
+    console.log(`User response to standard install prompt: ${outcome}`);
+    setDeferredPrompt(null); // Hide prompt button once used
+    // isAppInstalled state will update via 'appinstalled' event or display-mode change
+  }, [deferredPrompt, isIOS]);
 
-    // We hide the install button permanently (or until next eligible event)
-    // regardless of the outcome.
-    setDeferredPrompt(null);
+  // Standard install possible only if event exists AND not on iOS AND not installed
+  const canInstall = !!deferredPrompt && !isIOS && !isAppInstalled;
 
-    if (outcome === "accepted") {
-      // The appinstalled event will handle setting isAppInstalled=true
-      console.log("User accepted the install prompt.");
-    } else {
-      console.log("User dismissed the install prompt");
-    }
-  }, [deferredPrompt]);
-
-  const canInstall = !!deferredPrompt && !isAppInstalled;
-
+  // Context Value
   const contextValue: PWAInstallContextType = {
     canInstall,
     isAppInstalled,
+    isIOS,
+    showIOSInstallInstructions: showIOSInstallInstructions && !isAppInstalled, // Ensure instructions hidden if somehow installed later
     triggerInstallPrompt,
   };
 
