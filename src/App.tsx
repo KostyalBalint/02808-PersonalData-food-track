@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { LoginPage } from "./pages/LoginPage.tsx";
-import { AuthProvider } from "./hooks/useAuth";
 import { ProtectedRoute } from "./router/Protected.tsx";
 import { ResponsiveDrawer } from "./components/responsiveDrawer.tsx";
 import { SnackbarProvider } from "notistack";
@@ -9,6 +8,7 @@ import theme from "./theme/theme.ts";
 import { pages } from "./pages/pages.ts";
 import { Page404 } from "./pages/404Page.tsx";
 import { MealPage } from "./pages/MealPage.tsx";
+import { AuthProvider } from "./context/AuthContext.tsx";
 
 function App() {
   return (
@@ -29,19 +29,19 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
 
               {/* Protected Routes */}
-              <Route element={<ProtectedRoute />}>
-                <Route element={<ResponsiveDrawer />}>
-                  {pages.map((page) => (
-                    <Route
-                      key={page.path}
-                      path={page.path}
-                      element={<page.component />}
-                    />
-                  ))}
 
-                  <Route path="/meal/:id" element={<MealPage />} />
-                  <Route path="*" element={<Page404 />} />
-                </Route>
+              <Route element={<ResponsiveDrawer />}>
+                {pages.map((page) => (
+                  <Route
+                    element={<ProtectedRoute allowedRoles={page.roles} />}
+                    key={page.path}
+                  >
+                    <Route path={page.path} element={<page.component />} />
+                  </Route>
+                ))}
+
+                <Route path="/meal/:id" element={<MealPage />} />
+                <Route path="*" element={<Page404 />} />
               </Route>
 
               {/* Default Route */}

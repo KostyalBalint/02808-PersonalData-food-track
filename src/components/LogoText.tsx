@@ -1,5 +1,4 @@
-import { Typography, useTheme } from "@mui/material";
-import { TypographyProps } from "@mui/material/Typography/Typography";
+import { Typography, TypographyProps, useTheme } from "@mui/material";
 import { FC } from "react";
 
 export const LogoText: FC<TypographyProps> = (props) => {

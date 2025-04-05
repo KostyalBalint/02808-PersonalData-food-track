@@ -8,14 +8,15 @@
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
-    "target": "es2017",
-
-
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "target": "es2017", // Or newer
+    "rootDir": "src",   // Make sure this points to your functions source
+    "baseUrl": "src"    // Often used with rootDir
   },
   "compileOnSave": true,
   "include": [
-    "src"
-  ]
+    "src/**/*"         // Only include files within functions/src
+  ],
+  "exclude": [
+    "node_modules"
+  ],
 }

@@ -1,5 +1,4 @@
 import { FC, JSX } from "react";
-import { HomePage } from "./HomePage.tsx";
 import { IconType } from "react-icons";
 import { CameraPage } from "./CameraPage/CameraPage.tsx";
 import { MealListPage } from "./MealListPage/MealListPage.tsx";
@@ -7,15 +6,25 @@ import {
   IoCameraOutline,
   IoHomeOutline,
   IoImagesOutline,
+  IoPeopleOutline,
   IoSettingsOutline,
 } from "react-icons/io5";
-import { SettingsPage } from "./Settings.tsx";
+import { SettingsPage } from "./Admin/Settings.tsx";
+import { HomePage } from "./HomePage.tsx";
+import AdminPage from "./Admin/AdminPage.tsx";
+import { UserSettings } from "./UserSettings.tsx";
+import { AnalyzePage } from "./Analyze/AnalyzePage.tsx";
 
-interface Page {
+export type Role = "ADMIN" | "CONTROLL" | "SUBJECT";
+
+// src/types/navigation.ts
+
+export interface Page {
   name: string;
   path: string;
   component: (() => JSX.Element) | FC;
   icon: IconType;
+  roles?: Role[]; // Add roles array - Optional: if undefined, maybe accessible by all logged-in users? Or specify explicitly.
 }
 
 export const pages: Page[] = [
@@ -24,23 +33,48 @@ export const pages: Page[] = [
     path: "/",
     component: HomePage,
     icon: IoHomeOutline,
+    roles: ["ADMIN", "CONTROLL", "SUBJECT"], // Accessible by all roles
   },
   {
     name: "Camera",
     path: "/camera",
     component: CameraPage,
     icon: IoCameraOutline,
+    roles: ["ADMIN", "CONTROLL", "SUBJECT"],
   },
   {
     name: "Meals",
     path: "/meals",
     component: MealListPage,
     icon: IoImagesOutline,
+    roles: ["ADMIN", "CONTROLL", "SUBJECT"],
+  },
+  {
+    name: "Meal Analysis",
+    path: "/analyze",
+    component: AnalyzePage,
+    icon: IoImagesOutline,
+    roles: ["ADMIN", "SUBJECT"],
   },
   {
     name: "Settings",
     path: "/settings",
+    component: UserSettings,
+    icon: IoSettingsOutline,
+    roles: ["ADMIN", "CONTROLL", "SUBJECT"],
+  },
+  {
+    name: "Admin Settings",
+    path: "/admin/settings",
     component: SettingsPage,
     icon: IoSettingsOutline,
+    roles: ["ADMIN"],
+  },
+  {
+    name: "User management",
+    path: "/admin/users",
+    component: AdminPage,
+    icon: IoPeopleOutline,
+    roles: ["ADMIN"], // Only ADMIN
   },
 ];
