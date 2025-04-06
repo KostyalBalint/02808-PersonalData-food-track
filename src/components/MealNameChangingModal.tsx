@@ -1,10 +1,11 @@
 import {
-  Modal,
-  Box,
-  Typography,
   Button,
+  Container,
+  Modal,
+  Paper,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 import { FC, useState } from "react";
 
@@ -39,40 +40,47 @@ export const MealNameChangingModal: FC<MealNameChangingModalProps> = ({
       onClose={onClose}
       aria-labelledby="confirmation-modal-title"
       aria-describedby="confirmation-modal-description"
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
     >
-      <Box
-        sx={{
-          p: 3,
-          bgcolor: "background.paper",
-          boxShadow: 24,
-          mx: "auto",
-          my: "10%",
-          maxWidth: 400,
-        }}
-      >
-        <Typography id="confirmation-modal-title" variant="h6" component="h2">
-          {title}
-        </Typography>
-        <TextField
-          onChange={handleChange}
-          id="standard-basic"
-          variant="standard"
-          defaultValue={originalMealName}
-        />
-        <Stack
-          direction="row"
-          spacing={2}
-          justifyContent="space-between"
-          sx={{ mt: 3 }}
+      <Container maxWidth="sm">
+        <Paper
+          sx={{
+            p: 3,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            mx: "auto",
+            my: "10%",
+          }}
         >
-          <Button variant="outlined" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button variant="contained" color="info" onClick={handleConfirm}>
-            Confirm
-          </Button>
-        </Stack>
-      </Box>
+          <Typography id="confirmation-modal-title" variant="h6" component="h2">
+            {title}
+          </Typography>
+          <TextField
+            onChange={handleChange}
+            id="standard-basic"
+            size="small"
+            defaultValue={originalMealName}
+            fullWidth
+          />
+          <Stack
+            direction="row"
+            spacing={2}
+            justifyContent="space-between"
+            sx={{ mt: 3 }}
+          >
+            <Button variant="outlined" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button variant="contained" color="info" onClick={handleConfirm}>
+              Confirm
+            </Button>
+          </Stack>
+        </Paper>
+      </Container>
     </Modal>
   );
 };

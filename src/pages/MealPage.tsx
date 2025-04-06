@@ -95,6 +95,7 @@ export const MealPage = () => {
 
   const handleMealChangingModalClose = () => {
     setEditModalOpen(false);
+    setAnchorEl(null);
   };
 
   const handleDateModalClose = () => {
