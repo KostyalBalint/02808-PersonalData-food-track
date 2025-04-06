@@ -113,7 +113,7 @@ export const reindexAllImages = https.onCall(
     timeoutSeconds: 60, // Timeout for *starting* the job, not finishing it
     memory: "256MiB",
   },
-  async () => {
+  async (request) => {
     // Optional: Add authentication check if needed
     // if (!request.auth) {
     //   throw new https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
@@ -135,8 +135,17 @@ export const reindexAllImages = https.onCall(
         jobType: "all",
       });
 
+      let query = db.collection("meals");
+
+      if (request.data.userId) {
+        // @ts-expect-error shiti firebase
+        query = db
+          .collection("meals")
+          .where("userId", "==", request.data.userId);
+      }
+
       // Count total meals
-      const mealsSnapshot = await db.collection("meals").get();
+      const mealsSnapshot = await query.get();
       const totalMeals = mealsSnapshot.docs.length;
 
       if (totalMeals === 0) {

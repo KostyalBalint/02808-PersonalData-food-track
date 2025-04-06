@@ -242,9 +242,11 @@ export const MealPage = () => {
   return (
     <Container sx={{ mt: 2 }}>
       <Grid container spacing={2}>
-        {meal?.errorMessage && (
-          <Alert severity="error">{meal?.errorMessage}</Alert>
-        )}
+        <Grid size={{ xs: 12 }}>
+          {meal?.errorMessage && (
+            <Alert severity="error">{meal?.errorMessage}</Alert>
+          )}
+        </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <Container maxWidth={"sm"} disableGutters>
             <Card sx={{ m: 0 }}>

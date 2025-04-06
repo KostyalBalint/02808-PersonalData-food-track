@@ -24,7 +24,7 @@ async function convertImagesToWebP() {
     await Promise.all(
       querySnapshot.docs.map(async (doc) => {
         const data = doc.data();
-        const imageUrl = data.imageUrl;
+        const imageUrl = data.originalImageUrl;
         const userId = data.userId || "unknownUser"; // Handle potential missing userId
         const mealId = doc.id;
 
@@ -67,7 +67,7 @@ async function convertImagesToWebP() {
 
         // Update firestore document with the new URL
         await doc.ref.update({
-          imageUrl: newDownloadURL,
+          imageUrl: newDownloadURL[0],
           originalImageUrl: imageUrl,
         });
 

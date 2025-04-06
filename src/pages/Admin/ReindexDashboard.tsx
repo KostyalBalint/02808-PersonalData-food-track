@@ -39,6 +39,8 @@ function ReindexDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [jobs, setJobs] = useState<Record<string, JobProgress>>({}); // Store job progress by progressId
 
+  const [reindexAllUserId, setReindexAllUserId] = useState<string | null>(null);
+
   // Refs to store active RTDB listeners to clean them up
   const listenersRef = useRef<Record<string, Unsubscribe>>({});
 
@@ -116,7 +118,9 @@ function ReindexDashboard() {
     setLoadingAll(true);
     setError(null);
     try {
-      const result = (await callReindexAll()) as HttpsCallableResult<{
+      const result = (await callReindexAll({
+        userId: reindexAllUserId && null,
+      })) as HttpsCallableResult<{
         progressId: string;
         message: string;
       }>;
@@ -308,6 +312,15 @@ function ReindexDashboard() {
         <Typography variant="h6" gutterBottom>
           Reindex All Meals
         </Typography>
+        <TextField
+          label="User ID (optional)"
+          variant="outlined"
+          size="small"
+          value={reindexAllUserId || ""}
+          onChange={(e) => setReindexAllUserId(e.target.value)}
+          disabled={loadingAll}
+          sx={{ pr: 2 }}
+        />
         <Button
           variant="contained"
           onClick={handleReindexAll}
