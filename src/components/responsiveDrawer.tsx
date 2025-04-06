@@ -154,7 +154,7 @@ export const ResponsiveDrawer = () => {
       </Drawer>
       <Box
         sx={{
-          height: "100dvh",
+          height: "100%",
           width: "100%",
           display: "flex",
           direction: "column",
@@ -192,16 +192,25 @@ export const ResponsiveDrawer = () => {
             navigate(newValue);
           }}
           value={location.pathname}
+          sx={{
+            backgroundColor: (theme) =>
+              alpha(theme.palette.background.paper, 1),
+            backdropFilter: "blur(8px)",
+            borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+            mb: "env(safe-area-inset-bottom, 0px)",
+          }}
         >
-          {accessiblePages.map((page) => (
-            <FeatureFlagGuard flagKey={page.featureFlag} key={page.path}>
-              <BottomNavigationAction
-                value={page.path}
-                label={page.name}
-                icon={<page.icon />}
-              />
-            </FeatureFlagGuard>
-          ))}
+          {accessiblePages
+            .map((page) => (
+              <FeatureFlagGuard flagKey={page.featureFlag} key={page.path}>
+                <BottomNavigationAction
+                  value={page.path}
+                  label={page.name}
+                  icon={<page.icon />}
+                />
+              </FeatureFlagGuard>
+            ))
+            .filter((page) => page)}
         </BottomNavigation>
       </Paper>
     </Box>

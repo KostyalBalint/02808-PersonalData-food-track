@@ -13,6 +13,7 @@ import { PWAInstallProvider } from "./context/PWAInstallContext.tsx";
 import { InstallPWAPrompt } from "./components/InstallPWAPrompt.tsx";
 import CacheBuster from "react-cache-buster";
 import { version } from "../package.json";
+import SafeArea from "./components/SafeArea.tsx";
 
 function App() {
   return (
@@ -26,45 +27,61 @@ function App() {
     >
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <SnackbarProvider
-          maxSnack={3}
-          anchorOrigin={{
-            vertical: "top",
-            horizontal: "right",
+        <SafeArea
+          component="main" // Semantic HTML element, type-checked
+          sx={{
+            // sx prop is type-checked
+            display: "flex",
+            flexDirection: "column",
+            minHeight: "100dvh", // Ensure it tries to fill viewport height
           }}
-          autoHideDuration={3000}
+          // Example: Disable top padding if AppBar handles it
+          // disableTop={true} // type-checked boolean
+          // Example: Using theme spacing units (ensure it resolves to string/number)
         >
-          <PWAInstallProvider>
-            <InstallPWAPrompt />
-            <AuthProvider>
-              <Router>
-                <Routes>
-                  {/* Public Route */}
-                  <Route path="/login" element={<LoginPage />} />
+          <SnackbarProvider
+            maxSnack={3}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            autoHideDuration={3000}
+          >
+            <PWAInstallProvider>
+              <InstallPWAPrompt />
+              <AuthProvider>
+                <Router>
+                  <Routes>
+                    {/* Public Route */}
+                    <Route path="/login" element={<LoginPage />} />
 
-                  {/* Protected Routes */}
+                    {/* Protected Routes */}
 
-                  <Route element={<ResponsiveDrawer />}>
-                    {pages.map((page) => (
-                      <Route
-                        element={<ProtectedRoute allowedRoles={page.roles} />}
-                        key={page.path}
-                      >
-                        <Route path={page.path} element={<page.component />} />
-                      </Route>
-                    ))}
+                    <Route element={<ResponsiveDrawer />}>
+                      {pages.map((page) => (
+                        <Route
+                          element={<ProtectedRoute allowedRoles={page.roles} />}
+                          key={page.path}
+                        >
+                          <Route
+                            path={page.path}
+                            element={<page.component />}
+                          />
+                        </Route>
+                      ))}
 
-                    <Route path="/meal/:id" element={<MealPage />} />
-                    <Route path="*" element={<Page404 />} />
-                  </Route>
+                      <Route path="/meal/:id" element={<MealPage />} />
+                      <Route path="*" element={<Page404 />} />
+                    </Route>
 
-                  {/* Default Route */}
-                  <Route path="*" element={<LoginPage />} />
-                </Routes>
-              </Router>
-            </AuthProvider>
-          </PWAInstallProvider>
-        </SnackbarProvider>
+                    {/* Default Route */}
+                    <Route path="*" element={<LoginPage />} />
+                  </Routes>
+                </Router>
+              </AuthProvider>
+            </PWAInstallProvider>
+          </SnackbarProvider>
+        </SafeArea>
       </ThemeProvider>
     </CacheBuster>
   );
