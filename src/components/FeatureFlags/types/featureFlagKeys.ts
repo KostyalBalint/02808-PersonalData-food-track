@@ -9,7 +9,8 @@ export type FeatureFlagKeys =
   | "meal-recommendations"
   | "why-home-empty-inform"
   | "meal-analysis"
-  | "meal-list-dqq";
+  | "meal-list-dqq"
+  | "dqq-questions-meal-page";
 // Add your actual flag keys here as a union type (|)
 
 // If you prefer less strict typing (e.g., for highly dynamic flags),

@@ -46,6 +46,7 @@ import dayjs, { Dayjs } from "dayjs";
 import { MealNameChangingModal } from "../components/MealNameChangingModal.tsx";
 import { DatePickerModal } from "../components/DatePickerModal.tsx";
 import { format } from "date-fns";
+import FeatureFlagGuard from "../components/FeatureFlags/FeatureFlagGuard.tsx";
 
 export const MealPage = () => {
   const { id } = useParams();
@@ -395,7 +396,9 @@ export const MealPage = () => {
           </Paper>
         </Grid>
         <Grid size={{ xs: 12 }}>
-          {meal && <DqqQuestionerForm mealId={meal.id} />}
+          <FeatureFlagGuard flagKey="dqq-questions-meal-page">
+            {meal && <DqqQuestionerForm mealId={meal.id} />}
+          </FeatureFlagGuard>
         </Grid>
 
         <Grid size={{ xs: 12 }}>
