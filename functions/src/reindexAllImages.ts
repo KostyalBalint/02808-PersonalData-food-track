@@ -20,7 +20,7 @@ const PROCESSING_TOPIC = "process-image"; // Make sure this topic exists in your
 
 // --- Helper Function to Queue a Single Meal ---
 // This encapsulates the common logic for queuing and progress setup
-async function queueMealForProcessing(
+export async function queueMealForProcessing(
   mealId: string,
   isSingleJob: boolean = false,
 ) {

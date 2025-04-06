@@ -1,15 +1,17 @@
 import { onDocumentCreated } from "firebase-functions/firestore";
-import { MealData } from "./constants.js";
-import { processImage } from "./workers/processImage.js";
+import { queueMealForProcessing } from "./reindexAllImages.js";
 
 export const documentCreatedHandler = onDocumentCreated(
   "meals/{mealId}",
   async (event) => {
-    const meal = event.data?.data() as MealData;
-    const processedData = await processImage(meal);
+    console.log("Document created", event);
+    const result = await queueMealForProcessing(event.params.mealId, true);
+    if (result.error) {
+      console.error("Error queuing meal for processing:", result.error);
+      return;
+    }
+    console.log("Meal queued for processing:", event.params.mealId);
 
-    return event.data?.ref.set(processedData ?? {}, {
-      merge: true,
-    });
+    return result;
   },
 );

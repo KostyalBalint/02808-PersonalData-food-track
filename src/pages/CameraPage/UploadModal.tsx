@@ -98,7 +98,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     // Process all files and update state
     const processedFiles = await Promise.all(files.map(processFile));
     const validFiles = processedFiles.filter((f): f is ImageFile => f !== null);
-    setSelectedFiles((prev) => [...prev, ...validFiles]);
+    setSelectedFiles(validFiles);
   };
 
   const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {

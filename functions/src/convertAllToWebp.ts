@@ -28,6 +28,12 @@ async function convertImagesToWebP() {
         const userId = data.userId || "unknownUser"; // Handle potential missing userId
         const mealId = doc.id;
 
+        // Only process Anna's images
+        if (userId !== "AeJpsmknsNUbpz87XFzdfu8bC4n1") {
+          console.log(`Skipping user ${userId}`);
+          return;
+        }
+
         // Fetch image buffer using node-fetch
         const response = await fetch(imageUrl);
         if (!response.ok)
