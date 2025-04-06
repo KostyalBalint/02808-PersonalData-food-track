@@ -367,6 +367,19 @@ export const processImageWorker = pubsub.onMessagePublished(
 
       const meal = mealDoc.data() as MealData;
 
+      if (meal.withoutImage) {
+        logger.info(
+          `Skipping processing for meal ${mealId} as it was created without an image.`,
+        );
+        // Update the progress counter - use a transaction for safety
+        await rtdb
+          .ref(`progress/${progressId}/processed`)
+          .transaction((current: number | null) => {
+            return (current || 0) + 1;
+          });
+        return; // Acknowledge message
+      }
+
       // Process the image (YOUR CORE LOGIC)
       const processedData = await processImage(meal); // Assuming processImage returns the fields to update
 

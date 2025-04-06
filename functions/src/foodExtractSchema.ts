@@ -16,9 +16,9 @@ export const FoodExtractSchema = z.object({
           name: z.string().describe("Name of the ingredient (Required)"),
           amount: z.number().describe("Amount of the specific ingredient"),
           unit: z
-            .enum(["Pcs", "grams", "liter"])
+            .enum(["Pcs", "grams", "ml"])
             .describe(
-              'Unit of the amount (Required, Allowed values: "Pcs", "grams", "liter"',
+              'Unit of the amount (Required, Allowed values: "Pcs", "grams", "ml"',
             ),
           categories: z
             .array(

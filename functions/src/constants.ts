@@ -1,6 +1,6 @@
 import { Timestamp } from "firebase/firestore";
 
-export const units = ["Pcs", "grams", "liter"];
+export const units = ["Pcs", "grams", "ml"];
 
 type DqqQuestionKey = `DQQ${number}`; // Matches keys like DQQ1, DQQ2, ..., DQQ99
 
@@ -19,6 +19,7 @@ export interface MealData {
     createdAt: Timestamp;
   };
   errorMessage?: string;
+  withoutImage?: boolean; // Indicates if the meal was created without an image
 }
 
 // Match the structure stored by the backend function
