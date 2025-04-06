@@ -202,13 +202,11 @@ export const ResponsiveDrawer = () => {
         >
           {accessiblePages
             .map((page) => (
-              <FeatureFlagGuard flagKey={page.featureFlag} key={page.path}>
-                <BottomNavigationAction
-                  value={page.path}
-                  label={page.name}
-                  icon={<page.icon />}
-                />
-              </FeatureFlagGuard>
+              <BottomNavigationAction
+                value={page.path}
+                label={page.name}
+                icon={<page.icon />}
+              />
             ))
             .filter((page) => page)}
         </BottomNavigation>

@@ -10,7 +10,14 @@ import {
   initialAnswersState,
   initialDemographicsState,
 } from "../../components/DqqCalculator/dqqQuestions.ts";
-import { Container, Grid, Paper, Typography } from "@mui/material";
+import {
+  Card,
+  CardHeader,
+  Container,
+  Grid,
+  Paper,
+  Typography,
+} from "@mui/material";
 import {
   collection,
   onSnapshot,
@@ -24,6 +31,7 @@ import DqqTimeChart, { DqqTimeChartDataPoint } from "./DqqTimeChart.tsx";
 import { format } from "date-fns";
 import { mergeMultipleDQQ } from "../../components/DqqCalculator/mergeMultipleDQQ.ts";
 import { ChartToggleWrapper } from "./ChartToggleWrapper.tsx";
+import FeatureFlagGuard from "../../components/FeatureFlags/FeatureFlagGuard.tsx";
 
 export const AnalyzePage = () => {
   const { demographicsComplete, userProfile } = useAuth();
@@ -137,31 +145,49 @@ export const AnalyzePage = () => {
   return (
     <Container sx={{ mt: 2 }}>
       <Grid container spacing={2}>
+        <FeatureFlagGuard flagKey="why-home-empty-inform">
+          <Grid size={{ xs: 12 }}>
+            <Card sx={{ width: "100%" }}>
+              <CardHeader title="Why is this page empty?" />
+              <Typography
+                p={2}
+                variant="body2"
+                color="text.secondary"
+                gutterBottom
+                sx={{ width: "100%" }}
+              >
+                We have features coming up here. As the experiment progresses,
+                you can access more features here.
+              </Typography>
+            </Card>
+          </Grid>
+        </FeatureFlagGuard>
         <Grid size={{ xs: 12, md: 8, xl: 6 }}>
-          <Paper sx={{ py: 2, pr: 2 }}>
-            <ChartToggleWrapper
-              title="DQQ Scores over time" // Pass title to the wrapper
-              initialChartType="line" // Optional: set default
-              // lineLabel="Trend" // Optional: customize labels
-              // barLabel="Daily Scores" // Optional: customize labels
-            >
-              {/* DqqTimeChart is now the child */}
-              {chartData.length > 0 ? (
-                <DqqTimeChart
-                  data={chartData}
-                  onHover={onChartHover}
-                  // chartType prop is now provided by ChartToggleWrapper
-                  chartType="line" // Only add this bc. TS
-                />
-              ) : (
-                // Display message within the wrapper if no data
-                <Typography sx={{ mt: 4, textAlign: "center" }}>
-                  No data available to display chart.
-                </Typography>
-              )}
-            </ChartToggleWrapper>
-          </Paper>
-          {/*
+          <FeatureFlagGuard flagKey="meal-analysis">
+            <Paper sx={{ py: 2, pr: 2 }}>
+              <ChartToggleWrapper
+                title="DQQ Scores over time" // Pass title to the wrapper
+                initialChartType="line" // Optional: set default
+                // lineLabel="Trend" // Optional: customize labels
+                // barLabel="Daily Scores" // Optional: customize labels
+              >
+                {/* DqqTimeChart is now the child */}
+                {chartData.length > 0 ? (
+                  <DqqTimeChart
+                    data={chartData}
+                    onHover={onChartHover}
+                    // chartType prop is now provided by ChartToggleWrapper
+                    chartType="line" // Only add this bc. TS
+                  />
+                ) : (
+                  // Display message within the wrapper if no data
+                  <Typography sx={{ mt: 4, textAlign: "center" }}>
+                    No data available to display chart.
+                  </Typography>
+                )}
+              </ChartToggleWrapper>
+            </Paper>
+            {/*
             <Paper>
                 <Grid container spacing={1}>
                   {selectedResult.meals.map((meal) => (
@@ -172,14 +198,17 @@ export const AnalyzePage = () => {
                 </Grid>
               </Paper>
              */}
+          </FeatureFlagGuard>
         </Grid>
         <Grid size={{ xs: 12, md: 4, xl: 6 }}>
-          {selectedResult && (
-            <DqqResultsDisplay
-              results={selectedResult.results}
-              demographicsComplete={demographicsComplete}
-            />
-          )}
+          <FeatureFlagGuard flagKey="meal-analysis">
+            {selectedResult && (
+              <DqqResultsDisplay
+                results={selectedResult.results}
+                demographicsComplete={demographicsComplete}
+              />
+            )}
+          </FeatureFlagGuard>
         </Grid>
       </Grid>
     </Container>
