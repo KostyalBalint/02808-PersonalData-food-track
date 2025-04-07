@@ -151,7 +151,7 @@ export const CameraPage: React.FC = () => {
         }
 
         new Compressor(blob, {
-          quality: 0.95,
+          quality: 0.8,
           maxWidth: 2048,
           maxHeight: 2048,
           resize: "contain",
