@@ -93,7 +93,8 @@ export const CameraPage: React.FC = () => {
 
       // Get new stream
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode },
+        video: { facingMode, height: { ideal: 2048 }, width: { ideal: 2048 } },
+        //video: { facingMode },
         audio: false,
       });
 
@@ -150,7 +151,7 @@ export const CameraPage: React.FC = () => {
         }
 
         new Compressor(blob, {
-          quality: 0.8,
+          quality: 0.95,
           maxWidth: 2048,
           maxHeight: 2048,
           resize: "contain",
