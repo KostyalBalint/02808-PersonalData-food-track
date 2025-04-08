@@ -156,7 +156,7 @@ export const CreateMealWithoutImage: React.FC<CreateMealModalProps> = ({
     const mealToSave = {
       // Type for serverTimestamp
       ...mealData,
-      userId: auth.currentUser?.uid,
+      userId: auth.userProfile?.uid,
       withoutImage: true, //Indicate that this meal is created without an image
       createdAt: serverTimestamp(), // Use Firestore server timestamp
     };

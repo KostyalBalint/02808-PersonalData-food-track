@@ -1,7 +1,12 @@
 // src/pages/AdminPage.tsx
 import React, { useEffect, useState } from "react";
 import { collection, doc, getDocs, query, updateDoc } from "firebase/firestore";
-import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridActionsCellItem,
+  GridColDef,
+  GridRowParams,
+} from "@mui/x-data-grid";
 import {
   Alert,
   Box,
@@ -11,13 +16,16 @@ import {
   Paper,
   Select,
   SelectChangeEvent,
+  Tooltip, // Import Tooltip
   Typography,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit"; // For potential future inline edit
+import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
+import LoginIcon from "@mui/icons-material/Login"; // Icon for impersonate
 import { useAuth } from "../../context/AuthContext.tsx";
 import { Role } from "../pages.ts";
 import { db } from "../../firebaseConfig.ts";
+import { useSnackbar } from "notistack";
 
 // Define a type for the user data fetched from Firestore for the table
 interface UserData {
@@ -28,7 +36,13 @@ interface UserData {
 }
 
 const AdminPage: React.FC = () => {
-  const { isAdmin } = useAuth(); // Get admin status from context
+  // Get auth context values needed for impersonation
+  const {
+    isAdmin,
+    actualUserProfile, // The admin's own profile
+    startImpersonation,
+    isImpersonating, // To potentially disable actions while already impersonating
+  } = useAuth();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,23 +50,24 @@ const AdminPage: React.FC = () => {
 
   const availableRoles: Role[] = ["ADMIN", "CONTROLL", "SUBJECT"]; // All possible roles
 
+  const { enqueueSnackbar } = useSnackbar();
+
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
       setError(null);
       try {
-        // Query Firestore for all documents in the 'users' collection
         const usersCollectionRef = collection(db, "users");
-        const q = query(usersCollectionRef); // Add ordering or filtering if needed
+        const q = query(usersCollectionRef);
         const querySnapshot = await getDocs(q);
 
         const usersData = querySnapshot.docs.map(
           (doc) =>
             ({
-              id: doc.id, // Use Firestore document ID as the DataGrid row id
+              id: doc.id,
               email: doc.data().email || "N/A",
               displayName: doc.data().displayName || "N/A",
-              role: doc.data().role || "SUBJECT", // Default if missing
+              role: doc.data().role || "SUBJECT",
             }) as UserData,
         );
 
@@ -60,51 +75,81 @@ const AdminPage: React.FC = () => {
       } catch (err) {
         console.error("Error fetching users:", err);
         setError("Failed to load users. Check console for details.");
+        enqueueSnackbar("Error fetching users", { variant: "error" });
       } finally {
         setLoading(false);
       }
     };
 
-    // Only fetch if the current user is an Admin
     if (isAdmin) {
       fetchUsers();
     } else {
       setError("You do not have permission to view this page.");
       setLoading(false);
     }
-  }, [isAdmin]); // Re-run if admin status changes (unlikely after load, but good practice)
+  }, [isAdmin, enqueueSnackbar]); // Add enqueueSnackbar dependency
 
   const handleRoleChange = async (id: string, newRole: Role) => {
     console.log(`Attempting to change role for user ${id} to ${newRole}`);
     const userDocRef = doc(db, "users", id);
     try {
-      // Update the role field in Firestore
       await updateDoc(userDocRef, {
         role: newRole,
       });
 
-      // Update the local state to reflect the change immediately
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.id === id ? { ...user, role: newRole } : user,
         ),
       );
-      setEditRowId(null); // Exit edit mode for this row
+      setEditRowId(null);
+      enqueueSnackbar(`Role updated successfully for user ${id}`, {
+        variant: "success",
+      });
       console.log(`Successfully updated role for user ${id} to ${newRole}`);
-
-      // *** IMPORTANT: Cloud Functions for Custom Claims ***
-      // If using custom claims, you would trigger a Cloud Function here
-      // (or have one triggered automatically by the Firestore write)
-      // to update the user's custom claims.
-      // Example: callCloudFunction('updateUserRole', { uid: id, newRole: newRole });
-    } catch (error) {
-      console.error("Error updating user role:", error);
+      // Potentially trigger cloud function for custom claims here
+    } catch (err) {
+      console.error("Error updating user role:", err);
       setError(`Failed to update role for user ${id}.`);
-      // Optionally revert local state change or show specific error
+      enqueueSnackbar(`Error updating role for user ${id}`, {
+        variant: "error",
+      });
     }
   };
 
-  const columns: GridColDef[] = [
+  const handleStartImpersonation = async (targetUid: string) => {
+    if (!isAdmin) {
+      enqueueSnackbar("Permission Denied.", { variant: "error" });
+      return;
+    }
+    if (isImpersonating) {
+      enqueueSnackbar("Stop current impersonation session first.", {
+        variant: "warning",
+      });
+      return;
+    }
+    if (actualUserProfile?.uid === targetUid) {
+      enqueueSnackbar("You cannot impersonate yourself.", { variant: "info" });
+      return;
+    }
+
+    try {
+      await startImpersonation(targetUid);
+      enqueueSnackbar(`Started impersonating user ${targetUid}`, {
+        variant: "info",
+      });
+      // Optional: Navigate away or refresh page if needed,
+      // but usually the context change handles UI updates.
+    } catch (error) {
+      console.error("Failed to start impersonation:", error);
+      enqueueSnackbar("Failed to start impersonation. See console.", {
+        variant: "error",
+      });
+    }
+  };
+
+  const columns: GridColDef<UserData>[] = [
+    // Add UserData type here
     { field: "id", headerName: "User ID (UID)", width: 250 },
     {
       field: "displayName",
@@ -124,7 +169,6 @@ const AdminPage: React.FC = () => {
             <Select
               value={params.value}
               onChange={(event: SelectChangeEvent<Role>) => {
-                // Immediately attempt to save when a new role is selected
                 handleRoleChange(
                   params.id.toString(),
                   event.target.value as Role,
@@ -132,8 +176,9 @@ const AdminPage: React.FC = () => {
               }}
               size="small"
               sx={{ width: "100%" }}
-              onBlur={() => setEditRowId(null)} // Optionally exit edit mode on blur if no change
+              onBlur={() => setEditRowId(null)}
               autoFocus
+              disabled={isImpersonating} // Disable role editing while impersonating
             >
               {availableRoles.map((roleOption) => (
                 <MenuItem key={roleOption} value={roleOption}>
@@ -143,7 +188,6 @@ const AdminPage: React.FC = () => {
             </Select>
           );
         }
-        // Otherwise, just display the role text
         return params.value;
       },
     },
@@ -151,38 +195,75 @@ const AdminPage: React.FC = () => {
       field: "actions",
       type: "actions",
       headerName: "Actions",
-      width: 100,
+      width: 150, // Increased width for two icons
       cellClassName: "actions",
-      getActions: ({ id }) => {
-        const isInEditMode = editRowId === id;
+      getActions: (params: GridRowParams<UserData>) => {
+        // Use GridRowParams<UserData>
+        const isInEditMode = editRowId === params.id;
+        const isCurrentUser = actualUserProfile?.uid === params.id;
+        // Optional: Prevent impersonating other admins
+        // const isTargetAdmin = params.row.role === 'ADMIN';
+
+        const actions = [];
 
         if (isInEditMode) {
-          // While editing, maybe show a cancel/confirm, but here we auto-save on change
-          // So just show a "being edited" indicator or nothing actionable
-          return [
+          actions.push(
             <GridActionsCellItem
+              key={`edit-${params.id}`}
               icon={<CheckIcon />}
               label="Editing"
               sx={{ color: "primary.main" }}
-              disabled // Indicates editing state, action is handled by Select onChange
+              disabled
             />,
-          ];
+          );
+        } else {
+          actions.push(
+            <GridActionsCellItem
+              key={`edit-action-${params.id}`}
+              icon={<EditIcon />}
+              label="Edit Role"
+              className="textPrimary"
+              onClick={() => setEditRowId(params.id.toString())}
+              color="inherit"
+              disabled={isImpersonating} // Disable role editing while impersonating
+            />,
+          );
         }
 
-        return [
-          <GridActionsCellItem
-            icon={<EditIcon />}
-            label="Edit Role"
-            className="textPrimary"
-            onClick={() => setEditRowId(id.toString())} // Enter edit mode for this row
-            color="inherit"
-          />,
-        ];
+        // Add Impersonate Button
+        actions.push(
+          <Tooltip
+            title={
+              isCurrentUser
+                ? "Cannot impersonate yourself"
+                : isImpersonating
+                  ? "Stop current session first"
+                  : "Impersonate User"
+            }
+          >
+            {/* Wrap in span for tooltip when disabled */}
+            <span>
+              <GridActionsCellItem
+                key={`impersonate-${params.id}`}
+                icon={<LoginIcon />}
+                label="Impersonate"
+                onClick={() => handleStartImpersonation(params.id.toString())}
+                disabled={
+                  isCurrentUser || isImpersonating /*|| isTargetAdmin */
+                } // Disable if it's the admin themselves, or already impersonating (or target is admin)
+                color="primary"
+              />
+            </span>
+          </Tooltip>,
+        );
+
+        return actions;
       },
     },
   ];
 
-  if (!isAdmin && !loading) {
+  if (!isAdmin && !loading && !isImpersonating) {
+    // Allow page view if impersonating
     return (
       <Alert severity="error">
         Access Denied: You must be an ADMIN to manage users.
@@ -194,25 +275,61 @@ const AdminPage: React.FC = () => {
     return <CircularProgress />;
   }
 
-  if (error) {
+  if (error && !isImpersonating) {
+    // Don't show fetch error if admin is just impersonating
     return <Alert severity="error">{error}</Alert>;
   }
 
+  // Show a different message if the admin is viewing this page while impersonating
+  if (isImpersonating) {
+    return (
+      <Container>
+        <Alert severity="info" sx={{ mt: 2 }}>
+          Currently impersonating. User management actions are disabled.{" "}
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault(); /* Stop impersonation logic is in the banner */
+            }}
+          >
+            (Stop Impersonating)
+          </a>
+        </Alert>
+        <Paper sx={{ p: 2, mt: 2 }}>
+          {/* Optionally show a read-only view of users or hide the table */}
+          <Typography variant="h6" gutterBottom>
+            User List (Read-only during impersonation)
+          </Typography>
+          <DataGrid
+            rows={users}
+            columns={columns} // Columns will show disabled actions
+            pageSizeOptions={[10, 25, 50]}
+            checkboxSelection={false}
+            sx={{ pointerEvents: "none", opacity: 0.7 }} // Make grid visually disabled
+          />
+        </Paper>
+      </Container>
+    );
+  }
+
+  // Default view for Admin not impersonating
   return (
     <Container>
       <Paper sx={{ p: 2, mt: 5 }}>
         <Box sx={{ width: "100%" }}>
           <Typography variant="h4" gutterBottom>
-            Manage User Roles
+            Manage Users
           </Typography>
           <DataGrid
             rows={users}
             columns={columns}
             pageSizeOptions={[10, 25, 50]}
-            checkboxSelection={false} // Disable checkbox selection unless needed
-            // Optional: Handle row edit stop if needed for more complex scenarios
-            // onEditCellPropsChange={(params) => console.log("Edit props change", params)}
-            // processRowUpdate might be useful if not auto-saving on change
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 10 },
+              },
+            }}
+            checkboxSelection={false}
           />
         </Box>
       </Paper>

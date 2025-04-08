@@ -18,7 +18,7 @@ import FoodRecommendations from "../components/FoodRecommendations.tsx";
 import FeatureFlagGuard from "../components/FeatureFlags/FeatureFlagGuard.tsx";
 
 export const HomePage = () => {
-  const { currentUser, userProfile } = useAuth();
+  const { userProfile } = useAuth();
 
   const aimedAmountsByCategory: CategoryAmounts = {
     Grains: 300, // g
@@ -89,7 +89,7 @@ export const HomePage = () => {
             <CardHeader
               title={
                 <Stack direction="row" gap={2} alignItems={"center"}>
-                  Hi, {currentUser?.displayName}
+                  Hi, {userProfile?.displayName}
                   <Chip label={userProfile?.role} />
                 </Stack>
               }

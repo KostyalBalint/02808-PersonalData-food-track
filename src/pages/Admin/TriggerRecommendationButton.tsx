@@ -20,7 +20,7 @@ interface TriggerRecommendationButtonProps {
 const TriggerRecommendationButton: React.FC<
   TriggerRecommendationButtonProps
 > = ({ onSuccess, onError }) => {
-  const { currentUser: user } = useAuth(); // Get authenticated user
+  const { userProfile: user } = useAuth(); // Get authenticated user
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);

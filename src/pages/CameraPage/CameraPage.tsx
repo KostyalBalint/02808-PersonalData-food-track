@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { auth, db, storage } from "../../firebaseConfig.ts";
+import { db, storage } from "../../firebaseConfig.ts";
 import {
   getDownloadURL,
   ref,
@@ -32,6 +32,7 @@ import { useNavigate } from "react-router-dom";
 import { UploadModal } from "./UploadModal.tsx";
 import EditIcon from "@mui/icons-material/Edit";
 import { CreateMealWithoutImage } from "./CreateMealWithoutImage.tsx";
+import { useAuth } from "../../context/AuthContext.tsx";
 
 const CameraContainer = styled(Box)(({ theme }) => ({
   width: "100%",
@@ -73,6 +74,8 @@ export const CameraPage: React.FC = () => {
 
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+
+  const { userProfile } = useAuth();
 
   // Initialize camera
   useEffect(() => {
@@ -192,13 +195,13 @@ export const CameraPage: React.FC = () => {
   };
 
   const handleUpload = useCallback(async (): Promise<void> => {
-    if (!image || !auth.currentUser) return;
+    if (!image || !userProfile) return;
 
     setUploading(true);
 
     const imageRef = ref(
       storage,
-      `images/${auth.currentUser.uid}/${Date.now()}_${image.name}`,
+      `images/${userProfile.uid}/${Date.now()}_${image.name}`,
     );
 
     console.log(`Uploading image`, image);
@@ -224,7 +227,7 @@ export const CameraPage: React.FC = () => {
           const imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
 
           const doc: DocumentReference = await addDoc(collection(db, "meals"), {
-            userId: auth.currentUser?.uid,
+            userId: userProfile?.uid,
             imageUrl,
             createdAt: serverTimestamp(),
           });
