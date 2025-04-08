@@ -155,7 +155,7 @@ export const ResponsiveDrawer = () => {
       <Box
         sx={{
           height: "100%",
-          width: "100%",
+          width: { xs: "100%", md: "calc(100vw - 240px)" },
           display: "flex",
           direction: "column",
         }}
