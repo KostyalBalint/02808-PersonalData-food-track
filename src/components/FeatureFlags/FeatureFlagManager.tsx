@@ -17,7 +17,6 @@ import {
   Box,
   Button,
   CircularProgress,
-  Container,
   Dialog,
   DialogActions,
   DialogContent,
@@ -218,7 +217,7 @@ const FeatureFlagManager: React.FC = () => {
 
   // --- Rendering ---
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Box>
       <Box
         sx={{
           display: "flex",
@@ -399,7 +398,7 @@ const FeatureFlagManager: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </Box>
   );
 };
 

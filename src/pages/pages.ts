@@ -3,17 +3,14 @@ import { IconType } from "react-icons";
 import { CameraPage } from "./CameraPage/CameraPage.tsx";
 import { MealListPage } from "./MealListPage/MealListPage.tsx";
 import {
+  IoAnalyticsOutline,
   IoCameraOutline,
   IoHomeOutline,
   IoImagesOutline,
-  IoPeopleOutline,
   IoSettingsOutline,
-  IoAnalyticsOutline,
 } from "react-icons/io5";
-import { SettingsPage } from "./Admin/Settings.tsx";
 import { HomePage } from "./HomePage.tsx";
-import AdminPage from "./Admin/AdminPage.tsx";
-import { UserSettings } from "./UserSettings.tsx";
+import { Settings } from "./Settings/Settings.tsx";
 import { AnalyzePage } from "./Analyze/AnalyzePage.tsx";
 import { FeatureFlagKeys } from "../components/FeatureFlags/types/featureFlagKeys.ts";
 
@@ -63,22 +60,8 @@ export const pages: Page[] = [
   {
     name: "Settings",
     path: "/settings",
-    component: UserSettings,
+    component: Settings,
     icon: IoSettingsOutline,
     roles: ["ADMIN", "CONTROLL", "SUBJECT"],
-  },
-  {
-    name: "Admin Settings",
-    path: "/admin/settings",
-    component: SettingsPage,
-    icon: IoSettingsOutline,
-    roles: ["ADMIN"],
-  },
-  {
-    name: "User management",
-    path: "/admin/users",
-    component: AdminPage,
-    icon: IoPeopleOutline,
-    roles: ["ADMIN"], // Only ADMIN
   },
 ];

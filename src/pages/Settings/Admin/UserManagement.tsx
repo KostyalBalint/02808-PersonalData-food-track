@@ -16,15 +16,15 @@ import {
   Paper,
   Select,
   SelectChangeEvent,
-  Tooltip, // Import Tooltip
+  Tooltip,
   Typography,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
 import LoginIcon from "@mui/icons-material/Login"; // Icon for impersonate
-import { useAuth } from "../../context/AuthContext.tsx";
-import { Role } from "../pages.ts";
-import { db } from "../../firebaseConfig.ts";
+import { useAuth } from "../../../context/AuthContext.tsx";
+import { Role } from "../../pages.ts";
+import { db } from "../../../firebaseConfig.ts";
 import { useSnackbar } from "notistack";
 
 // Define a type for the user data fetched from Firestore for the table
@@ -35,7 +35,7 @@ interface UserData {
   role: Role;
 }
 
-const AdminPage: React.FC = () => {
+const UserManagement: React.FC = () => {
   // Get auth context values needed for impersonation
   const {
     isAdmin,
@@ -314,27 +314,23 @@ const AdminPage: React.FC = () => {
 
   // Default view for Admin not impersonating
   return (
-    <Container>
-      <Paper sx={{ p: 2, mt: 5 }}>
-        <Box sx={{ width: "100%" }}>
-          <Typography variant="h4" gutterBottom>
-            Manage Users
-          </Typography>
-          <DataGrid
-            rows={users}
-            columns={columns}
-            pageSizeOptions={[10, 25, 50]}
-            initialState={{
-              pagination: {
-                paginationModel: { pageSize: 10 },
-              },
-            }}
-            checkboxSelection={false}
-          />
-        </Box>
-      </Paper>
-    </Container>
+    <Box sx={{ width: "100%" }}>
+      <Typography variant="h4" gutterBottom>
+        Manage Users
+      </Typography>
+      <DataGrid
+        rows={users}
+        columns={columns}
+        pageSizeOptions={[10, 25, 50]}
+        initialState={{
+          pagination: {
+            paginationModel: { pageSize: 10 },
+          },
+        }}
+        checkboxSelection={false}
+      />
+    </Box>
   );
 };
 
-export default AdminPage;
+export default UserManagement;

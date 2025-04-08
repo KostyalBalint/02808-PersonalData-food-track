@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 
 import {
-  Button,
-  CircularProgress,
   Alert,
   Box,
+  Button,
+  CircularProgress,
   Typography,
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { useAuth } from "../../context/AuthContext.tsx";
+import { useAuth } from "../../../context/AuthContext.tsx";
 import { httpsCallable } from "firebase/functions";
-import { functions } from "../../firebaseConfig.ts";
+import { functions } from "../../../firebaseConfig.ts";
 
 interface TriggerRecommendationButtonProps {
   onSuccess?: () => void; // Optional callback for successful trigger
@@ -69,43 +69,48 @@ const TriggerRecommendationButton: React.FC<
   };
 
   return (
-    <Box
-      sx={{
-        mt: 2,
-        mb: 2,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
-      <Typography variant="caption" color="text.secondary" sx={{ mb: 1 }}>
-        Click to generate new recommendations based on your latest meals
-        (usually runs automatically daily).
+    <Box>
+      <Typography variant="h4" component="h1">
+        Regenerate recommendations
       </Typography>
-      <Button
-        variant="contained"
-        onClick={handleTrigger}
-        disabled={loading || !user} // Disable if loading or not logged in
-        startIcon={
-          loading ? (
-            <CircularProgress size={20} color="inherit" />
-          ) : (
-            <RefreshIcon />
-          )
-        }
+      <Box
+        sx={{
+          mt: 2,
+          mb: 2,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
       >
-        {loading ? "Generating..." : "Generate Recommendations Now"}
-      </Button>
-      {error && (
-        <Alert severity="error" sx={{ mt: 2, width: "100%" }}>
-          {error}
-        </Alert>
-      )}
-      {successMessage && (
-        <Alert severity="success" sx={{ mt: 2, width: "100%" }}>
-          {successMessage}
-        </Alert>
-      )}
+        <Typography variant="caption" color="text.secondary" sx={{ mb: 1 }}>
+          Click to generate new recommendations based on your latest meals
+          (usually runs automatically daily).
+        </Typography>
+        <Button
+          variant="contained"
+          onClick={handleTrigger}
+          disabled={loading || !user} // Disable if loading or not logged in
+          startIcon={
+            loading ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              <RefreshIcon />
+            )
+          }
+        >
+          {loading ? "Generating..." : "Generate Recommendations Now"}
+        </Button>
+        {error && (
+          <Alert severity="error" sx={{ mt: 2, width: "100%" }}>
+            {error}
+          </Alert>
+        )}
+        {successMessage && (
+          <Alert severity="success" sx={{ mt: 2, width: "100%" }}>
+            {successMessage}
+          </Alert>
+        )}
+      </Box>
     </Box>
   );
 };

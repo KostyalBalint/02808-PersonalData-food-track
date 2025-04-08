@@ -127,7 +127,7 @@ export const ResponsiveDrawer = () => {
   );
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", width: "100wv" }}>
       <Drawer
         variant="permanent"
         sx={{
