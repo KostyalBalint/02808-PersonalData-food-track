@@ -187,7 +187,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     console.log(`Admin ${actualUser?.uid} stopping impersonation.`);
     setImpersonatedUserUid(null);
     setImpersonatedUserProfile(null);
-    navigate("/admin/users");
+    navigate("/settings");
   }, [actualUser]);
 
   // --- Derived State ---
