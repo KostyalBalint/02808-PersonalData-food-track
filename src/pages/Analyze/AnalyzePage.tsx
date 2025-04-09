@@ -56,15 +56,13 @@ export const AnalyzePage = () => {
     timestamp: "",
   });
 
-  const { currentUser } = useAuth();
-
   //Get all the meals
   useEffect(() => {
-    if (!currentUser) return;
+    if (!userProfile) return;
 
     const q = query(
       collection(db, "meals"),
-      where("userId", "==", currentUser.uid),
+      where("userId", "==", userProfile.uid),
       orderBy("createdAt", "desc"),
     );
 
@@ -78,7 +76,7 @@ export const AnalyzePage = () => {
 
     // Cleanup function
     return () => unsubscribe();
-  }, [currentUser]);
+  }, [userProfile]);
 
   useEffect(() => {
     if (!meals) return;

@@ -10,7 +10,7 @@ interface ProtectedComponentProps {
 export const ProtectedComponent: FC<
   PropsWithChildren<ProtectedComponentProps>
 > = ({ allowedRoles, children }) => {
-  const { currentUser, userProfile, loading } = useAuth();
+  const { currentUser, actualUserProfile, loading } = useAuth();
 
   if (loading) {
     return (
@@ -30,10 +30,14 @@ export const ProtectedComponent: FC<
   }
 
   // If allowedRoles is defined, check if user's role is included
-  if (allowedRoles && userProfile && !allowedRoles.includes(userProfile.role)) {
+  if (
+    allowedRoles &&
+    actualUserProfile &&
+    !allowedRoles.includes(actualUserProfile.role)
+  ) {
     // Logged in, but not authorized for this route
     console.warn(
-      `User role '${userProfile.role}' not authorized for path '${location.pathname}'. Allowed: ${allowedRoles.join(", ")}`,
+      `User role '${actualUserProfile.role}' not authorized for path '${location.pathname}'. Allowed: ${allowedRoles.join(", ")}`,
     );
     return null;
   }

@@ -52,7 +52,7 @@ export function DemographicsForm({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { userProfile, reFetchUserProfile } = useAuth();
+  const { userProfile } = useAuth();
 
   const userDocRef = useMemo(
     () =>
@@ -109,7 +109,6 @@ export function DemographicsForm({
           "DemographicsForm: Data updated from Firestore",
           fetchedDemographics,
         );
-        reFetchUserProfile();
       },
       (err: FirestoreError) => {
         console.error("DemographicsForm: Error fetching data:", err);

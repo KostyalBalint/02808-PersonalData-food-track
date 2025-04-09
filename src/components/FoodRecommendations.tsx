@@ -25,7 +25,7 @@ import { RecommendationDoc } from "../../functions/src/constants.ts";
 import { db } from "../firebaseConfig.ts"; // For formatting dates
 
 const FoodRecommendations: React.FC = () => {
-  const { currentUser: user, loading: authLoading } = useAuth();
+  const { userProfile: user, loading: authLoading } = useAuth();
   const [recommendations, setRecommendations] = useState<RecommendationDoc[]>(
     [],
   );

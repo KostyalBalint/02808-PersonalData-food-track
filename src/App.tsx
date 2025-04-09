@@ -14,6 +14,7 @@ import { InstallPWAPrompt } from "./components/InstallPWAPrompt.tsx";
 import CacheBuster from "react-cache-buster";
 import { version } from "../package.json";
 import SafeArea from "./components/SafeArea.tsx";
+import ImpersonationBanner from "./components/ImpersonationBanner/ImpersonationBanner.tsx";
 
 function App() {
   return (
@@ -51,8 +52,9 @@ function App() {
           >
             <PWAInstallProvider>
               <InstallPWAPrompt />
-              <AuthProvider>
-                <Router>
+              <Router>
+                <AuthProvider>
+                  <ImpersonationBanner />
                   <Routes>
                     {/* Public Route */}
                     <Route path="/login" element={<LoginPage />} />
@@ -79,8 +81,8 @@ function App() {
                     {/* Default Route */}
                     <Route path="*" element={<LoginPage />} />
                   </Routes>
-                </Router>
-              </AuthProvider>
+                </AuthProvider>
+              </Router>
             </PWAInstallProvider>
           </SnackbarProvider>
         </SafeArea>

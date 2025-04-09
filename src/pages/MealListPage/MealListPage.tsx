@@ -64,7 +64,7 @@ export const MealListPage = () => {
   >([]);
 
   const { enqueueSnackbar } = useSnackbar();
-  const { userProfile, currentUser } = useAuth(); // Get currentUser
+  const { userProfile, demographicsComplete } = useAuth(); // Get userProfile
   const MEALS_PER_PAGE = 6;
 
   // Effect to group meals and calculate DQQ (runs whenever 'meals' changes)
@@ -110,7 +110,7 @@ export const MealListPage = () => {
   // Fetch function using getDocs for pagination
   const fetchMeals = useCallback(
     async (isInitialFetch = false) => {
-      if (!currentUser || isFetching.current) return; // Check if already fetching
+      if (!userProfile || isFetching.current) return; // Check if already fetching
 
       setLoading(true);
       isFetching.current = true; // Mark as fetching
@@ -124,7 +124,7 @@ export const MealListPage = () => {
       try {
         let q;
         const baseQueryConstraints = [
-          where("userId", "==", currentUser.uid),
+          where("userId", "==", userProfile.uid),
           orderBy("createdAt", "desc"),
           limit(MEALS_PER_PAGE),
         ];
@@ -172,12 +172,13 @@ export const MealListPage = () => {
         isFetching.current = false; // Mark as not fetching
       }
     },
-    [currentUser, lastDoc, enqueueSnackbar], // Add dependencies
+    [userProfile, lastDoc, enqueueSnackbar], // Add dependencies
   );
 
   // Effect for Initial Fetch
   useEffect(() => {
-    if (currentUser) {
+    if (userProfile) {
+      console.log("Fetching meals for user:", userProfile.displayName);
       fetchMeals(true);
     } else {
       // Clear state if user logs out
@@ -188,17 +189,17 @@ export const MealListPage = () => {
       setInitialLoading(false);
       setLoading(false);
     }
-    // Intentionally only run when currentUser changes to trigger a full refresh
-  }, [currentUser]); // fetchMeals is stable due to useCallback
+    // Intentionally only run when userProfile changes to trigger a full refresh
+  }, [userProfile]); // fetchMeals is stable due to useCallback
 
   // Effect for Real-time Listener using onSnapshot
   useEffect(() => {
-    if (!currentUser) return;
+    if (!userProfile) return;
 
     // Listen to all meals for the user, ordered by creation time
     const q = query(
       collection(db, "meals"),
-      where("userId", "==", currentUser.uid),
+      where("userId", "==", userProfile.uid),
       orderBy("createdAt", "desc"),
     );
 
@@ -266,7 +267,7 @@ export const MealListPage = () => {
 
     // Cleanup listener on unmount or user change
     return () => unsubscribe();
-  }, [currentUser, initialLoading, enqueueSnackbar]); // Depend on currentUser and initialLoading flag
+  }, [userProfile, initialLoading, enqueueSnackbar]); // Depend on userProfile and initialLoading flag
 
   // Effect for Intersection Observer (Infinite Scroll)
   useEffect(() => {
@@ -354,10 +355,19 @@ export const MealListPage = () => {
                   <ProtectedComponent allowedRoles={["SUBJECT", "ADMIN"]}>
                     <FeatureFlagGuard flagKey="meal-list-dqq">
                       {/* Check if results object is not empty before rendering */}
+                      {!demographicsComplete && (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          textAlign="center"
+                          sx={{ flexGrow: 1 }}
+                        >
+                          Complete your demographics in the Settings page
+                        </Typography>
+                      )}
                       {mealGroup.results &&
                         Object.keys(mealGroup.results).length > 0 && (
                           <Grid size={{ xs: 12, md: 8 }}>
-                            {" "}
                             {/* Use item prop and adjust size */}
                             <Box>
                               <DqqScoreBarDisplay results={mealGroup.results} />

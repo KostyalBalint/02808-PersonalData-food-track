@@ -14,7 +14,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { httpsCallable, HttpsCallableResult } from "firebase/functions"; // Import Functions
 import { onValue, ref, Unsubscribe } from "firebase/database";
-import { database, functions } from "../../firebaseConfig.ts"; // Import Realtime Database
+import { database, functions } from "../../../firebaseConfig.ts"; // Import Realtime Database
 
 // --- Define Cloud Function Callables ---
 const callReindexAll = httpsCallable(functions, "reindexAllImages");
@@ -296,7 +296,7 @@ function ReindexDashboard() {
   };
 
   return (
-    <Paper sx={{ p: 2 }}>
+    <Box sx={{ p: 2 }}>
       <Typography variant="h4" gutterBottom>
         Meal Image Reindexing
       </Typography>
@@ -383,7 +383,7 @@ function ReindexDashboard() {
             .map(([id, job]) => renderJob(id, job))
         )}
       </Box>
-    </Paper>
+    </Box>
   );
 }
 

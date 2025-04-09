@@ -36,7 +36,7 @@ export const ResponsiveDrawer = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
 
-  const { userProfile } = useAuth();
+  const { actualUserProfile } = useAuth();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -45,8 +45,8 @@ export const ResponsiveDrawer = () => {
   const accessiblePages = pages
     .filter((page) => {
       if (!page.roles) return true; // Page accessible to all logged-in users if roles array is omitted/empty
-      if (!userProfile) return false; // Should not happen if ProtectedRoute works, but good check
-      return page.roles.includes(userProfile.role);
+      if (!actualUserProfile) return false; // Should not happen if ProtectedRoute works, but good check
+      return page.roles.includes(actualUserProfile.role);
     })
     .filter((page) => page.path !== "/not-authorized"); // Don't show Not Authorized in menu
 
@@ -127,7 +127,7 @@ export const ResponsiveDrawer = () => {
   );
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", width: "100wv" }}>
       <Drawer
         variant="permanent"
         sx={{
@@ -155,7 +155,7 @@ export const ResponsiveDrawer = () => {
       <Box
         sx={{
           height: "100%",
-          width: "100%",
+          width: { xs: "100%", md: "calc(100vw - 240px)" },
           display: "flex",
           direction: "column",
         }}
