@@ -216,6 +216,13 @@ export const MealNutritionVisualizer: React.FC<
                   }}
                   sx={{ maxWidth: "150px" }} // Limit max width
                 />
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ ml: 1 }}
+                >
+                  Grams
+                </Typography>
                 {/* Show subtle saving indicator next to field */}
                 {isSaving && <CircularProgress size={16} sx={{ ml: 1 }} />}
               </ListItem>

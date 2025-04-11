@@ -332,6 +332,11 @@ export const MealPage = () => {
                           size="small"
                           label="Amount"
                           type="number"
+                          inputProps={{
+                            // Add step for easier number input
+                            step: "0.1",
+                            min: "0", // Prevent negative numbers
+                          }}
                           onChange={(e) =>
                             handleIngredientChange(
                               ingredient.id,
