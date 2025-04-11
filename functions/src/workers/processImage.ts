@@ -3,7 +3,8 @@ import { gemini20Flash, googleAI } from "@genkit-ai/googleai";
 import { FoodExtractSchema } from "../foodExtractSchema.js";
 import { v4 as uuid } from "uuid";
 import { MealData } from "../constants.js";
-import { googleAIApiKey } from "../index.js";
+
+import { googleAIApiKey } from "../googleAIApiKey.js";
 
 // Function to process an image and return the extracted data
 export const processImage = async (meal: MealData) => {

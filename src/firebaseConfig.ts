@@ -29,11 +29,10 @@ const db = getFirestore(app);
 const database = getDatabase(app);
 const functions = getFunctions(app);
 
-// Connect to local emulator if running locally
-
 if (
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1"
+  import.meta.env.VITE_LOCAL_FIREBASE === "true" &&
+  (window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1")
 ) {
   console.warn("Running in local environment, connecting to emulators");
   connectAuthEmulator(auth, "http://localhost:9099");

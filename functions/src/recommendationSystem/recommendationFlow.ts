@@ -4,7 +4,8 @@ import * as z from "zod";
 import admin from "firebase-admin";
 import { Timestamp } from "firebase-admin/firestore";
 import { genkit } from "genkit";
-import { googleAIApiKey } from "../index.js";
+
+import { googleAIApiKey } from "../googleAIApiKey.js";
 
 const db = admin.firestore();
 
