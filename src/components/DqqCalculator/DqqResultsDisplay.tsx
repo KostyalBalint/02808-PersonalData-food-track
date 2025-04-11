@@ -143,9 +143,10 @@ export const DqqScoreBarDisplay: FC<{ results: Partial<DqqResultsState> }> = ({
     return typeof value === "number" && !isNaN(value) ? value : 0;
   };
 
-  const gdrScore = getScore("gdr");
+  //const gdrScore = getScore("gdr");
   const ncdRiskScore = getScore("ncdr");
   const ncdProtectScore = getScore("ncdp");
+  const fgdsScore = getScore("fgds");
 
   // Define max scores for bar width calculation
   const maxRiskScore = 8;
@@ -177,7 +178,7 @@ export const DqqScoreBarDisplay: FC<{ results: Partial<DqqResultsState> }> = ({
           gap={0.5}
         >
           <Typography variant="h5" component="p" sx={{ fontWeight: "medium" }}>
-            GDR Score
+            FGDS Score
           </Typography>
           <InfoTooltip size="small">
             <Typography variant="body2">
@@ -209,7 +210,7 @@ export const DqqScoreBarDisplay: FC<{ results: Partial<DqqResultsState> }> = ({
             </Typography>
           </InfoTooltip>
           <Typography variant="h5" component="p" sx={{ fontWeight: "medium" }}>
-            {gdrScore.toFixed(1)}
+            {fgdsScore.toFixed(1)}
           </Typography>
         </Stack>
         <Grid container spacing={1} justifyContent="center" alignItems="center">

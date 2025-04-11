@@ -15,6 +15,7 @@ import {
 export interface DqqTimeChartDataPoint {
   resultId: number;
   ncdProtectScore?: number;
+  fgdsScore?: number;
   gdrScore?: number;
   ncdRiskScore?: number;
   timestamp: string; // Keep as string for axis label
@@ -26,6 +27,12 @@ interface DqqTimeChartProps {
   // title: string; // Title is now handled outside
   onHover: (dataPoint: DqqTimeChartDataPoint | null) => void;
   chartType: "line" | "bar"; // Accept the chart type prop
+  showFeatures: {
+    fgds?: boolean;
+    ncdp?: boolean;
+    gdr?: boolean;
+    ncdr?: boolean;
+  };
 }
 
 // Custom Tooltip Content (Optional but recommended for consistency)
@@ -59,6 +66,7 @@ const DqqTimeChart: React.FC<DqqTimeChartProps> = ({
   data,
   onHover,
   chartType,
+  ...props
 }) => {
   // Recharts hover handler - needs access to payload to call onHover
   const handleMouseMove = (e: any) => {
@@ -94,7 +102,8 @@ const DqqTimeChart: React.FC<DqqTimeChartProps> = ({
   ];
 
   const ncdpColor = "#8884d8";
-  const gdrColor = "#82ca9d";
+  const gdrColor = "#ffc658";
+  const fgdsColor = "#82ca9d";
   const ncdrColor = "#ff7300";
 
   return (
@@ -108,25 +117,38 @@ const DqqTimeChart: React.FC<DqqTimeChartProps> = ({
           onMouseLeave={handleMouseLeave} // Attach leave handler
         >
           {commonComponents}
-          <Line
-            type="monotone"
-            dataKey="ncdProtectScore"
-            name="NCD Protect"
-            stroke={ncdpColor}
-            activeDot={{ r: 8 }}
-          />
-          <Line
-            type="monotone"
-            dataKey="gdrScore"
-            name="GDR Score"
-            stroke={gdrColor}
-          />
-          <Line
-            type="monotone"
-            dataKey="ncdRiskScore"
-            name="NCD Risk"
-            stroke={ncdrColor}
-          />
+          {props.showFeatures.fgds && (
+            <Line
+              type="monotone"
+              dataKey="fgdsScore"
+              name="FGDS Score"
+              stroke={fgdsColor}
+            />
+          )}
+          {props.showFeatures.ncdp && (
+            <Line
+              type="monotone"
+              dataKey="ncdProtectScore"
+              name="NCD Protect"
+              stroke={ncdpColor}
+            />
+          )}
+          {props.showFeatures.ncdr && (
+            <Line
+              type="monotone"
+              dataKey="ncdRiskScore"
+              name="NCD Risk"
+              stroke={ncdrColor}
+            />
+          )}
+          {props.showFeatures.gdr && (
+            <Line
+              type="monotone"
+              dataKey="gdrScore"
+              name="GDR Score"
+              stroke={gdrColor}
+            />
+          )}
         </LineChart>
       ) : (
         <BarChart
@@ -137,9 +159,22 @@ const DqqTimeChart: React.FC<DqqTimeChartProps> = ({
         >
           {commonComponents}
           {/* Add barSize prop for better spacing if needed */}
-          <Bar dataKey="ncdProtectScore" name="NCD Protect" fill={ncdpColor} />
-          <Bar dataKey="gdrScore" name="GDR Score" fill={gdrColor} />
-          <Bar dataKey="ncdRiskScore" name="NCD Risk" fill={ncdrColor} />
+          {props.showFeatures.fgds && (
+            <Bar dataKey="fgdsScore" name="FGDS Score" fill={fgdsColor} />
+          )}
+          {props.showFeatures.ncdp && (
+            <Bar
+              dataKey="ncdProtectScore"
+              name="NCD Protect"
+              fill={ncdpColor}
+            />
+          )}
+          {props.showFeatures.gdr && (
+            <Bar dataKey="gdrScore" name="GDR Score" fill={gdrColor} />
+          )}
+          {props.showFeatures.ncdr && (
+            <Bar dataKey="ncdRiskScore" name="NCD Risk" fill={ncdrColor} />
+          )}
         </BarChart>
       )}
     </ResponsiveContainer>
