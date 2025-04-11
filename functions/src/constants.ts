@@ -20,6 +20,7 @@ export interface MealData {
   };
   errorMessage?: string;
   withoutImage?: boolean; // Indicates if the meal was created without an image
+  userId: string;
 }
 
 // Match the structure stored by the backend function

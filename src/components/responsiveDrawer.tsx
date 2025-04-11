@@ -203,6 +203,7 @@ export const ResponsiveDrawer = () => {
           {accessiblePages
             .map((page) => (
               <BottomNavigationAction
+                key={page.path}
                 value={page.path}
                 label={page.name}
                 icon={<page.icon />}
