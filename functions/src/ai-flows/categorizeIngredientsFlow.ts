@@ -1,11 +1,10 @@
 import { genkit, z } from "genkit";
 import { gemini20Flash, googleAI } from "@genkit-ai/googleai";
-import { googleAIApiKey } from "../googleAIApiKey.js"; // Ensure this path is correct
 import * as math from "mathjs";
 
 // Initialize Genkit with the Google AI plugin
 // Pass API key during plugin init for cleaner setup, if desired
-const ai = genkit({ plugins: [googleAI({ apiKey: googleAIApiKey.value() })] });
+const ai = genkit({ plugins: [googleAI()] });
 
 // ----- Tool Definition: fetchIngredientDetails -----
 

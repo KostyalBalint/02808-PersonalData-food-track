@@ -8,6 +8,16 @@ export type DqqAnswersMap = {
   [K in DqqQuestionKey]?: boolean; // All keys are optional initially, store as boolean
 };
 
+export interface NutritionalData {
+  Grains: number;
+  Vegetables: number;
+  Fruits: number;
+  Protein: number;
+  Dairy: number;
+  Fats: number;
+  Sweets: number;
+}
+
 export interface MealData {
   id: string;
   name: string;
@@ -21,6 +31,7 @@ export interface MealData {
   errorMessage?: string;
   withoutImage?: boolean; // Indicates if the meal was created without an image
   userId: string;
+  nutrition?: NutritionalData; // Assuming this is part of the meal data
 }
 
 // Match the structure stored by the backend function

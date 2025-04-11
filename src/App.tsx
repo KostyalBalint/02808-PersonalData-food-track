@@ -7,7 +7,7 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 import theme from "./theme/theme.ts";
 import { pages } from "./pages/pages.ts";
 import { Page404 } from "./pages/404Page.tsx";
-import { MealPage } from "./pages/MealPage.tsx";
+import { MealPage } from "./pages/MealPage/MealPage.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { PWAInstallProvider } from "./context/PWAInstallContext.tsx";
 import { InstallPWAPrompt } from "./components/InstallPWAPrompt.tsx";

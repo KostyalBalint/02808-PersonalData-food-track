@@ -8,7 +8,6 @@ import {
   Chip,
   Container,
   FormControl,
-  Grid,
   IconButton,
   InputLabel,
   ListItem,
@@ -20,8 +19,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+
+import Masonry from "@mui/lab/Masonry";
 import { useNavigate, useParams } from "react-router-dom";
-import { MealData, units } from "../../functions/src/constants.ts";
+import { MealData, units } from "../../../functions/src/constants.ts";
 import { FaPlus, FaTrashCan } from "react-icons/fa6";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -35,18 +36,19 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { db } from "../firebaseConfig.ts";
-import { ConfirmationModal } from "../components/ConfirmationModal.tsx";
+import { db } from "../../firebaseConfig.ts";
+import { ConfirmationModal } from "../../components/ConfirmationModal.tsx";
 import { deleteObject, getStorage, ref } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
-import { DqqQuestionerForm } from "../components/DqqCalculator/DqqQuestionerForm.tsx";
+import { DqqQuestionerForm } from "../../components/DqqCalculator/DqqQuestionerForm.tsx";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useSnackbar } from "notistack";
 import dayjs, { Dayjs } from "dayjs";
-import { MealNameChangingModal } from "../components/MealNameChangingModal.tsx";
-import { DatePickerModal } from "../components/DatePickerModal.tsx";
+import { MealNameChangingModal } from "../../components/MealNameChangingModal.tsx";
+import { DatePickerModal } from "../../components/DatePickerModal.tsx";
 import { format } from "date-fns";
-import FeatureFlagGuard from "../components/FeatureFlags/FeatureFlagGuard.tsx";
+import FeatureFlagGuard from "../../components/FeatureFlags/FeatureFlagGuard.tsx";
+import { MealNutritionVisualizer } from "./MealNutritionVisualizer.tsx";
 
 export const MealPage = () => {
   const { id } = useParams();
@@ -242,178 +244,188 @@ export const MealPage = () => {
 
   return (
     <Container sx={{ mt: 2 }}>
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12 }}>
-          {meal?.errorMessage && (
-            <Alert severity="error">{meal?.errorMessage}</Alert>
-          )}
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Container maxWidth={"sm"} disableGutters>
-            <Card sx={{ m: 0 }}>
-              {meal && (
-                <CardHeader
-                  title={meal?.name}
-                  sx={{ textAlign: "center" }}
-                  action={
-                    <>
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevents navigation
-                          setAnchorEl(e.currentTarget);
-                        }}
-                      >
-                        <MoreVertIcon />
-                      </IconButton>
-                      <Menu
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl)}
-                        onClose={() => setAnchorEl(null)}
-                        onClick={(e) => e.stopPropagation()} // Prevent menu clicks from triggering navigation
-                      >
-                        <MenuItem onClick={() => setEditModalOpen(true)}>
-                          Change meal name
-                        </MenuItem>
-                        <MenuItem onClick={handleDateModalOpen}>
-                          Change time
-                        </MenuItem>
-                        <MenuItem onClick={handleDeleteClick}>Delete</MenuItem>
-                      </Menu>
-                    </>
-                  }
-                />
-              )}
-              <Box sx={{ position: "relative" }}>
-                <CardMedia
-                  component="img"
-                  image={meal?.imageUrl}
-                  alt="Uploaded images"
-                  sx={{ aspectRatio: "3/4" }}
-                />
+      <Stack gap={2}>
+        {meal?.errorMessage && (
+          <Alert severity="error">{meal?.errorMessage}</Alert>
+        )}
+        <Masonry
+          columns={{
+            xs: 1,
+            md: 2,
+          }}
+          spacing={2}
+        >
+          <Box>
+            <Container maxWidth={"sm"} disableGutters>
+              <Card sx={{ m: 0 }}>
                 {meal && (
-                  <Chip
-                    label={format(meal.createdAt.toDate(), "HH:mm")}
-                    size="small"
-                    color="primary"
-                    sx={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      zIndex: 1,
-                      m: 1,
-                    }}
+                  <CardHeader
+                    title={meal?.name}
+                    sx={{ textAlign: "center" }}
+                    action={
+                      <>
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevents navigation
+                            setAnchorEl(e.currentTarget);
+                          }}
+                        >
+                          <MoreVertIcon />
+                        </IconButton>
+                        <Menu
+                          anchorEl={anchorEl}
+                          open={Boolean(anchorEl)}
+                          onClose={() => setAnchorEl(null)}
+                          onClick={(e) => e.stopPropagation()} // Prevent menu clicks from triggering navigation
+                        >
+                          <MenuItem onClick={() => setEditModalOpen(true)}>
+                            Change meal name
+                          </MenuItem>
+                          <MenuItem onClick={handleDateModalOpen}>
+                            Change time
+                          </MenuItem>
+                          <MenuItem onClick={handleDeleteClick}>
+                            Delete
+                          </MenuItem>
+                        </Menu>
+                      </>
+                    }
                   />
                 )}
-              </Box>
-            </Card>
-          </Container>
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h4" mb={2}>
-              Ingredients:
-            </Typography>
-            <Stack gap={2}>
-              {meal?.ingredients?.map((ingredient) => (
-                <div key={ingredient.id}>
-                  <ListItem disableGutters disablePadding>
-                    <Stack direction="row" spacing={1} sx={{ width: "100%" }}>
-                      <TextField
-                        value={ingredient.amount}
-                        size="small"
-                        label="Amount"
-                        type="number"
-                        onChange={(e) =>
-                          handleIngredientChange(
-                            ingredient.id,
-                            "amount",
-                            Number(e.target.value),
-                          )
-                        }
-                        sx={{ width: "80px" }} // Narrower amount field
-                      />
-                      <FormControl sx={{ width: "100px" }}>
-                        {" "}
-                        {/* Narrower unit field */}
-                        <InputLabel id={`unit-selector-label-${ingredient.id}`}>
-                          Unit
-                        </InputLabel>
-                        <Select
-                          labelId={`unit-selector-label-${ingredient.id}`}
-                          id={`unit-selector-${ingredient.id}`}
-                          value={ingredient.unit}
+                <Box sx={{ position: "relative" }}>
+                  <CardMedia
+                    component="img"
+                    image={meal?.imageUrl}
+                    alt="Uploaded images"
+                    sx={{ aspectRatio: "3/4" }}
+                  />
+                  {meal && (
+                    <Chip
+                      label={format(meal.createdAt.toDate(), "HH:mm")}
+                      size="small"
+                      color="primary"
+                      sx={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        zIndex: 1,
+                        m: 1,
+                      }}
+                    />
+                  )}
+                </Box>
+              </Card>
+            </Container>
+          </Box>
+          <Box>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="h4" mb={2}>
+                Ingredients:
+              </Typography>
+              <Stack gap={2}>
+                {meal?.ingredients?.map((ingredient) => (
+                  <div key={ingredient.id}>
+                    <ListItem disableGutters disablePadding>
+                      <Stack direction="row" spacing={1} sx={{ width: "100%" }}>
+                        <TextField
+                          value={ingredient.amount}
+                          size="small"
+                          label="Amount"
+                          type="number"
                           onChange={(e) =>
                             handleIngredientChange(
                               ingredient.id,
-                              "unit",
+                              "amount",
+                              Number(e.target.value),
+                            )
+                          }
+                          sx={{ width: "80px" }} // Narrower amount field
+                        />
+                        <FormControl sx={{ width: "100px" }}>
+                          {" "}
+                          {/* Narrower unit field */}
+                          <InputLabel
+                            id={`unit-selector-label-${ingredient.id}`}
+                          >
+                            Unit
+                          </InputLabel>
+                          <Select
+                            labelId={`unit-selector-label-${ingredient.id}`}
+                            id={`unit-selector-${ingredient.id}`}
+                            value={ingredient.unit}
+                            onChange={(e) =>
+                              handleIngredientChange(
+                                ingredient.id,
+                                "unit",
+                                e.target.value,
+                              )
+                            }
+                            size="small"
+                            label="Unit"
+                          >
+                            {units.map((unit) => (
+                              <MenuItem key={unit} value={unit}>
+                                {unit}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                        <TextField
+                          value={ingredient.name}
+                          size="small"
+                          label="Name"
+                          sx={{ flexGrow: 1 }} // Takes up all remaining space
+                          onChange={(e) =>
+                            handleIngredientChange(
+                              ingredient.id,
+                              "name",
                               e.target.value,
                             )
                           }
+                        />
+                        <IconButton
+                          color="error"
                           size="small"
-                          label="Unit"
+                          onClick={() => handleDeleteIngredient(ingredient.id)}
                         >
-                          {units.map((unit) => (
-                            <MenuItem key={unit} value={unit}>
-                              {unit}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                      <TextField
-                        value={ingredient.name}
-                        size="small"
-                        label="Name"
-                        sx={{ flexGrow: 1 }} // Takes up all remaining space
-                        onChange={(e) =>
-                          handleIngredientChange(
-                            ingredient.id,
-                            "name",
-                            e.target.value,
-                          )
-                        }
-                      />
-                      <IconButton
-                        color="error"
-                        size="small"
-                        onClick={() => handleDeleteIngredient(ingredient.id)}
-                      >
-                        <FaTrashCan />
-                      </IconButton>
-                    </Stack>
-                  </ListItem>
-                </div>
-              ))}
-              <ListItem disableGutters disablePadding>
-                <Button
-                  startIcon={<FaPlus />}
-                  variant="contained"
-                  onClick={handleAddIngredient}
-                >
-                  Add new ingredient
-                </Button>
-              </ListItem>
-            </Stack>
-          </Paper>
-        </Grid>
-        <Grid size={{ xs: 12 }}>
-          <FeatureFlagGuard flagKey="dqq-questions-meal-page">
-            {meal && <DqqQuestionerForm mealId={meal.id} />}
+                          <FaTrashCan />
+                        </IconButton>
+                      </Stack>
+                    </ListItem>
+                  </div>
+                ))}
+                <ListItem disableGutters disablePadding>
+                  <Button
+                    startIcon={<FaPlus />}
+                    variant="contained"
+                    onClick={handleAddIngredient}
+                  >
+                    Add new ingredient
+                  </Button>
+                </ListItem>
+              </Stack>
+            </Paper>
+          </Box>
+          <FeatureFlagGuard flagKey="food-nutrition-values">
+            <Box>{meal && <MealNutritionVisualizer meal={meal} />}</Box>
           </FeatureFlagGuard>
-        </Grid>
+        </Masonry>
 
-        <Grid size={{ xs: 12 }}>
-          <Paper sx={{ p: 2 }}>
-            <Stack direction="row" gap={2}>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={handleDeleteClick}
-              >
-                Delete
-              </Button>
-            </Stack>
-          </Paper>
-        </Grid>
+        <FeatureFlagGuard flagKey="dqq-questions-meal-page">
+          {meal && <DqqQuestionerForm mealId={meal.id} />}
+        </FeatureFlagGuard>
+
+        <Paper sx={{ p: 2 }}>
+          <Stack direction="row" gap={2}>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleDeleteClick}
+            >
+              Delete
+            </Button>
+          </Stack>
+        </Paper>
         <ConfirmationModal
           open={isModalOpen}
           onClose={handleModalClose}
@@ -440,7 +452,7 @@ export const MealPage = () => {
             //Save the new name to the database
           }}
         />
-      </Grid>
+      </Stack>
     </Container>
   );
 };
