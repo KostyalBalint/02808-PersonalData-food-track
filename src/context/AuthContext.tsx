@@ -18,12 +18,27 @@ import {
 } from "../components/DqqCalculator/dqqQuestions.ts";
 import { useNavigate } from "react-router-dom";
 
+export interface AimedFoodGroup {
+  min?: number;
+  max?: number;
+}
+
+export interface UserNutritionSettings {
+  protein?: AimedFoodGroup;
+  carbohydrates?: AimedFoodGroup;
+  fruits?: AimedFoodGroup;
+  vegetables?: AimedFoodGroup;
+  fats?: AimedFoodGroup;
+  sweets?: AimedFoodGroup;
+}
+
 export interface UserProfile {
   uid: string;
   email: string | null;
   displayName: string | null;
   role: Role;
   demographics?: DqqDemographics;
+  nutritionSettings?: UserNutritionSettings;
   // Add other profile fields as needed
 }
 

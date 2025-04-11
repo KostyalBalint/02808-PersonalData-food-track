@@ -24,6 +24,7 @@ import TriggerRecommendationButton from "./Admin/TriggerRecommendationButton.tsx
 import FeatureFlagManager from "../../components/FeatureFlags/FeatureFlagManager.tsx";
 import { useSnackbar } from "notistack";
 import ReindexDashboard from "./Admin/ReindexDashboard.tsx";
+import { FoodPyramidSettingsForm } from "../../components/FoodPyramidSettingsForm.tsx";
 
 const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
   color: theme.palette.getContrastText(grey[200]),
@@ -35,7 +36,6 @@ const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
 
 export const Settings = () => {
   const navigate = useNavigate();
-
   const { enqueueSnackbar } = useSnackbar();
 
   const handleLogout = async () => {
@@ -81,6 +81,10 @@ export const Settings = () => {
               <Typography variant="h4" textAlign="center">
                 Admin Settings
               </Typography>
+              <Divider />
+              <ProtectedComponent allowedRoles={["ADMIN"]}>
+                <FoodPyramidSettingsForm />
+              </ProtectedComponent>
               <Divider />
               <UserManagement />
               <Divider />
