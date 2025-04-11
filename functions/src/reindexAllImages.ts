@@ -3,13 +3,15 @@ import admin from "firebase-admin";
 import { PubSub } from "@google-cloud/pubsub"; // Import the Google Cloud PubSub library
 import { processImage } from "./workers/processImage.js"; // Assuming your worker logic is here
 import { MealData } from "./constants.js";
-import { createImageForMeal } from "./workers/createImageForMeal.js"; // Assuming your type definition is here
+import { createImageForMeal } from "./workers/createImageForMeal.js";
+import { handleCategorizeIngredients } from "./categorizeIngredients.js"; // Assuming your type definition is here
 
 // Initialize Firebase
 // Ensure you only initialize ONCE per process, typically at the top level
 if (!admin.apps.length) {
   admin.initializeApp();
 }
+
 const db = admin.firestore();
 const rtdb = admin.database(); // Realtime Database for progress tracking
 
@@ -378,6 +380,7 @@ export const processImageWorker = pubsub.onMessagePublished(
 
         if (imageUrl) {
           await db.collection("meals").doc(mealId).update({ imageUrl });
+          await handleCategorizeIngredients(mealId);
         }
 
         await rtdb
@@ -394,6 +397,7 @@ export const processImageWorker = pubsub.onMessagePublished(
       // Update the meal document with the processed data
       // Use update instead of set({ merge: true }) for potentially better performance if only updating specific fields
       await db.collection("meals").doc(mealId).update(processedData);
+      await handleCategorizeIngredients(mealId);
 
       // Update the progress counter - use a transaction for safety
       await rtdb
