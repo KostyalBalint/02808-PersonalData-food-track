@@ -2,7 +2,8 @@ import { https, logger, pubsub } from "firebase-functions/v2";
 import admin from "firebase-admin";
 import { PubSub } from "@google-cloud/pubsub"; // Import the Google Cloud PubSub library
 import { processImage } from "./workers/processImage.js"; // Assuming your worker logic is here
-import { MealData } from "./constants.js"; // Assuming your type definition is here
+import { MealData } from "./constants.js";
+import { createImageForMeal } from "./workers/createImageForMeal.js"; // Assuming your type definition is here
 
 // Initialize Firebase
 // Ensure you only initialize ONCE per process, typically at the top level
@@ -366,12 +367,19 @@ export const processImageWorker = pubsub.onMessagePublished(
       }
 
       const meal = mealDoc.data() as MealData;
+      logger.debug(meal);
 
       if (meal.withoutImage) {
         logger.info(
-          `Skipping processing for meal ${mealId} as it was created without an image.`,
+          `Meal ${mealId} was created without an image. Generating image...`,
         );
-        // Update the progress counter - use a transaction for safety
+
+        const { imageUrl } = await createImageForMeal({ ...meal, id: mealId });
+
+        if (imageUrl) {
+          await db.collection("meals").doc(mealId).update({ imageUrl });
+        }
+
         await rtdb
           .ref(`progress/${progressId}/processed`)
           .transaction((current: number | null) => {
