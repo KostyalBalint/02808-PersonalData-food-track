@@ -64,6 +64,8 @@ export const FoodPyramidSettingsForm = () => {
     fruits: {},
     vegetables: {},
     fats: {},
+    dairy: {},
+    sweets: {},
   });
 
   useEffect(() => {
@@ -122,6 +124,8 @@ export const FoodPyramidSettingsForm = () => {
             fruits: { min: 0, max: 0 },
             vegetables: { min: 0, max: 0 },
             fats: { min: 0, max: 0 },
+            dairy: { min: 0, max: 0 },
+            sweets: { min: 0, max: 0 },
           });
         }
       };
@@ -134,6 +138,8 @@ export const FoodPyramidSettingsForm = () => {
         fruits: {},
         vegetables: {},
         fats: {},
+        dairy: {},
+        sweets: {},
       });
     }
   }, [selectedUserId]);
@@ -172,7 +178,7 @@ export const FoodPyramidSettingsForm = () => {
                 label="Min"
                 type="number"
                 size="small"
-                value={aimedAmounts.protein?.min || ""}
+                value={aimedAmounts.protein?.min ?? ""}
                 onChange={(e) =>
                   handleAimAmountChange(
                     Number(e.target.value),
@@ -185,7 +191,7 @@ export const FoodPyramidSettingsForm = () => {
                 label="Max"
                 type="number"
                 size="small"
-                value={aimedAmounts.protein?.max || ""}
+                value={aimedAmounts.protein?.max ?? ""}
                 onChange={(e) =>
                   handleAimAmountChange(
                     Number(e.target.value),
@@ -204,7 +210,7 @@ export const FoodPyramidSettingsForm = () => {
                 label="Min"
                 type="number"
                 size="small"
-                value={aimedAmounts.carbohydrates?.min || ""}
+                value={aimedAmounts.carbohydrates?.min ?? ""}
                 onChange={(e) =>
                   handleAimAmountChange(
                     Number(e.target.value),
@@ -217,7 +223,7 @@ export const FoodPyramidSettingsForm = () => {
                 label="Max"
                 type="number"
                 size="small"
-                value={aimedAmounts.carbohydrates?.max || ""}
+                value={aimedAmounts.carbohydrates?.max ?? ""}
                 onChange={(e) =>
                   handleAimAmountChange(
                     Number(e.target.value),
@@ -236,7 +242,7 @@ export const FoodPyramidSettingsForm = () => {
                 label="Min"
                 type="number"
                 size="small"
-                value={aimedAmounts.fruits?.min || ""}
+                value={aimedAmounts.fruits?.min ?? ""}
                 onChange={(e) =>
                   handleAimAmountChange(Number(e.target.value), "fruits", "min")
                 }
@@ -245,7 +251,7 @@ export const FoodPyramidSettingsForm = () => {
                 label="Max"
                 type="number"
                 size="small"
-                value={aimedAmounts.fruits?.max || ""}
+                value={aimedAmounts.fruits?.max ?? ""}
                 onChange={(e) =>
                   handleAimAmountChange(Number(e.target.value), "fruits", "max")
                 }
@@ -254,13 +260,37 @@ export const FoodPyramidSettingsForm = () => {
           </Box>
 
           <Box>
-            <Typography variant="subtitle1">Vegetables (servings)</Typography>
+            <Typography variant="subtitle1">Dairy </Typography>
             <Stack direction="row" spacing={2} alignItems="center">
               <TextField
                 label="Min"
                 type="number"
                 size="small"
-                value={aimedAmounts.vegetables?.min || ""}
+                value={aimedAmounts.dairy?.min ?? ""}
+                onChange={(e) =>
+                  handleAimAmountChange(Number(e.target.value), "dairy", "min")
+                }
+              />
+              <TextField
+                label="Max"
+                type="number"
+                size="small"
+                value={aimedAmounts.dairy?.max ?? ""}
+                onChange={(e) =>
+                  handleAimAmountChange(Number(e.target.value), "dairy", "max")
+                }
+              />
+            </Stack>
+          </Box>
+
+          <Box>
+            <Typography variant="subtitle1">Vegetables (g)</Typography>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <TextField
+                label="Min"
+                type="number"
+                size="small"
+                value={aimedAmounts.vegetables?.min ?? ""}
                 onChange={(e) =>
                   handleAimAmountChange(
                     Number(e.target.value),
@@ -273,7 +303,7 @@ export const FoodPyramidSettingsForm = () => {
                 label="Max"
                 type="number"
                 size="small"
-                value={aimedAmounts.vegetables?.max || ""}
+                value={aimedAmounts.vegetables?.max ?? ""}
                 onChange={(e) =>
                   handleAimAmountChange(
                     Number(e.target.value),
@@ -292,7 +322,7 @@ export const FoodPyramidSettingsForm = () => {
                 label="Min"
                 type="number"
                 size="small"
-                value={aimedAmounts.fats?.min || ""}
+                value={aimedAmounts.fats?.min ?? ""}
                 onChange={(e) =>
                   handleAimAmountChange(Number(e.target.value), "fats", "min")
                 }
@@ -301,9 +331,37 @@ export const FoodPyramidSettingsForm = () => {
                 label="Max"
                 type="number"
                 size="small"
-                value={aimedAmounts.fats?.max || ""}
+                value={aimedAmounts.fats?.max ?? ""}
                 onChange={(e) =>
                   handleAimAmountChange(Number(e.target.value), "fats", "max")
+                }
+              />
+            </Stack>
+          </Box>
+
+          <Box>
+            <Typography variant="subtitle1">Sweets (g)</Typography>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <TextField
+                label="Min"
+                type="number"
+                size="small"
+                inputProps={{
+                  // Add step for easier number input
+                  min: "-1", // Prevent negative numbers
+                }}
+                value={aimedAmounts.sweets?.min ?? ""}
+                onChange={(e) =>
+                  handleAimAmountChange(Number(e.target.value), "sweets", "min")
+                }
+              />
+              <TextField
+                label="Max"
+                type="number"
+                size="small"
+                value={aimedAmounts.sweets?.max ?? ""}
+                onChange={(e) =>
+                  handleAimAmountChange(Number(e.target.value), "sweets", "max")
                 }
               />
             </Stack>
