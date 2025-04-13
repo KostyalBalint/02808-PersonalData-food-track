@@ -55,7 +55,6 @@ export const pages: Page[] = [
     component: AnalyzePage,
     icon: IoAnalyticsOutline,
     roles: ["ADMIN", "SUBJECT"],
-    featureFlag: "meal-analysis", // Example feature flag
   },
   {
     name: "Settings",
