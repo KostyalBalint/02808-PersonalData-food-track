@@ -167,7 +167,10 @@ export const MealNutritionVisualizer: React.FC<
               Nutritional Info for Meal{" "}
               {meal.name ? `"${meal.name}"` : `(ID: ${meal.id})`}
             </Typography>
-            <Tooltip title="Calculate nutrition values based on ingredients, this may take up to 30 seconds.">
+            <Tooltip
+              enterTouchDelay={0}
+              title="Calculate nutrition values based on ingredients, this may take up to 30 seconds."
+            >
               <Button
                 variant="outlined"
                 onClick={handleCategorize}
