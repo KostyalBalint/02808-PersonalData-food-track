@@ -1,8 +1,8 @@
 import { FC } from "react";
-import { CategoryAmounts } from "./FoodPyramidWrapper.tsx";
+import { NutritionalData } from "../../../functions/src/constants.ts";
 
 type PyramidData = {
-  key: keyof CategoryAmounts;
+  key: keyof NutritionalData;
   name: string;
   percentage: number;
   color: string;

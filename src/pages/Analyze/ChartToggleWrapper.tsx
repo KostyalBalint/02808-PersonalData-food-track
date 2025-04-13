@@ -1,5 +1,11 @@
-import React, { useState, isValidElement, cloneElement } from "react";
+import React, {
+  useState,
+  isValidElement,
+  cloneElement,
+  ReactNode,
+} from "react";
 import { Box, Switch, FormControlLabel, Typography } from "@mui/material";
+import { InfoTooltip } from "../../components/InfoTooltip.tsx";
 
 // Define the possible chart types
 type ChartType = "line" | "bar";
@@ -10,6 +16,8 @@ interface ChartToggleWrapperProps {
   lineLabel?: string;
   barLabel?: string;
   title?: string; // Optional title for the chart section
+  subtitle?: string;
+  infoToolTip?: ReactNode;
 }
 
 export const ChartToggleWrapper: React.FC<ChartToggleWrapperProps> = ({
@@ -18,6 +26,8 @@ export const ChartToggleWrapper: React.FC<ChartToggleWrapperProps> = ({
   lineLabel = "Line Chart",
   barLabel = "Bar Chart",
   title,
+  subtitle,
+  infoToolTip,
 }) => {
   const [chartType, setChartType] = useState<ChartType>(initialChartType);
 
@@ -48,11 +58,19 @@ export const ChartToggleWrapper: React.FC<ChartToggleWrapperProps> = ({
           mb: 2,
         }}
       >
-        {title && (
-          <Typography variant="subtitle1" sx={{ ml: 5 }}>
-            {title}
-          </Typography>
-        )}
+        <Box sx={{ mr: 1 }}>
+          {title && (
+            <Typography variant="subtitle1" sx={{ ml: 5 }}>
+              {title}
+            </Typography>
+          )}
+          {title && (
+            <Typography variant="body2" sx={{ ml: 5, color: "text.secondary" }}>
+              {subtitle}
+            </Typography>
+          )}
+        </Box>
+        {infoToolTip && <InfoTooltip size="small">{infoToolTip}</InfoTooltip>}
         {/* Place switch on the right if title exists, otherwise center/default */}
         <Box sx={{ ml: title ? "auto" : 0 }}>
           <FormControlLabel

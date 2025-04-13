@@ -1,20 +1,25 @@
-import { Card, CardHeader } from "@mui/material";
+import { Box } from "@mui/material";
 import { FoodPyramid } from "./FoodPyramid.tsx";
 import { FC, useEffect, useRef, useState } from "react";
 import useSize from "@react-hook/size";
-
-export interface CategoryAmounts {
-  Grains: number;
-  Vegetables: number;
-  Fruits: number;
-  Protein: number;
-  Dairy: number;
-  FatsAndSweets: number;
-}
+import { NutritionalData } from "../../../functions/src/constants.ts";
+import { UserNutritionSettings } from "../../context/AuthContext.tsx";
 
 type FoodPyramidWrapperProps = {
-  consumedByCategory: CategoryAmounts;
-  aimedAmountsByCategory: CategoryAmounts;
+  consumedByCategory: NutritionalData;
+  aimedAmountsByCategory: UserNutritionSettings;
+};
+
+const mapCategory: {
+  [key in keyof NutritionalData]: keyof UserNutritionSettings;
+} = {
+  Grains: "carbohydrates",
+  Sweets: "sweets",
+  Fats: "fats",
+  Protein: "protein",
+  Fruits: "fruits",
+  Dairy: "dairy",
+  Vegetables: "vegetables",
 };
 
 export const FoodPyramidWrapper: FC<FoodPyramidWrapperProps> = ({
@@ -28,28 +33,13 @@ export const FoodPyramidWrapper: FC<FoodPyramidWrapperProps> = ({
 
   useEffect(() => {
     Object.keys(consumedByCategory).map((categoryKey) => {
-      const amount = consumedByCategory[categoryKey as keyof CategoryAmounts];
+      const consumedAmount =
+        consumedByCategory[categoryKey as keyof NutritionalData];
 
-      let updatedPercentage = 0;
-      switch (categoryKey as keyof CategoryAmounts) {
-        case "Grains":
-          updatedPercentage = calculatePercentageForGrains(amount);
-          break;
-        case "Vegetables":
-          updatedPercentage = calculatePercentageForVegetables(amount);
-          break;
-        case "Fruits":
-          updatedPercentage = calculatePercentageForFruit(amount, 101);
-          break;
-        case "Protein":
-          updatedPercentage = calculatePercentageForProtein(amount);
-          break;
-        case "FatsAndSweets":
-          updatedPercentage = calculatePercentageForFatsAndSweets(amount);
-          break;
-        default:
-          updatedPercentage = 100;
-      }
+      let updatedPercentage = calculatePercentage(
+        mapCategory[categoryKey as keyof NutritionalData],
+        consumedAmount,
+      );
 
       setPyramidData((prevData) =>
         prevData.map((item) =>
@@ -62,72 +52,42 @@ export const FoodPyramidWrapper: FC<FoodPyramidWrapperProps> = ({
   }, [consumedByCategory]);
 
   const calculatePercentage = (
-    category: keyof CategoryAmounts,
+    category: keyof UserNutritionSettings,
     consumedAmount: number,
-    offsetMultiplierAbove: number,
-    offsetMultiplierBelow: number,
+    offsetMultiplierAbove: number = 1,
+    offsetMultiplierBelow: number = 1,
   ): number => {
-    const aimedAmount = aimedAmountsByCategory[category];
+    const aimedAmountLow = aimedAmountsByCategory[category]?.min ?? 0;
+    const aimedAmountHigh = aimedAmountsByCategory[category]?.max ?? 0;
+
     if (
-      consumedAmount > aimedAmount * offsetMultiplierBelow &&
-      consumedAmount <= aimedAmount * offsetMultiplierAbove
+      consumedAmount > aimedAmountLow * offsetMultiplierBelow &&
+      consumedAmount <= aimedAmountHigh * offsetMultiplierAbove
     ) {
+      //In the aimed range -> 100%
       return 100;
-    } else if (consumedAmount > aimedAmount * offsetMultiplierAbove) {
+    } else if (consumedAmount > aimedAmountHigh * offsetMultiplierAbove) {
+      //Above the aimed range -> 100% + (what is above)
       return (
         100 +
-        ((consumedAmount - aimedAmount * offsetMultiplierAbove) /
-          (aimedAmount * offsetMultiplierAbove)) *
+        ((consumedAmount - aimedAmountHigh * offsetMultiplierAbove) /
+          (aimedAmountHigh * offsetMultiplierAbove)) *
           100
       );
     } else {
+      //Bellow aimed range -> 100% - (what we are bellow)
       return (
         100 -
-        ((aimedAmount * offsetMultiplierBelow - consumedAmount) /
-          (aimedAmount * offsetMultiplierBelow)) *
+        ((aimedAmountLow * offsetMultiplierBelow - consumedAmount) /
+          (aimedAmountLow * offsetMultiplierBelow)) *
           100
       );
     }
-  };
-
-  const calculatePercentageForGrains = (grainInGrams: number): number => {
-    return calculatePercentage("Grains", grainInGrams, 1.3, 0.5);
-  };
-
-  const calculatePercentageForFatsAndSweets = (fatsInGrams: number): number => {
-    if (fatsInGrams < aimedAmountsByCategory.FatsAndSweets) {
-      return 100;
-    } else {
-      return 100 + (fatsInGrams - aimedAmountsByCategory.FatsAndSweets) * 3;
-    }
-  };
-
-  const calculatePercentageForVegetables = (
-    vegetableInGrams: number,
-  ): number => {
-    return calculatePercentage("Vegetables", vegetableInGrams, 2, 0.8);
-  };
-
-  const calculatePercentageForProtein = (proteinInGrams: number): number => {
-    return calculatePercentage("Protein", proteinInGrams, 2.5, 0.5);
-  };
-
-  const calculatePercentageForFruit = (
-    amount: number,
-    fruitInGrams: number,
-  ): number => {
-    let fruitAmount = consumedByCategory.Fruits;
-    if (fruitInGrams > 100) {
-      fruitAmount += 1;
-    } else {
-      fruitAmount = amount / 120;
-    }
-    return calculatePercentage("Fruits", fruitAmount, 2, 0.5);
   };
 
   const [pyramidData, setPyramidData] = useState<
     {
-      key: keyof CategoryAmounts;
+      key: keyof NutritionalData;
       name: string;
       percentage: number;
       color: string;
@@ -136,7 +96,7 @@ export const FoodPyramidWrapper: FC<FoodPyramidWrapperProps> = ({
   >([
     {
       key: "Grains",
-      name: "Grains",
+      name: "Carbohydrates",
       percentage: 120,
       color: "#DAA520",
       subtitle: "6-11 servings",
@@ -170,18 +130,24 @@ export const FoodPyramidWrapper: FC<FoodPyramidWrapperProps> = ({
       subtitle: "2-3 servings",
     },
     {
-      key: "FatsAndSweets",
-      name: "Fats, Sweets",
+      key: "Fats",
+      name: "Fats",
       percentage: 30,
       color: "#FFD700",
       subtitle: "Use sparingly",
     },
+    {
+      key: "Sweets",
+      name: "Sweets",
+      percentage: 30,
+      color: "#b15cc0",
+      subtitle: "Mitigate",
+    },
   ]);
 
   return (
-    <Card ref={target}>
-      <CardHeader title="Your food pyramid" />
+    <Box ref={target}>
       <FoodPyramid pyramidData={pyramidData} pyramidWidth={pyramidWidth} />
-    </Card>
+    </Box>
   );
 };

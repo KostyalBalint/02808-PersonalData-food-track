@@ -26,7 +26,7 @@ import { MealCard } from "./MealCard.tsx";
 import { MealData } from "../../../functions/src/constants.ts";
 import { useSnackbar } from "notistack";
 import { format } from "date-fns";
-import { DqqScoreBarDisplay } from "../../components/DqqCalculator/DqqResultsDisplay.tsx";
+import { FGDSScoreDisplay } from "../../components/DqqCalculator/DqqResultsDisplay.tsx";
 import { mergeMultipleDQQ } from "../../components/DqqCalculator/mergeMultipleDQQ.ts";
 import { DqqAnswersMap } from "../../components/DqqCalculator/dqqQuestions.ts";
 import {
@@ -65,7 +65,7 @@ export const MealListPage = () => {
 
   const { enqueueSnackbar } = useSnackbar();
   const { userProfile, demographicsComplete } = useAuth(); // Get userProfile
-  const MEALS_PER_PAGE = 6;
+  const MEALS_PER_PAGE = 20;
 
   // Effect to group meals and calculate DQQ (runs whenever 'meals' changes)
   useEffect(() => {
@@ -284,7 +284,7 @@ export const MealListPage = () => {
     };
 
     observer.current = new IntersectionObserver(handleObserver, {
-      rootMargin: "100px", // Load a bit before element is visible
+      rootMargin: "800px", // Load a bit before element is visible
     });
 
     // Ensure loadingRef.current exists before observing
@@ -351,31 +351,30 @@ export const MealListPage = () => {
                       {formatDateDisplay(mealGroup.timestamp)}
                     </Typography>
                   </Grid>
-                  {/* Ensure DqqScoreBarDisplay takes up appropriate space */}
-                  <ProtectedComponent allowedRoles={["SUBJECT", "ADMIN"]}>
-                    <FeatureFlagGuard flagKey="meal-list-dqq">
-                      {/* Check if results object is not empty before rendering */}
-                      {!demographicsComplete && (
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          textAlign="center"
-                          sx={{ flexGrow: 1 }}
-                        >
-                          Complete your demographics in the Settings page
-                        </Typography>
-                      )}
-                      {mealGroup.results &&
-                        Object.keys(mealGroup.results).length > 0 && (
-                          <Grid size={{ xs: 12, md: 8 }}>
-                            {/* Use item prop and adjust size */}
-                            <Box>
-                              <DqqScoreBarDisplay results={mealGroup.results} />
-                            </Box>
-                          </Grid>
+                  <Grid size={{ xs: 12, md: 8 }}>
+                    {/* Ensure DqqScoreBarDisplay takes up appropriate space */}
+                    <ProtectedComponent allowedRoles={["SUBJECT", "ADMIN"]}>
+                      <FeatureFlagGuard flagKey="meal-list-dqq">
+                        {/* Check if results object is not empty before rendering */}
+                        {!demographicsComplete && (
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            textAlign="center"
+                            sx={{ flexGrow: 1 }}
+                          >
+                            Complete your demographics in the Settings page
+                          </Typography>
                         )}
-                    </FeatureFlagGuard>
-                  </ProtectedComponent>
+                        {mealGroup.results &&
+                          Object.keys(mealGroup.results).length > 0 && (
+                            <Box>
+                              <FGDSScoreDisplay results={mealGroup.results} />
+                            </Box>
+                          )}
+                      </FeatureFlagGuard>
+                    </ProtectedComponent>
+                  </Grid>
                 </Grid>
               </Paper>
             </Grid>

@@ -5,6 +5,7 @@ import {
   CardContent,
   Divider,
   Grid,
+  Slider,
   Stack,
   Typography,
   useTheme,
@@ -13,6 +14,10 @@ import { IndicatorRow } from "./IndicatorRow";
 import { DqqResultsState } from "./calculateDqqIndicators.ts";
 import { InfoTooltip } from "../InfoTooltip.tsx";
 import { FC } from "react"; // Adjust path
+// Import appropriate icons
+import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
+import SentimentSatisfiedIcon from "@mui/icons-material/SentimentSatisfied"; // Neutral-ish face
+import SentimentVerySatisfiedIcon from "@mui/icons-material/SentimentVerySatisfied";
 
 // Keep the definition of rows needed for display
 const extraIndicatorRows = [
@@ -99,6 +104,8 @@ export function DqqResultsDisplay({
         ) : (
           <>
             {/* --- Top Scores --- */}
+            <FGDSScoreDisplay results={results} />
+
             <DqqScoreBarDisplay results={results} />
 
             {/* --- Indicator List --- */}
@@ -134,6 +141,156 @@ export function DqqResultsDisplay({
   );
 }
 
+export const DDSScoreTooltipInfo = () => {
+  return (
+    <Typography variant="body2">
+      <Typography variant="subtitle2" component="span" fontWeight="bold">
+        Name
+      </Typography>
+      <br />
+      Dietary Diversity Score (DDS)
+      <br />
+      <Typography variant="subtitle2" component="span" fontWeight="bold">
+        Definition
+      </Typography>
+      <br />
+      DDS is used to assess the diversity within food groups based on a healthy
+      and balanced diet. It assesses whether a person consumes a sufficient
+      variety of foods across different food groups. Several studies showed that
+      DDS could be used for the assessment of dietary diversity as a useful and
+      practical indicator. It has been shown that a higher dietary diversity is
+      correlated with improving diet quality.
+      <br />
+      <Typography variant="subtitle2" component="span" fontWeight="bold">
+        Relevance
+      </Typography>
+      <br />
+      Indicates how diverse your diet is (0 = Low, 10 = High)
+    </Typography>
+  );
+};
+
+export const FGDSScoreDisplay: FC<{
+  results: Partial<DqqResultsState>;
+}> = ({ results }) => {
+  // Helper function to safely get scores
+  const getScore = (key: keyof DqqResultsState): number => {
+    const value = results[key];
+    // Ensure score is within 0-10 range, default to 0 if invalid
+    return typeof value === "number" && !isNaN(value)
+      ? Math.max(0, Math.min(10, value))
+      : 0;
+  };
+
+  const fgdsScore = getScore("fgds");
+
+  // Determine icon and color based on score
+  const getScoreVisuals = (score: number) => {
+    if (score <= 3) {
+      return {
+        icon: SentimentVeryDissatisfiedIcon,
+        color: "error.main", // Red
+        label: "Low Diversity",
+      };
+    } else if (score <= 7) {
+      return {
+        icon: SentimentSatisfiedIcon,
+        color: "warning.main", // Orange/Yellow
+        label: "Moderate Diversity",
+      };
+    } else {
+      return {
+        icon: SentimentVerySatisfiedIcon,
+        color: "success.main", // Green
+        label: "High Diversity",
+      };
+    }
+  };
+
+  const {
+    icon: ScoreIcon,
+    color: scoreColor,
+    label: scoreLabel,
+  } = getScoreVisuals(fgdsScore);
+
+  return (
+    <Stack spacing={1.5} alignItems="center" sx={{ width: "100%", py: 2 }}>
+      {/* Title and Tooltip */}
+      <Stack
+        direction="row"
+        justifyContent="center"
+        alignItems="center"
+        gap={0.5}
+      >
+        <Typography variant="h5" component="p" sx={{ fontWeight: "medium" }}>
+          DDS Score
+        </Typography>
+        <InfoTooltip size="small">
+          <DDSScoreTooltipInfo />
+        </InfoTooltip>
+        {/* Display Score Text Separately */}
+        <Typography variant="h5" component="p" sx={{ fontWeight: "medium" }}>
+          ({fgdsScore.toFixed(1)})
+        </Typography>
+      </Stack>
+
+      {/* Visual Representation: Icon + Slider */}
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={2}
+        sx={{ width: "90%", maxWidth: 400 }} // Control max width for aesthetics
+      >
+        {/* Score Icon */}
+        <ScoreIcon
+          sx={{ fontSize: 35, color: scoreColor }}
+          aria-label={scoreLabel}
+        />
+
+        {/* Visual Slider */}
+        <Slider
+          aria-label={`FGDS Score Visual: ${fgdsScore.toFixed(1)} out of 10 - ${scoreLabel}`}
+          value={fgdsScore}
+          min={0}
+          max={10}
+          step={0.1} // Match precision of display if needed
+          disabled // Make it non-interactive
+          sx={{
+            color: scoreColor, // Color the track and thumb
+            height: 8, // Make slider thicker
+            cursor: "default", // Show default cursor as it's disabled
+            "& .MuiSlider-thumb": {
+              width: 20,
+              height: 20,
+              backgroundColor: scoreColor, // Ensure thumb color matches
+              // Remove hover effects on disabled thumb
+              "&:hover, &.Mui-focusVisible, &.Mui-active": {
+                boxShadow: "none",
+              },
+            },
+            "& .MuiSlider-track": {
+              border: "none",
+              backgroundColor: scoreColor, // Ensure track color matches
+            },
+            "& .MuiSlider-rail": {
+              opacity: 0.3,
+              backgroundColor: "grey.400", // Dimmed background rail
+            },
+            // Override Mui's disabled style to keep our color
+            "&.Mui-disabled": {
+              color: scoreColor,
+            },
+          }}
+        />
+        {/* Optional: Add min/max labels if desired */}
+        {/* <Typography variant="caption">0</Typography> */}
+        {/* <Typography variant="caption">10</Typography> */}
+      </Stack>
+      {/* You could add the score label text here too if desired */}
+      {/* <Typography variant="body2" sx={{ color: scoreColor }}>{scoreLabel}</Typography> */}
+    </Stack>
+  );
+};
 export const DqqScoreBarDisplay: FC<{ results: Partial<DqqResultsState> }> = ({
   results,
 }) => {
@@ -180,33 +337,7 @@ export const DqqScoreBarDisplay: FC<{ results: Partial<DqqResultsState> }> = ({
             GDR Score
           </Typography>
           <InfoTooltip size="small">
-            <Typography variant="body2">
-              <Typography
-                variant="subtitle2"
-                component="span"
-                fontWeight="bold"
-              >
-                Definition
-              </Typography>
-              <br />
-              The global dietary recommendations (GDR) score has two components,
-              NCD-Protect and NCD-Risk. It is based on food consumption from
-              nine health-protective food groups (NCD-Protect) and eight food
-              groups to limit or avoid (NCD-Risk) during the previous day or
-              night. The score ranges from 0 to 18 with higher scores indicating
-              more recommendations met.
-              <br />
-              <br />
-              <Typography
-                variant="subtitle2"
-                component="span"
-                fontWeight="bold"
-              >
-                Relevance
-              </Typography>
-              <br />A higher Global Dietary Recommendations (GDR) score reflects
-              meeting global dietary recommendations of the WHO."
-            </Typography>
+            GDR (Global Diet Quality Score) is a measure of the overall
           </InfoTooltip>
           <Typography variant="h5" component="p" sx={{ fontWeight: "medium" }}>
             {gdrScore.toFixed(1)}

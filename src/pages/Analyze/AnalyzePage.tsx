@@ -1,4 +1,7 @@
-import { DqqResultsDisplay } from "../../components/DqqCalculator/DqqResultsDisplay.tsx";
+import {
+  DDSScoreTooltipInfo,
+  DqqResultsDisplay,
+} from "../../components/DqqCalculator/DqqResultsDisplay.tsx";
 import { useCallback, useEffect, useState } from "react";
 import {
   calculateDqqIndicators,
@@ -10,14 +13,7 @@ import {
   initialAnswersState,
   initialDemographicsState,
 } from "../../components/DqqCalculator/dqqQuestions.ts";
-import {
-  Card,
-  CardHeader,
-  Container,
-  Grid,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Container, Grid, Paper, Typography } from "@mui/material";
 import {
   collection,
   onSnapshot,
@@ -28,7 +24,7 @@ import {
 import { db } from "../../firebaseConfig.ts";
 import { MealData } from "../../../functions/src/constants.ts";
 import DqqTimeChart, { DqqTimeChartDataPoint } from "./DqqTimeChart.tsx";
-import { format } from "date-fns";
+import { format, toDate } from "date-fns";
 import { mergeMultipleDQQ } from "../../components/DqqCalculator/mergeMultipleDQQ.ts";
 import { ChartToggleWrapper } from "./ChartToggleWrapper.tsx";
 import FeatureFlagGuard from "../../components/FeatureFlags/FeatureFlagGuard.tsx";
@@ -98,21 +94,26 @@ export const AnalyzePage = () => {
     );
 
     setResults(
-      Object.keys(mealsByDay).map((dayKey) => {
-        const mealsForDay = mealsByDay[dayKey];
+      Object.keys(mealsByDay)
+        .map((dayKey) => {
+          const mealsForDay = mealsByDay[dayKey];
 
-        const answer = mergeMultipleDQQ(
-          mealsForDay
-            .map((meal) => meal.dqqData?.answers)
-            .map((a) => a) as DqqAnswersMap[],
-        );
+          const answer = mergeMultipleDQQ(
+            mealsForDay
+              .map((meal) => meal.dqqData?.answers)
+              .map((a) => a) as DqqAnswersMap[],
+          );
 
-        return {
-          results: calculateDqqIndicators(answer, demographics),
-          timestamp: dayKey,
-          meals: mealsForDay,
-        };
-      }),
+          return {
+            results: calculateDqqIndicators(answer, demographics),
+            timestamp: dayKey,
+            meals: mealsForDay,
+          };
+        })
+        .sort(
+          (a, b) =>
+            toDate(a.timestamp).getTime() - toDate(b.timestamp).getTime(),
+        ),
     );
   }, [meals]);
 
@@ -124,6 +125,7 @@ export const AnalyzePage = () => {
     (result, id) =>
       ({
         resultId: id,
+        fgdsScore: result.results.fgds,
         ncdProtectScore: result.results.ncdp,
         gdrScore: result.results.gdr,
         ncdRiskScore: result.results.ncdr,
@@ -143,29 +145,14 @@ export const AnalyzePage = () => {
   return (
     <Container sx={{ mt: 2 }}>
       <Grid container spacing={2}>
-        <FeatureFlagGuard flagKey="why-home-empty-inform">
-          <Grid size={{ xs: 12 }}>
-            <Card sx={{ width: "100%" }}>
-              <CardHeader title="Why is this page empty?" />
-              <Typography
-                p={2}
-                variant="body2"
-                color="text.secondary"
-                gutterBottom
-                sx={{ width: "100%" }}
-              >
-                We have features coming up here. As the experiment progresses,
-                you can access more features here.
-              </Typography>
-            </Card>
-          </Grid>
-        </FeatureFlagGuard>
-        <Grid size={{ xs: 12, md: 8, xl: 6 }}>
-          <FeatureFlagGuard flagKey="meal-analysis">
+        <Grid size={{ xs: 12 }}>
+          <FeatureFlagGuard flagKey="dds-score-over-time">
             <Paper sx={{ py: 2, pr: 2 }}>
               <ChartToggleWrapper
-                title="DQQ Scores over time" // Pass title to the wrapper
+                title="DDS Scores over time" // Pass title to the wrapper
+                subtitle="Food Group Diversity Score, larger is better"
                 initialChartType="line" // Optional: set default
+                infoToolTip={<DDSScoreTooltipInfo />}
                 // lineLabel="Trend" // Optional: customize labels
                 // barLabel="Daily Scores" // Optional: customize labels
               >
@@ -173,6 +160,86 @@ export const AnalyzePage = () => {
                 {chartData.length > 0 ? (
                   <DqqTimeChart
                     data={chartData}
+                    onHover={onChartHover}
+                    // chartType prop is now provided by ChartToggleWrapper
+                    chartType="line" // Only add this bc. TS
+                    showFeatures={{
+                      fgds: true,
+                    }}
+                  />
+                ) : (
+                  // Display message within the wrapper if no data
+                  <Typography sx={{ mt: 4, textAlign: "center" }}>
+                    No data available to display chart.
+                  </Typography>
+                )}
+              </ChartToggleWrapper>
+            </Paper>
+            {/*
+            <Paper>
+                <Grid container spacing={1}>
+                  {selectedResult.meals.map((meal) => (
+                    <Grid size={{ xs: 12, md: 6, lg: 4 }} key={meal.id}>
+                      <MealCard meal={meal} />
+                    </Grid>
+                  ))}
+                </Grid>
+              </Paper>
+             */}
+          </FeatureFlagGuard>
+        </Grid>
+        <Grid size={{ xs: 12, md: 8, xl: 6 }}>
+          <FeatureFlagGuard flagKey="meal-analysis">
+            <Paper sx={{ py: 2, pr: 2 }}>
+              <ChartToggleWrapper
+                title="DQQ Scores over time" // Pass title to the wrapper
+                initialChartType="line" // Optional: set default
+                infoToolTip={
+                  <>
+                    <Typography variant="body2">
+                      <Typography
+                        variant="subtitle2"
+                        component="span"
+                        fontWeight="bold"
+                      >
+                        Definition
+                      </Typography>
+                      <br />
+                      DDS is used to assess the diversity within food groups
+                      based on a healthy and balanced diet. It assesses whether
+                      a person consumes a sufficient variety of foods across
+                      different food groups. Several studies showed that DDS
+                      could be used for the assessment of dietary diversity as a
+                      useful and practical indicator. It has been shown that a
+                      higher dietary diversity is correlated with improving diet
+                      quality.
+                      <br />
+                      <br />
+                      <Typography
+                        variant="subtitle2"
+                        component="span"
+                        fontWeight="bold"
+                      >
+                        Relevance
+                      </Typography>
+                      <br />A higher Global Dietary Recommendations (GDR) score
+                      reflects meeting global dietary recommendations of the
+                      WHO."
+                    </Typography>
+                  </>
+                }
+                // lineLabel="Trend" // Optional: customize labels
+                // barLabel="Daily Scores" // Optional: customize labels
+              >
+                {/* DqqTimeChart is now the child */}
+                {chartData.length > 0 ? (
+                  <DqqTimeChart
+                    data={chartData}
+                    showFeatures={{
+                      gdr: true,
+                      ncdp: true,
+                      ncdr: true,
+                    }}
                     onHover={onChartHover}
                     // chartType prop is now provided by ChartToggleWrapper
                     chartType="line" // Only add this bc. TS
