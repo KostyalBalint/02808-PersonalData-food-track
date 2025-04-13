@@ -65,7 +65,7 @@ export const MealListPage = () => {
 
   const { enqueueSnackbar } = useSnackbar();
   const { userProfile, demographicsComplete } = useAuth(); // Get userProfile
-  const MEALS_PER_PAGE = 15;
+  const MEALS_PER_PAGE = 30;
 
   // Effect to group meals and calculate DQQ (runs whenever 'meals' changes)
   useEffect(() => {
