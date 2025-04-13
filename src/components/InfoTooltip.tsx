@@ -24,7 +24,13 @@ export const InfoTooltip: React.FC<PropsWithChildren<InfoTooltipProps>> = ({
   children,
 }) => {
   return (
-    <Tooltip title={<div>{children}</div>} arrow placement="top">
+    <Tooltip
+      enterTouchDelay={0}
+      leaveTouchDelay={10000}
+      title={<div>{children}</div>}
+      arrow
+      placement="top"
+    >
       <CircleIconButton size={size}>
         <InfoOutlinedIcon fontSize={size === "small" ? "small" : "medium"} />
       </CircleIconButton>
