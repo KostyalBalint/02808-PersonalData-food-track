@@ -170,7 +170,7 @@ export const AnalyzePage = () => {
           <FeatureFlagGuard flagKey="meal-analysis">
             <Paper sx={{ py: 2, pr: 2 }}>
               <ChartToggleWrapper
-                title="FGDS Scores over time" // Pass title to the wrapper
+                title="DDS Scores over time" // Pass title to the wrapper
                 subtitle="Food Group Diversity Score, larger is better"
                 initialChartType="line" // Optional: set default
                 infoToolTip={
@@ -184,13 +184,14 @@ export const AnalyzePage = () => {
                         Definition
                       </Typography>
                       <br />
-                      The global dietary recommendations (GDR) score has two
-                      components, NCD-Protect and NCD-Risk. It is based on food
-                      consumption from nine health-protective food groups
-                      (NCD-Protect) and eight food groups to limit or avoid
-                      (NCD-Risk) during the previous day or night. The score
-                      ranges from 0 to 18 with higher scores indicating more
-                      recommendations met.
+                      DDS is used to assess the diversity within food groups
+                      based on a healthy and balanced diet. It assesses whether
+                      a person consumes a sufficient variety of foods across
+                      different food groups. Several studies showed that DDS
+                      could be used for the assessment of dietary diversity as a
+                      useful and practical indicator. It has been shown that a
+                      higher dietary diversity is correlated with improving diet
+                      quality.
                       <br />
                     </Typography>
                   </>
@@ -247,13 +248,14 @@ export const AnalyzePage = () => {
                         Definition
                       </Typography>
                       <br />
-                      The global dietary recommendations (GDR) score has two
-                      components, NCD-Protect and NCD-Risk. It is based on food
-                      consumption from nine health-protective food groups
-                      (NCD-Protect) and eight food groups to limit or avoid
-                      (NCD-Risk) during the previous day or night. The score
-                      ranges from 0 to 18 with higher scores indicating more
-                      recommendations met.
+                      DDS is used to assess the diversity within food groups
+                      based on a healthy and balanced diet. It assesses whether
+                      a person consumes a sufficient variety of foods across
+                      different food groups. Several studies showed that DDS
+                      could be used for the assessment of dietary diversity as a
+                      useful and practical indicator. It has been shown that a
+                      higher dietary diversity is correlated with improving diet
+                      quality.
                       <br />
                       <br />
                       <Typography

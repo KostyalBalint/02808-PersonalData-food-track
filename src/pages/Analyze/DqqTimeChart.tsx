@@ -121,7 +121,7 @@ const DqqTimeChart: React.FC<DqqTimeChartProps> = ({
             <Line
               type="monotone"
               dataKey="fgdsScore"
-              name="FGDS Score"
+              name="DDS Score"
               stroke={fgdsColor}
             />
           )}
@@ -160,7 +160,11 @@ const DqqTimeChart: React.FC<DqqTimeChartProps> = ({
           {commonComponents}
           {/* Add barSize prop for better spacing if needed */}
           {props.showFeatures.fgds && (
-            <Bar dataKey="fgdsScore" name="FGDS Score" fill={fgdsColor} />
+            <Bar
+              dataKey="fgdsScore"
+              name="Dietary Diversity Score"
+              fill={fgdsColor}
+            />
           )}
           {props.showFeatures.ncdp && (
             <Bar
