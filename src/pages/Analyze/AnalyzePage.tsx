@@ -1,4 +1,7 @@
-import { DqqResultsDisplay } from "../../components/DqqCalculator/DqqResultsDisplay.tsx";
+import {
+  DDSScoreTooltipInfo,
+  DqqResultsDisplay,
+} from "../../components/DqqCalculator/DqqResultsDisplay.tsx";
 import { useCallback, useEffect, useState } from "react";
 import {
   calculateDqqIndicators,
@@ -10,14 +13,7 @@ import {
   initialAnswersState,
   initialDemographicsState,
 } from "../../components/DqqCalculator/dqqQuestions.ts";
-import {
-  Card,
-  CardHeader,
-  Container,
-  Grid,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Container, Grid, Paper, Typography } from "@mui/material";
 import {
   collection,
   onSnapshot,
@@ -149,53 +145,14 @@ export const AnalyzePage = () => {
   return (
     <Container sx={{ mt: 2 }}>
       <Grid container spacing={2}>
-        <FeatureFlagGuard flagKey="why-home-empty-inform">
-          <Grid size={{ xs: 12 }}>
-            <Card sx={{ width: "100%" }}>
-              <CardHeader title="Why is this page empty?" />
-              <Typography
-                p={2}
-                variant="body2"
-                color="text.secondary"
-                gutterBottom
-                sx={{ width: "100%" }}
-              >
-                We have features coming up here. As the experiment progresses,
-                you can access more features here.
-              </Typography>
-            </Card>
-          </Grid>
-        </FeatureFlagGuard>
         <Grid size={{ xs: 12 }}>
-          <FeatureFlagGuard flagKey="meal-analysis">
+          <FeatureFlagGuard flagKey="dds-score-over-time">
             <Paper sx={{ py: 2, pr: 2 }}>
               <ChartToggleWrapper
                 title="DDS Scores over time" // Pass title to the wrapper
                 subtitle="Food Group Diversity Score, larger is better"
                 initialChartType="line" // Optional: set default
-                infoToolTip={
-                  <>
-                    <Typography variant="body2">
-                      <Typography
-                        variant="subtitle2"
-                        component="span"
-                        fontWeight="bold"
-                      >
-                        Definition
-                      </Typography>
-                      <br />
-                      DDS is used to assess the diversity within food groups
-                      based on a healthy and balanced diet. It assesses whether
-                      a person consumes a sufficient variety of foods across
-                      different food groups. Several studies showed that DDS
-                      could be used for the assessment of dietary diversity as a
-                      useful and practical indicator. It has been shown that a
-                      higher dietary diversity is correlated with improving diet
-                      quality.
-                      <br />
-                    </Typography>
-                  </>
-                }
+                infoToolTip={<DDSScoreTooltipInfo />}
                 // lineLabel="Trend" // Optional: customize labels
                 // barLabel="Daily Scores" // Optional: customize labels
               >

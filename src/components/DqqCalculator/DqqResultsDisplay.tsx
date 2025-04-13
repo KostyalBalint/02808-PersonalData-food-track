@@ -141,6 +141,35 @@ export function DqqResultsDisplay({
   );
 }
 
+export const DDSScoreTooltipInfo = () => {
+  return (
+    <Typography variant="body2">
+      <Typography variant="subtitle2" component="span" fontWeight="bold">
+        Name
+      </Typography>
+      <br />
+      Dietary Diversity Score (DDS)
+      <br />
+      <Typography variant="subtitle2" component="span" fontWeight="bold">
+        Definition
+      </Typography>
+      <br />
+      DDS is used to assess the diversity within food groups based on a healthy
+      and balanced diet. It assesses whether a person consumes a sufficient
+      variety of foods across different food groups. Several studies showed that
+      DDS could be used for the assessment of dietary diversity as a useful and
+      practical indicator. It has been shown that a higher dietary diversity is
+      correlated with improving diet quality.
+      <br />
+      <Typography variant="subtitle2" component="span" fontWeight="bold">
+        Relevance
+      </Typography>
+      <br />
+      Indicates how diverse your diet is (0 = Low, 10 = High)
+    </Typography>
+  );
+};
+
 export const FGDSScoreDisplay: FC<{
   results: Partial<DqqResultsState>;
 }> = ({ results }) => {
@@ -194,23 +223,10 @@ export const FGDSScoreDisplay: FC<{
         gap={0.5}
       >
         <Typography variant="h5" component="p" sx={{ fontWeight: "medium" }}>
-          FGDS Score
+          DDS Score
         </Typography>
         <InfoTooltip size="small">
-          <Typography variant="body2">
-            <Typography variant="subtitle2" component="span" fontWeight="bold">
-              Name
-            </Typography>
-            <br />
-            Food group diversity score
-            <br />
-            <br />
-            <Typography variant="subtitle2" component="span" fontWeight="bold">
-              Relevance
-            </Typography>
-            <br />
-            Indicates how diverse your diet is (0 = Low, 10 = High)
-          </Typography>
+          <DDSScoreTooltipInfo />
         </InfoTooltip>
         {/* Display Score Text Separately */}
         <Typography variant="h5" component="p" sx={{ fontWeight: "medium" }}>
@@ -318,37 +334,10 @@ export const DqqScoreBarDisplay: FC<{ results: Partial<DqqResultsState> }> = ({
           gap={0.5}
         >
           <Typography variant="h5" component="p" sx={{ fontWeight: "medium" }}>
-            Dietary Diversity Score
+            GDR Score
           </Typography>
           <InfoTooltip size="small">
-            <Typography variant="body2">
-              <Typography
-                variant="subtitle2"
-                component="span"
-                fontWeight="bold"
-              >
-                Definition
-              </Typography>
-              <br />
-              Dietary Diversity Score DDS is used to assess the diversity within
-              food groups based on a healthy and balanced diet. It assesses
-              whether a person consumes a sufficient variety of foods across
-              different food groups. Several studies showed that DDS could be
-              used for the assessment of dietary diversity as a useful and
-              practical indicator. It has been shown that a higher dietary
-              diversity is correlated with improving diet quality.
-              <br />
-              <br />
-              <Typography
-                variant="subtitle2"
-                component="span"
-                fontWeight="bold"
-              >
-                Relevance
-              </Typography>
-              <br />A higher Dietary Diversity Score reflects meeting global
-              dietary recommendations of the WHO."
-            </Typography>
+            GDR (Global Diet Quality Score) is a measure of the overall
           </InfoTooltip>
           <Typography variant="h5" component="p" sx={{ fontWeight: "medium" }}>
             {gdrScore.toFixed(1)}
