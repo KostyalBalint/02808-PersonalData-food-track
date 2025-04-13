@@ -27,6 +27,7 @@ export interface UserNutritionSettings {
   protein?: AimedFoodGroup;
   carbohydrates?: AimedFoodGroup;
   fruits?: AimedFoodGroup;
+  dairy?: AimedFoodGroup;
   vegetables?: AimedFoodGroup;
   fats?: AimedFoodGroup;
   sweets?: AimedFoodGroup;

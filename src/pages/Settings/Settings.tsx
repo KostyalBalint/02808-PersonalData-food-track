@@ -25,6 +25,7 @@ import FeatureFlagManager from "../../components/FeatureFlags/FeatureFlagManager
 import { useSnackbar } from "notistack";
 import ReindexDashboard from "./Admin/ReindexDashboard.tsx";
 import { FoodPyramidSettingsForm } from "../../components/FoodPyramidSettingsForm.tsx";
+import CalculateNutritionInfoForAll from "./Admin/CalculateNutritionInfo.tsx";
 
 const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
   color: theme.palette.getContrastText(grey[200]),
@@ -106,6 +107,8 @@ export const Settings = () => {
               <FeatureFlagManager />
               <Divider />
               <ReindexDashboard />
+              <Divider />
+              <CalculateNutritionInfoForAll />
             </Stack>
           </CardContent>
         </Card>
