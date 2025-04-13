@@ -1,6 +1,7 @@
 import { genkit, z } from "genkit";
 import { gemini20Flash, googleAI } from "@genkit-ai/googleai";
 import * as math from "mathjs";
+import Fuse from "fuse.js";
 
 // Initialize Genkit with the Google AI plugin
 // Pass API key during plugin init for cleaner setup, if desired
@@ -64,7 +65,7 @@ export const fetchIngredientDetailsTool = ai.defineTool(
     console.log(
       `[fetchIngredientDetailsTool] Received request for: ${ingredientName}`,
     );
-    const searchUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(ingredientName)}&search_simple=1&action=process&json=1&page_size=1`; // Get top 1 result
+    const searchUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(ingredientName)}&search_simple=1&action=process&json=1&page_size=50`; // Get top 1 result
 
     try {
       console.log(`[fetchIngredientDetailsTool] Fetching URL: ${searchUrl}`);
@@ -103,7 +104,12 @@ export const fetchIngredientDetailsTool = ai.defineTool(
         };
       }
 
-      const product = data.products[0];
+      const fuse = new Fuse(data.products, {
+        keys: ["product_name"],
+      });
+
+      const product = fuse.search(ingredientName)[0].item as any;
+
       const nutriments = product.nutriments || {};
 
       console.log(
@@ -269,15 +275,16 @@ export const categorizeIngredientsFlow = ai.defineFlow(
       )
       .join("\n- ");
 
-    // --- Updated Prompt mentioning the new tool ---
-    const prompt = `
+    const systemPrompt = `
 You are an AI assistant specialized in nutritional analysis based on ingredient lists.
 Analyze a given food item and categorize its ingredients according to the standard food pyramid groups. For each category, estimate and report the *total weight in grams* contributed by the ingredients in that group.
 
 **You have access to these tools:**
 1.  **calculator**: Evaluates a mathematical expression string (e.g., '1.5 * 20 + 10 / 2'). Use this for ALL calculations (conversions, scaling, percentages, summing).
-2.  **fetchIngredientDetails**: Looks up nutritional information (per 100g) for a specific ingredient name from a database. Use this tool if you need specific nutritional data (e.g., protein content per 100g of 'chicken breast') to perform more accurate categorization or adjustments, especially for basic, unprocessed ingredients where standard data is helpful. Use it for every ingredient you have the slightest doubt about.
+2.  **fetchIngredientDetails**: Looks up nutritional information (per 100g) for a specific ingredient name from a database. Use this tool if you need specific nutritional data (e.g., protein content per 100g of 'chicken breast') to perform more accurate categorization or adjustments, especially for basic, unprocessed ingredients where standard data is helpful. Use it for every ingredient you have the slightest doubt about.`;
 
+    // --- Updated Prompt mentioning the new tool ---
+    const prompt = `
 **Food Item:** ${name}
 
 **Ingredients List:**
@@ -294,8 +301,8 @@ Analyze a given food item and categorize its ingredients according to the standa
 
 **Instructions:**
 1.  **Analyze Each Ingredient:** Process each ingredient from the list.
-2.  **Convert to Grams:** Determine the weight in grams for every ingredient. Use the **calculator** tool for any unit conversions (e.g., 1 cup flour ~ 120g, 1 tbsp oil ~ 14g, 1 egg ~ 50g, 1 lb ~ 453.6g). State assumptions clearly. Example Call: \`calculator({expression: '0.5 * 120'})\`.
-3.  **Fetch Details:** For basic ingredients (like 'chicken breast', 'flour', 'apple'), consider using the **fetchIngredientDetails** tool to get nutritional data per 100g. This can help with step 5. Example Call: \`fetchIngredientDetails({ ingredientName: 'chicken breast' })\`.
+2.  **Fetch ingredient information:** Use the \`fetchIngredientDetails({ ingredientName: '<ingredient_name>' })\` tool to fetch accurate ingredient info. 
+3.  **Convert to Grams:** Determine the weight in grams for every ingredient. Use the **calculator** tool for any unit conversions (e.g., 1 cup flour ~ 120g, 1 tbsp oil ~ 14g, 1 egg ~ 50g, 1 lb ~ 453.6g). State assumptions clearly. Example Call: \`calculator({expression: '0.5 * 120'})\`.
 4.  **Handle Complex Ingredients:** If an ingredient is complex (e.g., 'spring roll'), estimate its constituent parts in grams *per unit*. Use the **calculator** tool to scale these by the given quantity.
 5.  **Categorize & Adjust:** Assign the calculated gram weight of each basic ingredient (or scaled constituent) to its primary food category.
     *   If the **fetchIngredientDetails** tool provided specific data (e.g., % protein), or you have reliable estimates, use the **calculator** tool to adjust the weight contribution to different categories. Example: 100g chicken breast (fetched data shows ~25g protein/100g) -> Protein category gets \`calculator({expression: '100 * 0.25'})\` = 25g (adjusting for water/other components). If an item is e.g. 70% protein / 30% fat, split its weight accordingly using the calculator.
@@ -318,9 +325,11 @@ Calculate the totals based *only* on the provided ingredients list, your decompo
 
     console.log("[categorizeIngredientsFlow] Generating response...");
     const llmResponse = await ai.generate({
+      system: {
+        text: systemPrompt,
+      },
       prompt: { text: prompt },
       model: gemini20Flash, // Or a more capable model like gemini-1.5-flash-latest or gemini-1.5-pro-latest for better tool use
-      // *** Pass BOTH tool definition objects ***
       tools: [calculatorTool, fetchIngredientDetailsTool],
       toolChoice: "auto",
       maxTurns: 100,
