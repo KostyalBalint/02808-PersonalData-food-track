@@ -49,6 +49,7 @@ import { DatePickerModal } from "../../components/DatePickerModal.tsx";
 import { format } from "date-fns";
 import FeatureFlagGuard from "../../components/FeatureFlags/FeatureFlagGuard.tsx";
 import { MealNutritionVisualizer } from "./MealNutritionVisualizer.tsx";
+import { ProtectedComponent } from "../../context/ProtectedComponent.tsx";
 
 export const MealPage = () => {
   const { id } = useParams();
@@ -411,14 +412,18 @@ export const MealPage = () => {
               </Stack>
             </Paper>
           </Box>
-          <FeatureFlagGuard flagKey="food-nutrition-values">
-            <Box>{meal && <MealNutritionVisualizer meal={meal} />}</Box>
-          </FeatureFlagGuard>
+          <ProtectedComponent allowedRoles={["ADMIN", "SUBJECT"]}>
+            <FeatureFlagGuard flagKey="food-nutrition-values">
+              <Box>{meal && <MealNutritionVisualizer meal={meal} />}</Box>
+            </FeatureFlagGuard>
+          </ProtectedComponent>
         </Masonry>
 
-        <FeatureFlagGuard flagKey="dqq-questions-meal-page">
-          {meal && <DqqQuestionerForm mealId={meal.id} />}
-        </FeatureFlagGuard>
+        <ProtectedComponent allowedRoles={["ADMIN", "SUBJECT"]}>
+          <FeatureFlagGuard flagKey="dqq-questions-meal-page">
+            {meal && <DqqQuestionerForm mealId={meal.id} />}
+          </FeatureFlagGuard>
+        </ProtectedComponent>
 
         <Paper sx={{ p: 2 }}>
           <Stack direction="row" gap={2}>
