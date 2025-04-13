@@ -65,7 +65,7 @@ export const MealListPage = () => {
 
   const { enqueueSnackbar } = useSnackbar();
   const { userProfile, demographicsComplete } = useAuth(); // Get userProfile
-  const MEALS_PER_PAGE = 30;
+  const MEALS_PER_PAGE = 20;
 
   // Effect to group meals and calculate DQQ (runs whenever 'meals' changes)
   useEffect(() => {
@@ -284,7 +284,7 @@ export const MealListPage = () => {
     };
 
     observer.current = new IntersectionObserver(handleObserver, {
-      rootMargin: "100px", // Load a bit before element is visible
+      rootMargin: "800px", // Load a bit before element is visible
     });
 
     // Ensure loadingRef.current exists before observing
