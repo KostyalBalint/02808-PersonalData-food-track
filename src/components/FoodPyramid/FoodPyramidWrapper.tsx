@@ -166,14 +166,14 @@ export const FoodPyramidWrapper: FC<FoodPyramidWrapperProps> = ({
     },
     {
       key: "Meat",
-      name: "Meat, fish, eggs, beans",
+      name: "Meat",
       percentage: 110,
       color: "#FF6347",
       subtitle: "2 servings",
     },
     {
       key: "FatsOils",
-      name: "Fats And Oils",
+      name: "Oils",
       percentage: 30,
       color: "#FFD700",
       subtitle: "Use sparingly",

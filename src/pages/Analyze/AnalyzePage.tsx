@@ -13,7 +13,7 @@ import {
   initialAnswersState,
   initialDemographicsState,
 } from "../../components/DqqCalculator/dqqQuestions.ts";
-import { Container, Grid, Paper, Typography } from "@mui/material";
+import { Container, Grid, Paper, Stack, Typography } from "@mui/material";
 import {
   collection,
   onSnapshot,
@@ -34,16 +34,17 @@ export const AnalyzePage = () => {
   const { demographicsComplete, userProfile } = useAuth();
   const demographics = userProfile?.demographics ?? initialDemographicsState;
 
-  const [results, setResults] = useState<
+  const [dailyDqq, setDailyDqq] = useState<
     {
       results: Partial<DqqResultsState>;
       meals: MealData[];
       timestamp: string;
     }[]
   >([]);
+
   const [meals, setMeals] = useState<MealData[]>([] as MealData[]);
 
-  const [selectedResult, _setSelectedResult] = useState<{
+  const [selectedResult, setSelectedResult] = useState<{
     results: Partial<DqqResultsState>;
     meals: MealData[];
     timestamp: string;
@@ -94,7 +95,7 @@ export const AnalyzePage = () => {
       {} as Record<string, MealData[]>,
     );
 
-    setResults(
+    setDailyDqq(
       Object.keys(mealsByDay)
         .map((dayKey) => {
           const mealsForDay = mealsByDay[dayKey];
@@ -118,11 +119,7 @@ export const AnalyzePage = () => {
     );
   }, [meals]);
 
-  useEffect(() => {
-    console.log({ results });
-  }, [results]);
-
-  const chartData = results.map(
+  const chartData = dailyDqq.map(
     (result, id) =>
       ({
         resultId: id,
@@ -136,14 +133,29 @@ export const AnalyzePage = () => {
   );
 
   const onRangeSelect = useCallback(
-    (_dataPoints: DqqTimeChartDataPoint[] | null) => {
-      //if (!dataPoints) return;
-      //const resultIds = dataPoints?.flatMap((dataPoint) => {
-      //  return dataPoint.resultId;
-      //});
-      //setSelectedResult(results[dataPoint.resultId].results);
+    (selected: DqqTimeChartDataPoint[] | DqqTimeChartDataPoint | null) => {
+      if (!selected) return;
+      if (!Array.isArray(selected)) {
+        setSelectedResult(dailyDqq[selected.resultId]);
+      } else {
+        const mealsInRange = selected.reduce((prev, current) => {
+          return [...dailyDqq[current.resultId].meals, ...prev];
+        }, [] as MealData[]);
+
+        const answer = mergeMultipleDQQ(
+          mealsInRange
+            .map((meal) => meal.dqqData?.answers)
+            .map((a) => a) as DqqAnswersMap[],
+        );
+
+        setSelectedResult({
+          meals: mealsInRange,
+          results: calculateDqqIndicators(answer, demographics),
+          timestamp: `${format(mealsInRange[0].createdAt.toDate(), "yyyy-MM-dd")} - ${format(mealsInRange[mealsInRange.length - 1].createdAt.toDate(), "yyyy-MM-dd")}`,
+        });
+      }
     },
-    [results],
+    [dailyDqq],
   );
 
   return (
@@ -152,7 +164,12 @@ export const AnalyzePage = () => {
         <Grid size={{ xs: 12, md: 4 }}>
           <FeatureFlagGuard flagKey="analyse-food-pyramid">
             <Paper sx={{ overflow: "hidden" }}>
-              <MealFoodPyramid meals={selectedResult.meals} />
+              <Stack justifyContent="center">
+                <MealFoodPyramid meals={selectedResult.meals} />
+                <Typography variant="body2" color="textSecondary">
+                  {selectedResult.timestamp}
+                </Typography>
+              </Stack>
             </Paper>
           </FeatureFlagGuard>
         </Grid>
@@ -172,6 +189,7 @@ export const AnalyzePage = () => {
                   <DqqTimeChart
                     data={chartData}
                     onRangeSelect={onRangeSelect}
+                    onHover={onRangeSelect}
                     // chartType prop is now provided by ChartToggleWrapper
                     chartType="line" // Only add this bc. TS
                     showFeatures={{
@@ -252,6 +270,7 @@ export const AnalyzePage = () => {
                       ncdr: true,
                     }}
                     onRangeSelect={onRangeSelect}
+                    onHover={onRangeSelect}
                     // chartType prop is now provided by ChartToggleWrapper
                     chartType="line" // Only add this bc. TS
                   />

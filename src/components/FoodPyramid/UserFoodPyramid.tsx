@@ -1,13 +1,5 @@
 import { useAuth } from "../../context/AuthContext.tsx";
-import {
-  Box,
-  Card,
-  CardHeader,
-  CircularProgress,
-  Grid,
-  Slider,
-  Typography,
-} from "@mui/material"; // Import Slider, Box, CircularProgress
+import { Card, CardHeader, CircularProgress, Typography } from "@mui/material"; // Removed Slider, Box (unless Box is needed elsewhere)
 import {
   collection,
   onSnapshot,
@@ -17,39 +9,25 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig.ts";
-import { useEffect, useMemo, useState } from "react"; // Import useMemo
+import { FC, useEffect, useState } from "react"; // Removed useMemo
 import { MealData } from "../../../functions/src/constants.ts";
 import { MealFoodPyramid } from "./MealFoodPyramid.tsx";
 
-// Helper function to format timestamp (milliseconds) to a readable date string
-const formatDateLabel = (timestamp: number): string => {
-  if (!timestamp) return "";
-  return new Date(timestamp).toLocaleDateString();
-};
-
-// Define the minimum distance in milliseconds (1 day)
-const MIN_DISTANCE_MS = 24 * 60 * 60 * 1000;
-
-export const UserFoodPyramid = () => {
+export const UserFoodPyramid: FC<{ daysToShowInPast?: number }> = ({
+  daysToShowInPast = 5, // Default to showing the last 5 days
+}) => {
   const { userProfile } = useAuth();
   const completedNutritionFacts = userProfile?.nutritionSettings !== undefined;
 
   const [allMeals, setAllMeals] = useState<MealData[] | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Loading state for fetch
-
-  // State for the selected date range [startTimestamp, endTimestamp] in milliseconds
-  const [selectedDateRange, setSelectedDateRange] = useState<
-    [number, number] | null
-  >(null);
-
-  // State for the meals filtered by the selected date range
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filteredMeals, setFilteredMeals] = useState<MealData[] | null>(null);
 
-  // --- Fetch Meals Data ---
+  // --- Fetch All Meals Data ---
   useEffect(() => {
     if (!userProfile) {
       setIsLoading(false);
-      setAllMeals([]); // Set to empty array if no user
+      setAllMeals([]);
       return;
     }
 
@@ -57,7 +35,7 @@ export const UserFoodPyramid = () => {
     const q = query(
       collection(db, "meals"),
       where("userId", "==", userProfile.uid),
-      orderBy("createdAt", "asc"),
+      orderBy("createdAt", "asc"), // Keep ordering if needed, though filtering happens client-side
     );
 
     const unsubscribe = onSnapshot(
@@ -66,15 +44,12 @@ export const UserFoodPyramid = () => {
         const userMeals = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-          // Ensure createdAt is a Firestore Timestamp before converting
           createdAt:
             doc.data().createdAt instanceof Timestamp
               ? doc.data().createdAt
-              : // Attempt conversion if it's a plain object (less ideal)
-                typeof doc.data().createdAt?.toDate === "function"
+              : typeof doc.data().createdAt?.toDate === "function"
                 ? doc.data().createdAt
-                : // Fallback or handle error if type is unexpected
-                  Timestamp.now(), // Or some other default/error handling
+                : Timestamp.now(), // Fallback
         })) as MealData[];
 
         setAllMeals(userMeals);
@@ -83,109 +58,42 @@ export const UserFoodPyramid = () => {
       (error) => {
         console.error("Error fetching meals:", error);
         setIsLoading(false);
-        setAllMeals([]); // Set empty on error
+        setAllMeals([]);
       },
     );
 
-    // Cleanup function
     return () => unsubscribe();
   }, [userProfile]);
 
-  // --- Calculate Slider Range and Initialize State ---
-  const { minDate, maxDate } = useMemo(() => {
-    if (!allMeals || allMeals.length < 2) {
-      return { minDate: null, maxDate: null };
-    }
-    // Ensure createdAt is valid before getting time
-    const timestamps = allMeals
-      .map((meal) => meal.createdAt?.toDate?.().getTime())
-      .filter((ts) => typeof ts === "number");
-
-    if (timestamps.length < 2) {
-      return { minDate: null, maxDate: null };
-    }
-
-    const min = Math.min(...timestamps);
-    const max = Math.max(...timestamps);
-    return { minDate: min, maxDate: max };
-  }, [allMeals]);
-
-  // Initialize the slider range once min/max dates are available
+  // --- Filter Meals Based on daysToShowInPast ---
   useEffect(() => {
-    if (minDate !== null && maxDate !== null && selectedDateRange === null) {
-      setSelectedDateRange([minDate, maxDate]);
-    }
-    // Adjust if range becomes invalid (e.g., meals deleted)
-    else if (
-      minDate !== null &&
-      maxDate !== null &&
-      selectedDateRange !== null
-    ) {
-      const [currentStart, currentEnd] = selectedDateRange;
-      const adjustedStart = Math.max(minDate, currentStart);
-      const adjustedEnd = Math.min(maxDate, currentEnd);
-      // Ensure minimum distance after potential adjustment
-      if (adjustedEnd - adjustedStart >= MIN_DISTANCE_MS) {
-        setSelectedDateRange([adjustedStart, adjustedEnd]);
-      } else {
-        // If adjustment breaks min distance, reset to full range
-        setSelectedDateRange([minDate, maxDate]);
-      }
-    } else if (minDate === null || maxDate === null) {
-      // If not enough data for a range, clear selection
-      setSelectedDateRange(null);
-    }
-  }, [minDate, maxDate]); // Rerun when min/max changes
-
-  // --- Handle Slider Change ---
-  const handleDateChange = (
-    _event: Event,
-    newValue: number | number[],
-    activeThumb: number,
-  ) => {
-    if (!Array.isArray(newValue) || minDate === null || maxDate === null) {
+    if (!allMeals) {
+      setFilteredMeals(null); // No meals fetched yet
       return;
     }
 
-    const [newStart, newEnd] = newValue;
+    const now = new Date();
+    // Calculate the cutoff date by subtracting daysToShowInPast from today.
+    // Set time to the very beginning of that day (00:00:00.000)
+    const cutoffDate = new Date(now);
+    cutoffDate.setDate(now.getDate() - daysToShowInPast);
+    cutoffDate.setHours(0, 0, 0, 0);
 
-    if (activeThumb === 0) {
-      // Start thumb moved
-      const clampedStart = Math.min(newStart, maxDate - MIN_DISTANCE_MS); // Ensure end thumb can maintain min distance
-      setSelectedDateRange([
-        clampedStart,
-        Math.max(clampedStart + MIN_DISTANCE_MS, newEnd),
-      ]);
-    } else {
-      // End thumb moved
-      const clampedEnd = Math.max(newEnd, minDate + MIN_DISTANCE_MS); // Ensure start thumb can maintain min distance
-      setSelectedDateRange([
-        Math.min(clampedEnd - MIN_DISTANCE_MS, newStart),
-        clampedEnd,
-      ]);
-    }
-  };
-
-  // --- Filter Meals Based on Selected Range ---
-  useEffect(() => {
-    if (!allMeals || !selectedDateRange) {
-      setFilteredMeals(allMeals); // If no range selected or no meals, show all (or none if allMeals is null)
-      return;
-    }
-
-    const [startTime, endTime] = selectedDateRange;
+    const cutoffTimestamp = cutoffDate.getTime();
+    const nowTimestamp = now.getTime(); // Use current time as the upper bound
 
     const filtered = allMeals.filter((meal) => {
       const mealTime = meal.createdAt?.toDate?.().getTime();
-      // Ensure mealTime is a valid number before comparison
+      // Check if the meal's timestamp is within the desired range [cutoffTimestamp, nowTimestamp]
       return (
         typeof mealTime === "number" &&
-        mealTime >= startTime &&
-        mealTime <= endTime
+        mealTime >= cutoffTimestamp &&
+        mealTime <= nowTimestamp
       );
     });
+
     setFilteredMeals(filtered);
-  }, [allMeals, selectedDateRange]); // Update when source meals or range changes
+  }, [allMeals, daysToShowInPast]); // Update when source meals or the day range changes
 
   // --- Render Logic ---
 
@@ -201,72 +109,36 @@ export const UserFoodPyramid = () => {
     return <CircularProgress />;
   }
 
-  if (!allMeals || allMeals.length === 0) {
-    return <Typography>No meals recorded yet.</Typography>;
+  if (!allMeals) {
+    // This case might briefly appear between loading finishing and filtering happening
+    return <Typography>Loading meal data...</Typography>;
   }
 
-  const canShowSlider =
-    minDate !== null &&
-    maxDate !== null &&
-    selectedDateRange !== null &&
-    maxDate - minDate >= MIN_DISTANCE_MS;
+  // Check filtered meals specifically for the "no meals in range" message
+  const hasMealsInPeriod = filteredMeals && filteredMeals.length > 0;
 
   return (
     <Card sx={{ padding: 2 }}>
       <CardHeader title="Your food pyramid" />
-      <Grid container>
-        <Grid size={{ xs: 12, md: 6 }}>
-          {/* --- Date Range Slider --- */}
-          {canShowSlider ? (
-            <Box sx={{ width: "80%", margin: "20px auto" }}>
-              {" "}
-              {/* Center slider */}
-              <Typography>
-                Select Date Range: {formatDateLabel(selectedDateRange[0])} -{" "}
-                {formatDateLabel(selectedDateRange[1])}
-              </Typography>
-              <Slider
-                getAriaLabel={() => "Date range slider"}
-                value={selectedDateRange}
-                onChange={handleDateChange}
-                valueLabelDisplay="auto"
-                valueLabelFormat={formatDateLabel} // Use helper for tooltip format
-                min={minDate}
-                max={maxDate}
-                step={MIN_DISTANCE_MS} // Optional: Step by 1 day
-                disableSwap // Prevent thumbs from crossing
-                sx={{
-                  // Add some styling if needed
-                  "& .MuiSlider-thumb": {
-                    height: 20,
-                    width: 20,
-                  },
-                  "& .MuiSlider-rail": {
-                    height: 8,
-                  },
-                  "& .MuiSlider-track": {
-                    height: 8,
-                  },
-                }}
-              />
-            </Box>
-          ) : (
-            allMeals.length > 0 && (
-              <Typography sx={{ textAlign: "center" }}>
-                Not enough meal data spread to select a range.
-              </Typography>
-            )
-          )}
-          {/* --- Display Filtered Data Count (Example) --- */}
-          <Typography sx={{ textAlign: "center", marginBottom: 0 }}>
-            Showing {filteredMeals ? filteredMeals.length : 0} meals in selected
-            range.
-          </Typography>
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <MealFoodPyramid meals={filteredMeals} />
-        </Grid>
-      </Grid>
+      <Typography
+        sx={{ textAlign: "center", marginBottom: 2, color: "text.secondary" }}
+      >
+        {/* Informative text about the displayed period */}
+        Food pyramid based on the last {daysToShowInPast} day
+        {daysToShowInPast !== 1 ? "s" : ""}.
+      </Typography>
+      {hasMealsInPeriod ? (
+        // Render the pyramid if there are meals in the selected period
+        // Removed the Grid container/item structure for simplicity, letting the pyramid take full width
+        // Add back Grid if specific layout (e.g., centering, max width) is needed
+        <MealFoodPyramid meals={filteredMeals} />
+      ) : (
+        // Display a message if no meals were found in the specified past days
+        <Typography sx={{ textAlign: "center", marginTop: 2 }}>
+          No meals recorded in the last {daysToShowInPast} day
+          {daysToShowInPast !== 1 ? "s" : ""}.
+        </Typography>
+      )}
     </Card>
   );
 };
