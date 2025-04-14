@@ -43,7 +43,7 @@ export const AnalyzePage = () => {
   >([]);
   const [meals, setMeals] = useState<MealData[]>([] as MealData[]);
 
-  const [selectedResult, setSelectedResult] = useState<{
+  const [selectedResult, _setSelectedResult] = useState<{
     results: Partial<DqqResultsState>;
     meals: MealData[];
     timestamp: string;
@@ -136,7 +136,7 @@ export const AnalyzePage = () => {
   );
 
   const onRangeSelect = useCallback(
-    (dataPoints: DqqTimeChartDataPoint[] | null) => {
+    (_dataPoints: DqqTimeChartDataPoint[] | null) => {
       //if (!dataPoints) return;
       //const resultIds = dataPoints?.flatMap((dataPoint) => {
       //  return dataPoint.resultId;
