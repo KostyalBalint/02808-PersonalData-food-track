@@ -9,13 +9,12 @@ export type DqqAnswersMap = {
 };
 
 export interface NutritionalData {
-  Grains: number;
   Vegetables: number;
-  Fruits: number;
-  Protein: number;
+  Grains: number;
   Dairy: number;
-  Fats: number;
-  Sweets: number;
+  Meat: number;
+  FatsOils: number;
+  Sweet: number;
 }
 
 export interface MealData {

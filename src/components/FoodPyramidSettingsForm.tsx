@@ -59,11 +59,12 @@ export const FoodPyramidSettingsForm = () => {
   }, [enqueueSnackbar]); // Add enqueueSnackbar dependency
 
   const [aimedAmounts, setAimedAmounts] = useState<UserNutritionSettings>({
-    protein: {},
-    carbohydrates: {},
-    fruits: {},
     vegetables: {},
+    carbohydrates: {},
+    dairy: {},
+    protein: {},
     fats: {},
+    sweets: {},
   });
 
   useEffect(() => {
@@ -117,11 +118,12 @@ export const FoodPyramidSettingsForm = () => {
           setAimedAmounts(user.nutritionSettings); // Initialize the form with the fetched data
         } else {
           setAimedAmounts({
-            protein: { min: 0, max: 0 },
-            carbohydrates: { min: 0, max: 0 },
-            fruits: { min: 0, max: 0 },
             vegetables: { min: 0, max: 0 },
+            carbohydrates: { min: 0, max: 0 },
+            dairy: { min: 0, max: 0 },
+            protein: { min: 0, max: 0 },
             fats: { min: 0, max: 0 },
+            sweets: { min: 0, max: 0 },
           });
         }
       };
@@ -129,14 +131,40 @@ export const FoodPyramidSettingsForm = () => {
       fetchUserData();
     } else {
       setAimedAmounts({
-        protein: {},
-        carbohydrates: {},
-        fruits: {},
         vegetables: {},
+        carbohydrates: {},
+        dairy: {},
+        protein: {},
         fats: {},
+        sweets: {},
       });
     }
   }, [selectedUserId]);
+
+  const inputFiels: {
+    [key in keyof UserNutritionSettings]: {
+      title: string;
+    };
+  } = {
+    vegetables: {
+      title: "Vegetables in gram",
+    },
+    carbohydrates: {
+      title: "Carbohydrates in gram",
+    },
+    dairy: {
+      title: "Dairy in gram",
+    },
+    protein: {
+      title: "Meat in gram",
+    },
+    fats: {
+      title: "Fats and Oils in gram",
+    },
+    sweets: {
+      title: "Sweets in gram",
+    },
+  };
 
   return (
     <Stack spacing={2}>
@@ -165,154 +193,44 @@ export const FoodPyramidSettingsForm = () => {
 
       {selectedUserId && (
         <>
-          <Box>
-            <Typography variant="subtitle1">Protein (g)</Typography>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <TextField
-                label="Min"
-                type="number"
-                size="small"
-                value={aimedAmounts.protein?.min || ""}
-                onChange={(e) =>
-                  handleAimAmountChange(
-                    Number(e.target.value),
-                    "protein",
-                    "min",
-                  )
-                }
-              />
-              <TextField
-                label="Max"
-                type="number"
-                size="small"
-                value={aimedAmounts.protein?.max || ""}
-                onChange={(e) =>
-                  handleAimAmountChange(
-                    Number(e.target.value),
-                    "protein",
-                    "max",
-                  )
-                }
-              />
-            </Stack>
-          </Box>
-
-          <Box>
-            <Typography variant="subtitle1">Carbohydrates (g)</Typography>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <TextField
-                label="Min"
-                type="number"
-                size="small"
-                value={aimedAmounts.carbohydrates?.min || ""}
-                onChange={(e) =>
-                  handleAimAmountChange(
-                    Number(e.target.value),
-                    "carbohydrates",
-                    "min",
-                  )
-                }
-              />
-              <TextField
-                label="Max"
-                type="number"
-                size="small"
-                value={aimedAmounts.carbohydrates?.max || ""}
-                onChange={(e) =>
-                  handleAimAmountChange(
-                    Number(e.target.value),
-                    "carbohydrates",
-                    "max",
-                  )
-                }
-              />
-            </Stack>
-          </Box>
-
-          <Box>
-            <Typography variant="subtitle1">Fruits (servings)</Typography>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <TextField
-                label="Min"
-                type="number"
-                size="small"
-                value={aimedAmounts.fruits?.min || ""}
-                onChange={(e) =>
-                  handleAimAmountChange(Number(e.target.value), "fruits", "min")
-                }
-              />
-              <TextField
-                label="Max"
-                type="number"
-                size="small"
-                value={aimedAmounts.fruits?.max || ""}
-                onChange={(e) =>
-                  handleAimAmountChange(Number(e.target.value), "fruits", "max")
-                }
-              />
-            </Stack>
-          </Box>
-
-          <Box>
-            <Typography variant="subtitle1">Vegetables (servings)</Typography>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <TextField
-                label="Min"
-                type="number"
-                size="small"
-                value={aimedAmounts.vegetables?.min || ""}
-                onChange={(e) =>
-                  handleAimAmountChange(
-                    Number(e.target.value),
-                    "vegetables",
-                    "min",
-                  )
-                }
-              />
-              <TextField
-                label="Max"
-                type="number"
-                size="small"
-                value={aimedAmounts.vegetables?.max || ""}
-                onChange={(e) =>
-                  handleAimAmountChange(
-                    Number(e.target.value),
-                    "vegetables",
-                    "max",
-                  )
-                }
-              />
-            </Stack>
-          </Box>
-
-          <Box>
-            <Typography variant="subtitle1">Fats (g)</Typography>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <TextField
-                label="Min"
-                type="number"
-                size="small"
-                value={aimedAmounts.fats?.min || ""}
-                onChange={(e) =>
-                  handleAimAmountChange(Number(e.target.value), "fats", "min")
-                }
-              />
-              <TextField
-                label="Max"
-                type="number"
-                size="small"
-                value={aimedAmounts.fats?.max || ""}
-                onChange={(e) =>
-                  handleAimAmountChange(Number(e.target.value), "fats", "max")
-                }
-              />
-            </Stack>
-          </Box>
-
-          {/* Add a Save Button here to persist the aimedAmounts for the selectedUser */}
-          {/* <Button variant="contained" color="primary" onClick={() => handleSave(selectedUserId, aimedAmounts)}>
-            Save
-          </Button> */}
+          {Object.entries(inputFiels).map(([key, value]) => {
+            const typedKey = key as keyof UserNutritionSettings;
+            return (
+              <Box key={key}>
+                <Typography variant="subtitle1">{value.title}</Typography>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <TextField
+                    label="Min"
+                    type="number"
+                    size="small"
+                    value={aimedAmounts[typedKey]?.min ?? ""}
+                    InputProps={{ inputProps: { min: 0 } }}
+                    onChange={(e) =>
+                      handleAimAmountChange(
+                        Number(e.target.value),
+                        typedKey,
+                        "min",
+                      )
+                    }
+                  />
+                  <TextField
+                    label="Max"
+                    type="number"
+                    size="small"
+                    InputProps={{ inputProps: { min: 0 } }}
+                    value={aimedAmounts[typedKey]?.max ?? ""}
+                    onChange={(e) =>
+                      handleAimAmountChange(
+                        Number(e.target.value),
+                        typedKey,
+                        "max",
+                      )
+                    }
+                  />
+                </Stack>
+              </Box>
+            );
+          })}
         </>
       )}
     </Stack>

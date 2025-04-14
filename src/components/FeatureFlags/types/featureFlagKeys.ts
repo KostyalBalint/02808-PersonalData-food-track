@@ -12,7 +12,9 @@ export type FeatureFlagKeys =
   | "meal-list-dqq"
   | "dqq-questions-meal-page"
   | "food-nutrition-values"
-  | "dds-score-over-time";
+  | "dds-score-over-time"
+  | "meal-list-food-pyramid"
+  | "analyse-food-pyramid";
 // Add your actual flag keys here as a union type (|)
 
 // If you prefer less strict typing (e.g., for highly dynamic flags),

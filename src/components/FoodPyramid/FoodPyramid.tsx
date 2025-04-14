@@ -78,108 +78,115 @@ export const FoodPyramid: FC<FoodPyramidProps> = ({
         ></div>
 
         {/* Pyramid sections - from top to bottom */}
-        {pyramidData.map((category, index) => {
-          // Calculate dimensions for each row
-          const yPosition = (pyramidData.length - 1 - index) * rowHeight;
-          const topWidth =
-            pyramidWidth *
-            ((pyramidData.length - index - 1) / pyramidData.length);
-          const bottomWidth =
-            pyramidWidth * ((pyramidData.length - index) / pyramidData.length);
+        {pyramidData
+          .map((a) => ({
+            ...a,
+            percentage:
+              isNaN(a.percentage) || !isFinite(a.percentage) ? 0 : a.percentage,
+          }))
+          .map((category, index) => {
+            // Calculate dimensions for each row
+            const yPosition = (pyramidData.length - 1 - index) * rowHeight;
+            const topWidth =
+              pyramidWidth *
+              ((pyramidData.length - index - 1) / pyramidData.length);
+            const bottomWidth =
+              pyramidWidth *
+              ((pyramidData.length - index) / pyramidData.length);
 
-          // Calculate the slope for angled ends (angle in radians)
-          const slopeAngle = Math.atan(
-            (bottomWidth - topWidth) / (2 * rowHeight),
-          );
-          const slopeTan = Math.tan(slopeAngle);
+            // Calculate the slope for angled ends (angle in radians)
+            const slopeAngle = Math.atan(
+              (bottomWidth - topWidth) / (2 * rowHeight),
+            );
+            const slopeTan = Math.tan(slopeAngle);
 
-          return (
-            <div
-              key={category.key}
-              className="absolute flex items-center justify-center"
-              style={{
-                width: `${bottomWidth}px`,
-                height: `${rowHeight}px`,
-                top: `${yPosition}px`,
-                left: "50%",
-                transform: "translateX(-50%)",
-                zIndex: 1,
-              }}
-            >
-              {/* Background for the row */}
-              <div className="absolute w-full h-full opacity-30"></div>
+            return (
+              <div
+                key={category.key}
+                className="absolute flex items-center justify-center"
+                style={{
+                  width: `${bottomWidth}px`,
+                  height: `${rowHeight}px`,
+                  top: `${yPosition}px`,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  zIndex: 1,
+                }}
+              >
+                {/* Background for the row */}
+                <div className="absolute w-full h-full opacity-30"></div>
 
-              {/* Container for the bar */}
-              <div className="relative w-full h-full flex items-center justify-center">
-                {/* Left side of the bar with angled end */}
-                <div
-                  className="absolute h-full opacity-80"
-                  style={{
-                    width: `${Math.min(category.percentage / 2, 50)}%`,
-                    right: "50%",
-                    backgroundColor: category.color,
-                    clipPath: `polygon(${rowHeight * slopeTan}px 0, 100% 0, 100% 100%, 0 100%)`,
-                  }}
-                ></div>
-
-                {/* Right side of the bar with angled end */}
-                <div
-                  className="absolute h-full opacity-80"
-                  style={{
-                    width: `${Math.min(category.percentage / 2, 50)}%`,
-                    left: "50%",
-                    backgroundColor: category.color,
-                    clipPath: `polygon(0 0, 0 100%, 100% 100%, calc(100% - ${rowHeight * slopeTan}px) 0)`,
-                  }}
-                ></div>
-
-                {/* Left overextension (when exceeding 100%) */}
-                {category.percentage > 100 && (
+                {/* Container for the bar */}
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {/* Left side of the bar with angled end */}
                   <div
-                    className="absolute h-full"
+                    className="absolute h-full opacity-80"
                     style={{
-                      width: `calc(${category.percentage - 100}% + ${rowHeight * slopeTan}px)`,
-                      right: `calc(50% + 50%)`,
+                      width: `${Math.min(category.percentage / 2, 50)}%`,
+                      right: "50%",
                       backgroundColor: category.color,
-                      backgroundImage:
-                        "linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%, transparent 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1) 75%, transparent 75%, transparent)",
-                      backgroundSize: "10px 10px",
-                      translate: `${rowHeight * slopeTan}px`,
-                      clipPath: `polygon(${rowHeight * slopeTan}px 0, 100% 0, calc(100% - ${rowHeight * slopeTan}px) 100%, 0 100%)`,
+                      clipPath: `polygon(${rowHeight * slopeTan}px 0, 100% 0, 100% 100%, 0 100%)`,
                     }}
                   ></div>
-                )}
 
-                {/* Right overextension (when exceeding 100%) */}
-                {category.percentage > 100 && (
+                  {/* Right side of the bar with angled end */}
                   <div
-                    className="absolute h-full"
+                    className="absolute h-full opacity-80"
                     style={{
-                      width: `calc(${category.percentage - 100}% + ${rowHeight * slopeTan}px)`,
-                      left: `calc(50% + 50%)`,
+                      width: `${Math.min(category.percentage / 2, 50)}%`,
+                      left: "50%",
                       backgroundColor: category.color,
-                      backgroundImage:
-                        "linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%, transparent 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1) 75%, transparent 75%, transparent)",
-                      backgroundSize: "10px 10px",
-                      translate: `-${rowHeight * slopeTan}px`,
-                      clipPath: `polygon(0 0, calc(100% - ${rowHeight * slopeTan}px) 0, 100% 100%, ${rowHeight * slopeTan}px 100%)`,
+                      clipPath: `polygon(0 0, 0 100%, 100% 100%, calc(100% - ${rowHeight * slopeTan}px) 0)`,
                     }}
                   ></div>
-                )}
 
-                {/* Text content */}
-                <div className="z-10 text-sm w-4/5 flex justify-between">
-                  <div>
-                    <div className="font-medium">{category.name}</div>
-                  </div>
-                  <div className="font-bold">
-                    {category.percentage.toFixed(2)}%
+                  {/* Left overextension (when exceeding 100%) */}
+                  {category.percentage > 100 && (
+                    <div
+                      className="absolute h-full"
+                      style={{
+                        width: `calc(${category.percentage - 100}% + ${rowHeight * slopeTan}px)`,
+                        right: `calc(50% + 50%)`,
+                        backgroundColor: category.color,
+                        backgroundImage:
+                          "linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%, transparent 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1) 75%, transparent 75%, transparent)",
+                        backgroundSize: "10px 10px",
+                        translate: `${rowHeight * slopeTan}px`,
+                        clipPath: `polygon(${rowHeight * slopeTan}px 0, 100% 0, calc(100% - ${rowHeight * slopeTan}px) 100%, 0 100%)`,
+                      }}
+                    ></div>
+                  )}
+
+                  {/* Right overextension (when exceeding 100%) */}
+                  {category.percentage > 100 && (
+                    <div
+                      className="absolute h-full"
+                      style={{
+                        width: `calc(${category.percentage - 100}% + ${rowHeight * slopeTan}px)`,
+                        left: `calc(50% + 50%)`,
+                        backgroundColor: category.color,
+                        backgroundImage:
+                          "linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%, transparent 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1) 75%, transparent 75%, transparent)",
+                        backgroundSize: "10px 10px",
+                        translate: `-${rowHeight * slopeTan}px`,
+                        clipPath: `polygon(0 0, calc(100% - ${rowHeight * slopeTan}px) 0, 100% 100%, ${rowHeight * slopeTan}px 100%)`,
+                      }}
+                    ></div>
+                  )}
+
+                  {/* Text content */}
+                  <div className="z-10 text-sm w-4/5 flex justify-between">
+                    <div>
+                      <div className="font-medium">{category.name}</div>
+                    </div>
+                    <div className="font-bold">
+                      {category.percentage.toFixed(2)}%
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
     </div>
   );

@@ -36,6 +36,7 @@ import {
 import { useAuth } from "../../context/AuthContext.tsx";
 import { ProtectedComponent } from "../../context/ProtectedComponent.tsx";
 import FeatureFlagGuard from "../../components/FeatureFlags/FeatureFlagGuard.tsx";
+import { MealFoodPyramid } from "../../components/FoodPyramid/MealFoodPyramid.tsx";
 
 // Helper to convert Firestore doc to MealData
 const docToMealData = (doc: QueryDocumentSnapshot<DocumentData>): MealData =>
@@ -351,7 +352,14 @@ export const MealListPage = () => {
                       {formatDateDisplay(mealGroup.timestamp)}
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 12, md: 8 }}>
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <ProtectedComponent allowedRoles={["SUBJECT", "ADMIN"]}>
+                      <FeatureFlagGuard flagKey="meal-list-food-pyramid">
+                        <MealFoodPyramid meals={mealGroup.meals} />
+                      </FeatureFlagGuard>
+                    </ProtectedComponent>
+                  </Grid>
+                  <Grid size={{ xs: 12, md: 4 }}>
                     {/* Ensure DqqScoreBarDisplay takes up appropriate space */}
                     <ProtectedComponent allowedRoles={["SUBJECT", "ADMIN"]}>
                       <FeatureFlagGuard flagKey="meal-list-dqq">

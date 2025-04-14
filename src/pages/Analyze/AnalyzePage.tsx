@@ -13,7 +13,7 @@ import {
   initialAnswersState,
   initialDemographicsState,
 } from "../../components/DqqCalculator/dqqQuestions.ts";
-import { Container, Grid, Paper, Typography } from "@mui/material";
+import { Container, Grid, Paper, Stack, Typography } from "@mui/material";
 import {
   collection,
   onSnapshot,
@@ -28,18 +28,20 @@ import { format, toDate } from "date-fns";
 import { mergeMultipleDQQ } from "../../components/DqqCalculator/mergeMultipleDQQ.ts";
 import { ChartToggleWrapper } from "./ChartToggleWrapper.tsx";
 import FeatureFlagGuard from "../../components/FeatureFlags/FeatureFlagGuard.tsx";
+import { MealFoodPyramid } from "../../components/FoodPyramid/MealFoodPyramid.tsx";
 
 export const AnalyzePage = () => {
   const { demographicsComplete, userProfile } = useAuth();
   const demographics = userProfile?.demographics ?? initialDemographicsState;
 
-  const [results, setResults] = useState<
+  const [dailyDqq, setDailyDqq] = useState<
     {
       results: Partial<DqqResultsState>;
       meals: MealData[];
       timestamp: string;
     }[]
   >([]);
+
   const [meals, setMeals] = useState<MealData[]>([] as MealData[]);
 
   const [selectedResult, setSelectedResult] = useState<{
@@ -93,7 +95,7 @@ export const AnalyzePage = () => {
       {} as Record<string, MealData[]>,
     );
 
-    setResults(
+    setDailyDqq(
       Object.keys(mealsByDay)
         .map((dayKey) => {
           const mealsForDay = mealsByDay[dayKey];
@@ -117,11 +119,7 @@ export const AnalyzePage = () => {
     );
   }, [meals]);
 
-  useEffect(() => {
-    console.log({ results });
-  }, [results]);
-
-  const chartData = results.map(
+  const chartData = dailyDqq.map(
     (result, id) =>
       ({
         resultId: id,
@@ -134,18 +132,48 @@ export const AnalyzePage = () => {
       }) as DqqTimeChartDataPoint,
   );
 
-  const onChartHover = useCallback(
-    (dataPoint: DqqTimeChartDataPoint | null) => {
-      if (!dataPoint) return;
-      setSelectedResult(results[dataPoint.resultId]);
+  const onRangeSelect = useCallback(
+    (selected: DqqTimeChartDataPoint[] | DqqTimeChartDataPoint | null) => {
+      if (!selected) return;
+      if (!Array.isArray(selected)) {
+        setSelectedResult(dailyDqq[selected.resultId]);
+      } else {
+        const mealsInRange = selected.reduce((prev, current) => {
+          return [...dailyDqq[current.resultId].meals, ...prev];
+        }, [] as MealData[]);
+
+        const answer = mergeMultipleDQQ(
+          mealsInRange
+            .map((meal) => meal.dqqData?.answers)
+            .map((a) => a) as DqqAnswersMap[],
+        );
+
+        setSelectedResult({
+          meals: mealsInRange,
+          results: calculateDqqIndicators(answer, demographics),
+          timestamp: `${format(mealsInRange[0].createdAt.toDate(), "yyyy-MM-dd")} - ${format(mealsInRange[mealsInRange.length - 1].createdAt.toDate(), "yyyy-MM-dd")}`,
+        });
+      }
     },
-    [results],
+    [dailyDqq],
   );
 
   return (
     <Container sx={{ mt: 2 }}>
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12 }}>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <FeatureFlagGuard flagKey="analyse-food-pyramid">
+            <Paper sx={{ overflow: "hidden" }}>
+              <Stack justifyContent="center">
+                <MealFoodPyramid meals={selectedResult.meals} />
+                <Typography variant="body2" color="textSecondary">
+                  {selectedResult.timestamp}
+                </Typography>
+              </Stack>
+            </Paper>
+          </FeatureFlagGuard>
+        </Grid>
+        <Grid size={{ xs: 12, md: 8 }}>
           <FeatureFlagGuard flagKey="dds-score-over-time">
             <Paper sx={{ py: 2, pr: 2 }}>
               <ChartToggleWrapper
@@ -160,7 +188,7 @@ export const AnalyzePage = () => {
                 {chartData.length > 0 ? (
                   <DqqTimeChart
                     data={chartData}
-                    onHover={onChartHover}
+                    onRangeSelect={onRangeSelect}
                     // chartType prop is now provided by ChartToggleWrapper
                     chartType="line" // Only add this bc. TS
                     showFeatures={{
@@ -240,7 +268,7 @@ export const AnalyzePage = () => {
                       ncdp: true,
                       ncdr: true,
                     }}
-                    onHover={onChartHover}
+                    onRangeSelect={onRangeSelect}
                     // chartType prop is now provided by ChartToggleWrapper
                     chartType="line" // Only add this bc. TS
                   />
