@@ -189,7 +189,6 @@ export const AnalyzePage = () => {
                   <DqqTimeChart
                     data={chartData}
                     onRangeSelect={onRangeSelect}
-                    onHover={onRangeSelect}
                     // chartType prop is now provided by ChartToggleWrapper
                     chartType="line" // Only add this bc. TS
                     showFeatures={{
@@ -270,7 +269,6 @@ export const AnalyzePage = () => {
                       ncdr: true,
                     }}
                     onRangeSelect={onRangeSelect}
-                    onHover={onRangeSelect}
                     // chartType prop is now provided by ChartToggleWrapper
                     chartType="line" // Only add this bc. TS
                   />

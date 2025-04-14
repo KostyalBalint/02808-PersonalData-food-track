@@ -10,12 +10,12 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ReferenceArea,
+  ReferenceArea, // Import ReferenceArea
+  // Brush, // Remove Brush import
 } from "recharts";
 
 // Interfaces remain the same
 export interface DqqTimeChartDataPoint {
-  // ... (interface props)
   resultId: number;
   ncdProtectScore?: number;
   fgdsScore?: number;
@@ -26,7 +26,6 @@ export interface DqqTimeChartDataPoint {
 }
 
 interface DqqTimeChartProps {
-  // ... (interface props)
   data: DqqTimeChartDataPoint[];
   onHover?: (dataPoint: DqqTimeChartDataPoint | null) => void;
   onRangeSelect?: (selectedData: DqqTimeChartDataPoint[] | null) => void;
@@ -37,23 +36,24 @@ interface DqqTimeChartProps {
     gdr?: boolean;
     ncdr?: boolean;
   };
+  // Add optional prop to control selection color/style
   selectionColor?: string;
 }
 
 // Custom Tooltip remains the same
 const CustomTooltip = ({ active, payload, label }: any) => {
-  // ... (tooltip implementation unchanged)
+  // ... (tooltip implementation remains unchanged)
   if (active && payload && payload.length) {
     const dataPoint = payload[0].payload as DqqTimeChartDataPoint;
     return (
       <div
         className="custom-tooltip"
         style={{
-          backgroundColor: "rgba(255, 255, 255, 0.9)",
+          backgroundColor: "rgba(255, 255, 255, 0.9)", // Slightly transparent
           padding: "10px",
           border: "1px solid #ccc",
           fontSize: "0.8rem",
-          boxShadow: "2px 2px 5px rgba(0,0,0,0.1)",
+          boxShadow: "2px 2px 5px rgba(0,0,0,0.1)", // Add subtle shadow
         }}
       >
         <p
@@ -94,22 +94,22 @@ const DqqTimeChart: React.FC<DqqTimeChartProps> = ({
   onRangeSelect,
   chartType,
   showFeatures,
-  selectionColor = "rgba(136, 132, 216, 0.3)",
+  selectionColor = "rgba(136, 132, 216, 0.3)", // Default selection color (semi-transparent ncdp color)
 }) => {
+  // State to manage the selection process
   const [isSelecting, setIsSelecting] = useState(false);
   const [dragStartX, setDragStartX] = useState<string | null>(null);
   const [dragCurrentX, setDragCurrentX] = useState<string | null>(null);
+  // State to hold the *final* selected range for ReferenceArea persistence
   const [finalSelection, setFinalSelection] = useState<{
     x1: string | null;
     x2: string | null;
   }>({ x1: null, x2: null });
-  // State to hold the data selected after mouseup, before mouseleave triggers the callback
-  const [pendingSelectionData, setPendingSelectionData] = useState<
-    DqqTimeChartDataPoint[] | null
-  >(null);
 
+  // Ref to track if mouse moved significantly after mousedown, to differentiate click from drag
   const hasDragged = useRef(false);
 
+  // Find data indices based on timestamp - assumes data is sorted by timestamp
   const findDataIndex = useCallback(
     (timestamp: string | null): number => {
       if (!timestamp) return -1;
@@ -118,42 +118,33 @@ const DqqTimeChart: React.FC<DqqTimeChartProps> = ({
     [data],
   );
 
-  // --- Event Handlers ---
+  // --- Mouse Event Handlers ---
 
   const handleMouseDown = useCallback(
     (e: any) => {
-      // Clear previous selections and pending data on new click/drag start
-      setFinalSelection({ x1: null, x2: null });
-      setPendingSelectionData(null); // Clear any pending selection
-      if (onRangeSelect) {
-        // Notify parent immediately that the previous selection (if any) is cleared
-        // Do this *only* if there was a selection previously (visual or pending)
-        if (finalSelection.x1 || pendingSelectionData) {
-          onRangeSelect(null);
-        }
-      }
-
       // Only start selection if onRangeSelect is provided and click is on the chart plot area
       if (!onRangeSelect || !e || !e.activeLabel) {
-        // If clicking outside or no handler, ensure selection state is off
-        setIsSelecting(false);
-        setDragStartX(null);
-        setDragCurrentX(null);
-        hasDragged.current = false;
+        // If clicking outside a valid label or no handler, clear any existing selection
+        if (finalSelection.x1 || finalSelection.x2) {
+          setFinalSelection({ x1: null, x2: null });
+          onRangeSelect?.(null); // Notify parent
+        }
         return;
       }
 
+      // Reset drag state on new mousedown
       hasDragged.current = false;
       setIsSelecting(true);
-      setDragStartX(e.activeLabel);
-      setDragCurrentX(e.activeLabel);
+      setDragStartX(e.activeLabel); // Record the starting X value (timestamp)
+      setDragCurrentX(e.activeLabel); // Initially current is same as start
+      setFinalSelection({ x1: null, x2: null }); // Clear previous final selection visually during drag
     },
-    [onRangeSelect, finalSelection.x1, pendingSelectionData],
-  ); // Add pendingSelectionData dependency
+    [onRangeSelect, finalSelection.x1, finalSelection.x2],
+  );
 
   const handleMouseMove = useCallback(
     (e: any) => {
-      // Hover logic (remains mostly the same)
+      // Handle hover regardless of selection state
       if (onHover) {
         if (e && e.activePayload && e.activePayload.length > 0) {
           const hoveredTimestamp = e.activeLabel ?? e.activeCoordinate?.label;
@@ -162,77 +153,77 @@ const DqqTimeChart: React.FC<DqqTimeChartProps> = ({
           );
           onHover(dataPoint ?? null);
         } else {
+          // Don't clear hover if actively selecting, causes flicker
           if (!isSelecting) {
-            // Avoid clearing hover during selection drag
             onHover(null);
           }
         }
       }
 
-      // Selection drag update
+      // Handle selection drag
       if (!isSelecting || !e || !e.activeLabel) return;
 
+      // Check if mouse actually moved to differentiate from click
       if (e.activeLabel !== dragStartX && !hasDragged.current) {
         hasDragged.current = true;
       }
-      setDragCurrentX(e.activeLabel);
+
+      setDragCurrentX(e.activeLabel); // Update the current X value
     },
     [isSelecting, onHover, data, dragStartX],
   );
 
   const handleMouseUp = useCallback(() => {
-    if (!isSelecting) return; // Exit if not selecting
-
-    const wasDragging = hasDragged.current; // Capture drag status before resetting
-    const startX = dragStartX; // Capture start X
-    const currentX = dragCurrentX; // Capture end X
-
-    // Reset intermediate drag state *immediately* on mouseup
-    setIsSelecting(false);
-    setDragStartX(null);
-    setDragCurrentX(null);
-    hasDragged.current = false;
-
-    // If it wasn't a drag (just a click) or no valid range, clear everything and exit
-    if (
-      !wasDragging ||
-      !startX ||
-      !currentX ||
-      startX === currentX ||
-      !onRangeSelect
-    ) {
-      setFinalSelection({ x1: null, x2: null }); // Ensure visual area is cleared
-      setPendingSelectionData(null); // Ensure no pending data
-      // Optionally call onRangeSelect(null) on click here if desired,
-      // otherwise it waits for mousedown or mouseleave after pending.
-      // Let's keep it consistent: only fire on mouseleave or mousedown clears.
+    if (!isSelecting || !onRangeSelect) {
+      setIsSelecting(false); // Ensure selection state is reset
       return;
     }
 
-    // --- It was a valid drag ---
-    const idx1 = findDataIndex(startX);
-    const idx2 = findDataIndex(currentX);
+    setIsSelecting(false); // End selection process
+
+    // If the mouse didn't drag significantly, treat as click and clear selection
+    if (
+      !hasDragged.current ||
+      !dragStartX ||
+      !dragCurrentX ||
+      dragStartX === dragCurrentX
+    ) {
+      setDragStartX(null);
+      setDragCurrentX(null);
+      setFinalSelection({ x1: null, x2: null });
+      onRangeSelect(null);
+      hasDragged.current = false; // Reset drag flag
+      return;
+    }
+
+    // Determine the final range boundaries
+    const idx1 = findDataIndex(dragStartX);
+    const idx2 = findDataIndex(dragCurrentX);
 
     if (idx1 === -1 || idx2 === -1) {
       console.error("Could not find data indices for selection range.");
-      setFinalSelection({ x1: null, x2: null }); // Clear visuals
-      setPendingSelectionData(null); // Clear pending
+      setDragStartX(null);
+      setDragCurrentX(null);
+      onRangeSelect(null);
       return;
     }
 
     const startIdx = Math.min(idx1, idx2);
     const endIdx = Math.max(idx1, idx2);
-    const selectedData = data.slice(startIdx, endIdx + 1);
+    const selectedData = data.slice(startIdx, endIdx + 1); // +1 as slice end is exclusive
 
-    // Set final *visual* selection area
+    // Set final selection for persistent ReferenceArea
     const finalX1 = data[startIdx].timestamp;
     const finalX2 = data[endIdx].timestamp;
     setFinalSelection({ x1: finalX1, x2: finalX2 });
 
-    // Store the data to be sent on mouseleave
-    setPendingSelectionData(selectedData.length > 0 ? selectedData : null);
+    // Pass selected data to parent
+    onRangeSelect(selectedData.length > 0 ? selectedData : null);
 
-    // --- DO NOT call onRangeSelect here ---
+    // Reset intermediate drag state
+    setDragStartX(null);
+    setDragCurrentX(null);
+    hasDragged.current = false; // Reset drag flag
   }, [
     isSelecting,
     onRangeSelect,
@@ -243,37 +234,15 @@ const DqqTimeChart: React.FC<DqqTimeChartProps> = ({
   ]);
 
   const handleMouseLeave = useCallback(() => {
-    // 1. Handle case where mouse leaves *during* an active drag
+    // If dragging and mouse leaves chart, end the selection
     if (isSelecting) {
-      // Treat leaving during drag as completing the selection at the current point
-      handleMouseUp(); // This will calculate, set finalSelection, set pendingSelectionData, and reset drag state
-      // Now, fall through to the logic below to immediately fire the callback because we are leaving
+      handleMouseUp();
     }
-
-    // 2. Check if there's a selection pending to be reported
-    if (pendingSelectionData && onRangeSelect) {
-      onRangeSelect(pendingSelectionData);
-      setPendingSelectionData(null); // Clear pending data after firing event
-    } else if (!isSelecting && !finalSelection.x1 && onRangeSelect) {
-      // If leaving and there's no active selection visual and no pending data,
-      // ensure parent knows selection is null (covers edge case after a click-clear)
-      // This might be redundant if mousedown already cleared, but safe to include.
-      // onRangeSelect(null); // Re-evaluate if this is needed / causes issues
-    }
-
-    // 3. Clear hover state
+    // Clear hover state
     onHover?.(null);
-  }, [
-    isSelecting,
-    handleMouseUp,
-    onRangeSelect,
-    pendingSelectionData,
-    onHover,
-    finalSelection.x1,
-  ]); // Add dependencies
+  }, [isSelecting, handleMouseUp, onHover]);
 
-  // --- Memoized Components ---
-
+  // Memoize common chart components
   const commonComponents = useMemo(
     () =>
       [
@@ -284,31 +253,32 @@ const DqqTimeChart: React.FC<DqqTimeChartProps> = ({
           key="tooltip"
           content={<CustomTooltip />}
           allowEscapeViewBox={{ x: true, y: false }}
-        />,
+        />, // Keep tooltip
         <Legend key="legend" />,
-        // ReferenceArea for dragging (only visible *during* drag and *after* actual movement)
+        // --- Add ReferenceArea for selection ---
+        // 1. Render area during drag
         isSelecting && dragStartX && dragCurrentX && hasDragged.current ? (
           <ReferenceArea
             key="drag-selection"
-            x1={dragStartX < dragCurrentX ? dragStartX : dragCurrentX}
-            x2={dragStartX > dragCurrentX ? dragStartX : dragCurrentX}
-            stroke="none"
+            x1={dragStartX < dragCurrentX ? dragStartX : dragCurrentX} // Ensure x1 is left-most
+            x2={dragStartX > dragCurrentX ? dragStartX : dragCurrentX} // Ensure x2 is right-most
+            stroke="none" // No border during drag? Or subtle one?
             fill={selectionColor}
-            ifOverflow="visible"
-            isFront={true}
+            ifOverflow="visible" // Important for seeing area as you drag
+            isFront={true} // Draw on top
           />
         ) : null,
-        // ReferenceArea for the final selection (visible *after* mouseup, before mouseleave)
+        // 2. Render final persistent area after mouse up
         !isSelecting && finalSelection.x1 && finalSelection.x2 ? (
           <ReferenceArea
             key="final-selection"
             x1={finalSelection.x1}
             x2={finalSelection.x2}
-            stroke="rgba(0,0,0,0.5)"
+            stroke="rgba(0,0,0,0.5)" // Add a subtle border to final selection
             strokeWidth={1}
             fill={selectionColor}
             ifOverflow="visible"
-            isFront={true}
+            isFront={true} // Draw on top
           />
         ) : null,
       ].filter(Boolean),
@@ -320,17 +290,17 @@ const DqqTimeChart: React.FC<DqqTimeChartProps> = ({
       selectionColor,
       hasDragged,
     ],
-  );
+  ); // Dependencies
 
+  // Memoize FeatureSeries (remains the same logic)
   const FeatureSeries = useMemo(() => {
-    // ... (FeatureSeries implementation remains unchanged)
     const SeriesComponent = chartType === "line" ? Line : Bar;
     const lineProps = {
       type: "monotone" as const,
       dot: false,
       strokeWidth: 2,
       activeDot: { r: 6 },
-    };
+    }; // Enhance activeDot
     const barProps = {
       /* barSize: 20 */
     };
@@ -355,18 +325,21 @@ const DqqTimeChart: React.FC<DqqTimeChartProps> = ({
       .filter(Boolean);
   }, [chartType, showFeatures]);
 
+  // Select the main chart component based on type
   const ChartComponent = chartType === "line" ? LineChart : BarChart;
 
-  // --- Render ---
   return (
+    // Container needs to allow mouse events through
     <ResponsiveContainer width="100%" height={300}>
       <ChartComponent
         data={data}
         margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+        // Attach mouse handlers directly to the chart component
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseLeave} // MouseLeave triggers the final callback
+        onMouseLeave={handleMouseLeave} // Handle leaving the chart area
+        // syncId="dqqChartSync" // Optional: sync ID
       >
         {commonComponents}
         {FeatureSeries}
