@@ -28,6 +28,7 @@ import { format, toDate } from "date-fns";
 import { mergeMultipleDQQ } from "../../components/DqqCalculator/mergeMultipleDQQ.ts";
 import { ChartToggleWrapper } from "./ChartToggleWrapper.tsx";
 import FeatureFlagGuard from "../../components/FeatureFlags/FeatureFlagGuard.tsx";
+import { MealFoodPyramid } from "../../components/FoodPyramid/MealFoodPyramid.tsx";
 
 export const AnalyzePage = () => {
   const { demographicsComplete, userProfile } = useAuth();
@@ -134,10 +135,13 @@ export const AnalyzePage = () => {
       }) as DqqTimeChartDataPoint,
   );
 
-  const onChartHover = useCallback(
-    (dataPoint: DqqTimeChartDataPoint | null) => {
-      if (!dataPoint) return;
-      setSelectedResult(results[dataPoint.resultId]);
+  const onRangeSelect = useCallback(
+    (dataPoints: DqqTimeChartDataPoint[] | null) => {
+      //if (!dataPoints) return;
+      //const resultIds = dataPoints?.flatMap((dataPoint) => {
+      //  return dataPoint.resultId;
+      //});
+      //setSelectedResult(results[dataPoint.resultId].results);
     },
     [results],
   );
@@ -145,7 +149,14 @@ export const AnalyzePage = () => {
   return (
     <Container sx={{ mt: 2 }}>
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12 }}>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <FeatureFlagGuard flagKey="analyse-food-pyramid">
+            <Paper sx={{ overflow: "hidden" }}>
+              <MealFoodPyramid meals={selectedResult.meals} />
+            </Paper>
+          </FeatureFlagGuard>
+        </Grid>
+        <Grid size={{ xs: 12, md: 8 }}>
           <FeatureFlagGuard flagKey="dds-score-over-time">
             <Paper sx={{ py: 2, pr: 2 }}>
               <ChartToggleWrapper
@@ -160,7 +171,7 @@ export const AnalyzePage = () => {
                 {chartData.length > 0 ? (
                   <DqqTimeChart
                     data={chartData}
-                    onHover={onChartHover}
+                    onRangeSelect={onRangeSelect}
                     // chartType prop is now provided by ChartToggleWrapper
                     chartType="line" // Only add this bc. TS
                     showFeatures={{
@@ -240,7 +251,7 @@ export const AnalyzePage = () => {
                       ncdp: true,
                       ncdr: true,
                     }}
-                    onHover={onChartHover}
+                    onRangeSelect={onRangeSelect}
                     // chartType prop is now provided by ChartToggleWrapper
                     chartType="line" // Only add this bc. TS
                   />

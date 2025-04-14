@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react"; // Added useCallback
 import { collection, getDocs } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 
@@ -10,7 +10,7 @@ import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import { db, functions } from "../../../firebaseConfig.ts";
-import { MealData } from "../../CameraPage/CreateMealWithoutImage.tsx"; // Added for fetching state
+import { MealData } from "../../CameraPage/CreateMealWithoutImage.tsx";
 
 type ProcessingStatus =
   | "idle"
@@ -19,44 +19,68 @@ type ProcessingStatus =
   | "completed"
   | "error";
 
-// --- Firebase Cloud Function Definition (as provided) ---
+// --- Constants ---
+const MAX_CONCURRENCY = 5; // Max jobs running at the same time
+const MAX_RETRIES = 3; // Max retries per job
+const RETRY_DELAY_MS = 1000; // Delay between retries
+
+// --- Firebase Cloud Function Definition ---
 const callCategorizeIngredients = httpsCallable(
-  functions, // Your initialized Firebase Functions instance
+  functions,
   "categorizeIngredients",
 );
 
-// --- Flow Runner Function (as provided) ---
-const runCategorizeFlow = async (mealInput: MealData) => {
-  console.log("Running categorization flow for meal:", mealInput.id);
-  try {
-    // Simulate network delay (optional)
-    // await new Promise(resolve => setTimeout(resolve, 500));
+// --- Flow Runner Function (with Retries) ---
+const runCategorizeFlow = async (
+  mealInput: MealData,
+  maxRetries: number = MAX_RETRIES,
+) => {
+  const mealId = mealInput.id; // Store for consistent logging
+  console.log(`[${mealId}] Starting categorization flow.`);
+  let attempts = 0;
+  let lastError: any = null;
 
-    // Call the actual Cloud Function
-    const result = await callCategorizeIngredients({
-      mealId: mealInput.id,
-    });
-    console.log(`Genkit flow result for ${mealInput.id}:`, result.data); // Log result data
-    // You might want to handle specific results or errors from the function here
-    return { success: true, data: result.data };
-  } catch (error) {
-    console.error(`Error processing meal ${mealInput.id}:`, error);
-    // Rethrow or return an error indicator if needed downstream
-    return { success: false, error: error };
+  while (attempts < maxRetries) {
+    attempts++;
+    try {
+      console.log(`[${mealId}] Attempt ${attempts}/${maxRetries}...`);
+      // Simulate network delay (optional)
+      // await new Promise(resolve => setTimeout(resolve, Math.random() * 1500 + 500)); // Random delay for testing
+
+      const result = await callCategorizeIngredients({ mealId });
+      console.log(
+        `[${mealId}] Attempt ${attempts} successful. Result:`,
+        result.data,
+      );
+      return { success: true, data: result.data, mealId };
+    } catch (error) {
+      lastError = error;
+      console.error(
+        `[${mealId}] Attempt ${attempts}/${maxRetries} failed:`,
+        error,
+      );
+
+      if (attempts < maxRetries) {
+        console.log(`[${mealId}] Retrying in ${RETRY_DELAY_MS / 1000}s...`);
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+      }
+    }
   }
+  console.error(`[${mealId}] All ${maxRetries} attempts failed.`);
+  return { success: false, error: lastError, mealId };
 };
 
-// --- React Component ---
-
+// --- React Component (Modified for Parallelism) ---
 const CalculateNutritionInfoForAll = () => {
   const [status, setStatus] = useState<ProcessingStatus>("idle");
   const [progress, setProgress] = useState<number>(0);
   const [totalMeals, setTotalMeals] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [processedMeals, setProcessedMeals] = useState<string[]>([]); // Optional: Track processed IDs
-  const [failedMeals, setFailedMeals] = useState<string[]>([]); // Optional: Track failed IDs
+  const [processedMeals, setProcessedMeals] = useState<string[]>([]);
+  const [failedMeals, setFailedMeals] = useState<string[]>([]);
 
-  const handleStartProcessing = async () => {
+  // Using useCallback to potentially optimize if passed as prop, though not strictly needed here
+  const handleStartProcessing = useCallback(async () => {
     setStatus("fetching");
     setErrorMessage(null);
     setProgress(0);
@@ -65,18 +89,18 @@ const CalculateNutritionInfoForAll = () => {
     setFailedMeals([]);
 
     try {
-      // 1. Fetch Meals from Firestore
+      // 1. Fetch Meals
       console.log("Fetching meals from Firestore...");
-      const mealsCol = collection(db, "meals"); // Use your actual collection name
+      const mealsCol = collection(db, "meals");
       const mealSnapshot = await getDocs(mealsCol);
       const fetchedMeals: MealData[] = mealSnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...(doc.data() as Omit<MealData, "id">), // Spread other data if MealData has more fields
+        ...(doc.data() as Omit<MealData, "id">),
       }));
 
       if (fetchedMeals.length === 0) {
-        console.log("No meals found to process.");
-        setStatus("completed"); // Or 'idle' maybe?
+        console.log("No meals found.");
+        setStatus("completed");
         setTotalMeals(0);
         return;
       }
@@ -85,57 +109,91 @@ const CalculateNutritionInfoForAll = () => {
       setTotalMeals(fetchedMeals.length);
       setStatus("processing");
 
-      // 2. Process each meal sequentially
-      // Using a standard for...of loop for cleaner async/await handling
-      let currentProgress = 0;
-      const successfulIds: string[] = [];
-      const failedIds: string[] = [];
+      // 2. Process Meals in Parallel with Concurrency Limit
+      const mealQueue = [...fetchedMeals]; // Create a mutable copy for the queue
+      let runningTasks = 0;
+      let completedCount = 0;
+      const results: { success: boolean; mealId: string }[] = []; // Store results
 
-      for (const meal of fetchedMeals) {
-        try {
-          const result = await runCategorizeFlow(meal);
-          if (result.success) {
-            successfulIds.push(meal.id);
-          } else {
-            failedIds.push(meal.id);
-            // Optionally set a general error message if one fails,
-            // or just track failed IDs
-            // setErrorMessage(`Failed to process meal ${meal.id}. Check console.`);
+      // This promise resolves when all meals are processed (or failed after retries)
+      const allProcessingDone = new Promise<void>((resolve) => {
+        const processMeal = async (meal: MealData) => {
+          try {
+            const result = await runCategorizeFlow(meal, MAX_RETRIES);
+            results.push({ success: result.success, mealId: result.mealId });
+
+            // Use functional updates for state safety with concurrent updates
+            if (result.success) {
+              setProcessedMeals((prev) => [...prev, result.mealId]);
+            } else {
+              setFailedMeals((prev) => [...prev, result.mealId]);
+            }
+          } catch (error) {
+            // Should not happen if runCategorizeFlow always returns object, but good practice
+            console.error(
+              `[${meal.id}] Unexpected error in processMeal wrapper:`,
+              error,
+            );
+            results.push({ success: false, mealId: meal.id });
+            setFailedMeals((prev) => [...prev, meal.id]);
+          } finally {
+            // Use functional update for progress
+            setProgress((prev) => prev + 1);
+            completedCount++;
+            runningTasks--;
+            processNext(); // Try to start the next task from the queue
           }
-        } catch (error) {
-          // This catch block might be redundant if runCategorizeFlow handles its own errors
-          console.error(
-            `Unhandled exception during flow for meal ${meal.id}:`,
-            error,
-          );
-          failedIds.push(meal.id);
-          // setErrorMessage(`Error processing meal ${meal.id}. Check console.`);
-        } finally {
-          // Update progress regardless of success/failure
-          currentProgress++;
-          setProgress(currentProgress); // Update state for UI re-render
-          setProcessedMeals([...successfulIds]); // Update state
-          setFailedMeals([...failedIds]); // Update state
-        }
-      }
+        };
 
-      console.log("Processing finished.");
+        const processNext = () => {
+          // If all meals are processed or currently running, check for completion
+          if (completedCount === fetchedMeals.length) {
+            console.log("All meal processing attempts finished.");
+            resolve(); // All tasks are done
+            return;
+          }
+
+          // Start new tasks if concurrency limit allows and queue has items
+          while (runningTasks < MAX_CONCURRENCY && mealQueue.length > 0) {
+            const nextMeal = mealQueue.shift(); // Get next meal from queue
+            if (nextMeal) {
+              runningTasks++;
+              console.log(
+                `[${nextMeal.id}] Starting processing. ${runningTasks} tasks running. Queue size: ${mealQueue.length}`,
+              );
+              processMeal(nextMeal); // Start processing async, DO NOT await here
+            }
+          }
+          // If no tasks are running and the queue isn't empty (shouldn't happen with above logic, but safe check)
+          // or if queue is empty but not all are completed yet, we just wait for running tasks to finish
+          // console.log("Concurrency limit reached or queue empty, waiting for running tasks.");
+        };
+
+        // Start the initial batch of tasks
+        processNext();
+      });
+
+      // Wait for the master promise to resolve
+      await allProcessingDone;
+
+      console.log("Parallel processing finished.");
       setStatus("completed");
-      if (failedIds.length > 0) {
+
+      // Check final results after all tasks are done
+      const finalFailedCount = results.filter((r) => !r.success).length;
+      if (finalFailedCount > 0) {
         setErrorMessage(
-          `${failedIds.length} meal(s) failed to process. Check logs for details.`,
+          `${finalFailedCount} meal(s) failed to process after retries. Check logs.`,
         );
-        // Note: Status remains 'completed', but with an error message.
-        // You could introduce a 'completed_with_errors' status if needed.
       }
     } catch (error: unknown) {
-      console.error("Error during processing:", error);
+      console.error("Error during processing setup or fetch:", error);
       const message =
         error instanceof Error ? error.message : "An unknown error occurred.";
       setErrorMessage(message);
       setStatus("error");
     }
-  };
+  }, []); // Empty dependency array for useCallback, as it doesn't depend on props/state outside its scope
 
   const progressPercentage = totalMeals > 0 ? (progress / totalMeals) * 100 : 0;
 
@@ -151,7 +209,7 @@ const CalculateNutritionInfoForAll = () => {
       }}
     >
       <Typography variant="h5" gutterBottom>
-        Meal Ingredient Categorization
+        Meal Ingredient Categorization (Parallel)
       </Typography>
 
       <Box sx={{ my: 2 }}>
@@ -160,13 +218,13 @@ const CalculateNutritionInfoForAll = () => {
           onClick={handleStartProcessing}
           disabled={status === "fetching" || status === "processing"}
           startIcon={
-            status === "fetching" ? (
+            status === "fetching" || status === "processing" ? ( // Show spinner during both states
               <CircularProgress size={20} color="inherit" />
             ) : null
           }
         >
           {status === "processing"
-            ? "Processing..."
+            ? `Processing (${progress}/${totalMeals})...` // Show progress on button
             : status === "fetching"
               ? "Fetching Meals..."
               : "Start Processing All Meals"}
@@ -176,12 +234,14 @@ const CalculateNutritionInfoForAll = () => {
       {status === "processing" && (
         <Box sx={{ width: "100%", my: 2 }}>
           <Typography variant="body1" gutterBottom>
-            Processing meal {progress} of {totalMeals}...
+            Processing meal {progress} of {totalMeals}... (Max {MAX_CONCURRENCY}{" "}
+            parallel)
           </Typography>
           <LinearProgress variant="determinate" value={progressPercentage} />
+          {/* Displaying failed count live might be slightly delayed due to async state updates */}
           {failedMeals.length > 0 && (
             <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-              Encountered errors on {failedMeals.length} meal(s).
+              Failed so far: {failedMeals.length} meal(s).
             </Typography>
           )}
         </Box>
@@ -193,7 +253,7 @@ const CalculateNutritionInfoForAll = () => {
           sx={{ my: 2 }}
         >
           Processing completed. {processedMeals.length} successful,{" "}
-          {failedMeals.length} failed out of {totalMeals} total meals.
+          {failedMeals.length} failed (after retries) out of {totalMeals} total.
           {errorMessage && ` (${errorMessage})`}
         </Alert>
       )}
@@ -204,15 +264,28 @@ const CalculateNutritionInfoForAll = () => {
         </Alert>
       )}
 
-      {/* Optional: Display lists of processed/failed IDs */}
-      {/*
-             {(processedMeals.length > 0 || failedMeals.length > 0) && (
-                 <Box sx={{mt: 2}}>
-                    {processedMeals.length > 0 && <Typography variant="body2">Successfully processed: {processedMeals.join(', ')}</Typography>}
-                    {failedMeals.length > 0 && <Typography variant="body2" color="error">Failed to process: {failedMeals.join(', ')}</Typography>}
-                 </Box>
-             )}
-             */}
+      {/* Keep displaying final lists after completion */}
+      {(status === "completed" || status === "error") &&
+        (processedMeals.length > 0 || failedMeals.length > 0) && (
+          <Box sx={{ mt: 2, maxHeight: 150, overflowY: "auto" }}>
+            {processedMeals.length > 0 && (
+              <Typography variant="body2">
+                Successfully processed ({processedMeals.length}):{" "}
+                {processedMeals.join(", ")}
+              </Typography>
+            )}
+            {failedMeals.length > 0 && (
+              <Typography
+                variant="body2"
+                color="error"
+                sx={{ mt: processedMeals.length > 0 ? 1 : 0 }}
+              >
+                Failed to process ({failedMeals.length}):{" "}
+                {failedMeals.join(", ")}
+              </Typography>
+            )}
+          </Box>
+        )}
     </Box>
   );
 };

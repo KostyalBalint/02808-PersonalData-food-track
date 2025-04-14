@@ -24,13 +24,21 @@ export interface AimedFoodGroup {
 }
 
 export interface UserNutritionSettings {
-  protein?: AimedFoodGroup;
-  carbohydrates?: AimedFoodGroup;
-  fruits?: AimedFoodGroup;
-  dairy?: AimedFoodGroup;
   vegetables?: AimedFoodGroup;
+  carbohydrates?: AimedFoodGroup;
+  dairy?: AimedFoodGroup;
+  protein?: AimedFoodGroup;
   fats?: AimedFoodGroup;
   sweets?: AimedFoodGroup;
+
+  /*
+  Vegetables
+  Grains
+  Dairy
+  Meat
+  FatsOils
+  Sweet
+   */
 }
 
 export interface UserProfile {

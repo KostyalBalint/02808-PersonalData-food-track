@@ -1,25 +1,25 @@
 import { useAuth } from "../../context/AuthContext.tsx";
 import {
-  Typography,
-  Slider,
   Box,
-  CircularProgress,
-  CardHeader,
   Card,
+  CardHeader,
+  CircularProgress,
   Grid,
+  Slider,
+  Typography,
 } from "@mui/material"; // Import Slider, Box, CircularProgress
 import {
   collection,
   onSnapshot,
   orderBy,
   query,
+  Timestamp,
   where,
-  Timestamp, // Import Timestamp type if not already globally available
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig.ts";
-import { useEffect, useState, useMemo } from "react"; // Import useMemo
-import { MealData, NutritionalData } from "../../../functions/src/constants.ts";
-import { FoodPyramidWrapper } from "./FoodPyramidWrapper.tsx";
+import { useEffect, useMemo, useState } from "react"; // Import useMemo
+import { MealData } from "../../../functions/src/constants.ts";
+import { MealFoodPyramid } from "./MealFoodPyramid.tsx";
 
 // Helper function to format timestamp (milliseconds) to a readable date string
 const formatDateLabel = (timestamp: number): string => {
@@ -41,13 +41,6 @@ export const UserFoodPyramid = () => {
   const [selectedDateRange, setSelectedDateRange] = useState<
     [number, number] | null
   >(null);
-
-  const numberOfSelectedDays =
-    selectedDateRange !== null
-      ? Math.ceil(
-          (selectedDateRange[1] - selectedDateRange[0]) / (24 * 60 * 60 * 1000),
-        )
-      : 0;
 
   // State for the meals filtered by the selected date range
   const [filteredMeals, setFilteredMeals] = useState<MealData[] | null>(null);
@@ -194,91 +187,6 @@ export const UserFoodPyramid = () => {
     setFilteredMeals(filtered);
   }, [allMeals, selectedDateRange]); // Update when source meals or range changes
 
-  const aimedAmountsByCategory = {
-    protein: {
-      min:
-        (userProfile?.nutritionSettings?.protein?.min ?? 0) *
-        numberOfSelectedDays,
-      max:
-        (userProfile?.nutritionSettings?.protein?.max ?? 0) *
-        numberOfSelectedDays,
-    },
-    carbohydrates: {
-      min:
-        (userProfile?.nutritionSettings?.carbohydrates?.min ?? 0) *
-        numberOfSelectedDays,
-      max:
-        (userProfile?.nutritionSettings?.carbohydrates?.max ?? 0) *
-        numberOfSelectedDays,
-    },
-    fruits: {
-      min:
-        (userProfile?.nutritionSettings?.fruits?.min ?? 0) *
-        numberOfSelectedDays,
-      max:
-        (userProfile?.nutritionSettings?.fruits?.max ?? 0) *
-        numberOfSelectedDays,
-    },
-    dairy: {
-      min:
-        (userProfile?.nutritionSettings?.dairy?.min ?? 0) *
-        numberOfSelectedDays,
-      max:
-        (userProfile?.nutritionSettings?.dairy?.max ?? 0) *
-        numberOfSelectedDays,
-    },
-    vegetables: {
-      min:
-        (userProfile?.nutritionSettings?.vegetables?.min ?? 0) *
-        numberOfSelectedDays,
-      max:
-        (userProfile?.nutritionSettings?.vegetables?.max ?? 0) *
-        numberOfSelectedDays,
-    },
-    fats: {
-      min:
-        (userProfile?.nutritionSettings?.fats?.min ?? 0) * numberOfSelectedDays,
-      max:
-        (userProfile?.nutritionSettings?.fats?.max ?? 0) * numberOfSelectedDays,
-    },
-    sweets: {
-      min:
-        (userProfile?.nutritionSettings?.sweets?.min ?? 0) *
-        numberOfSelectedDays,
-      max:
-        (userProfile?.nutritionSettings?.sweets?.max ?? 0) *
-        numberOfSelectedDays,
-    },
-  };
-
-  const defaultNutritionData: NutritionalData = {
-    Grains: 0,
-    Vegetables: 0,
-    Fruits: 0,
-    Protein: 0,
-    Dairy: 0,
-    Fats: 0,
-    Sweets: 0,
-  };
-
-  const consumedByCategory: NutritionalData =
-    filteredMeals?.reduce((prev, current) => {
-      if (current.nutrition) {
-        return {
-          Grains: prev.Grains + (current.nutrition.Grains ?? 0),
-          Vegetables: prev.Vegetables + (current.nutrition.Vegetables ?? 0),
-          Fruits: prev.Fruits + (current.nutrition.Fruits ?? 0),
-          Protein: prev.Protein + (current.nutrition.Protein ?? 0),
-          Dairy: prev.Dairy + (current.nutrition.Dairy ?? 0),
-          Fats: prev.Fats + (current.nutrition.Fats ?? 0),
-          Sweets: prev.Sweets + (current.nutrition.Sweets ?? 0),
-        };
-      }
-      return prev;
-    }, defaultNutritionData) ?? defaultNutritionData;
-
-  console.log(consumedByCategory);
-
   // --- Render Logic ---
 
   if (!completedNutritionFacts) {
@@ -356,12 +264,7 @@ export const UserFoodPyramid = () => {
           </Typography>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          {/* --- Food Pyramid --- */}
-          {/* Pass data derived from `filteredMeals` here */}
-          <FoodPyramidWrapper
-            aimedAmountsByCategory={aimedAmountsByCategory}
-            consumedByCategory={consumedByCategory}
-          />
+          <MealFoodPyramid meals={filteredMeals} />
         </Grid>
       </Grid>
     </Card>

@@ -1,8 +1,7 @@
 // src/components/MealNutritionVisualizer.tsx
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
-  Box,
   Button,
   Card,
   CardContent,
@@ -12,9 +11,9 @@ import {
   List,
   ListItem,
   ListItemText,
+  Stack,
   TextField,
-  Tooltip,
-  Typography, // Import Typography
+  Typography,
 } from "@mui/material";
 import { doc, setDoc } from "firebase/firestore";
 import { db, functions } from "../../firebaseConfig.ts";
@@ -22,6 +21,8 @@ import { MealData, NutritionalData } from "../../../functions/src/constants.ts";
 import { useSnackbar } from "notistack";
 import { debounce } from "../../utils/debounce.ts";
 import { httpsCallable } from "firebase/functions";
+import { InfoTooltip } from "../../components/InfoTooltip.tsx";
+import { nutritionCategoriesInfo } from "../../components/FoodPyramid/FoodPyramidWrapper.tsx";
 
 const callCategorizeIngredients = httpsCallable(
   functions,
@@ -40,24 +41,22 @@ const runCategorizeFlow = async (mealInput: MealData) => {
 
 // Define the expected keys explicitly for iteration order and validation
 const NUTRITIONAL_KEYS: (keyof NutritionalData)[] = [
-  "Grains",
   "Vegetables",
-  "Fruits",
-  "Protein",
+  "Grains",
   "Dairy",
-  "Fats",
-  "Sweets",
+  "Meat",
+  "FatsOils",
+  "Sweet",
 ];
 
 // Helper to create default nutritional data
 const createDefaultNutrition = (): NutritionalData => ({
-  Grains: 0,
   Vegetables: 0,
-  Fruits: 0,
-  Protein: 0,
+  Grains: 0,
   Dairy: 0,
-  Fats: 0,
-  Sweets: 0,
+  Meat: 0,
+  FatsOils: 0,
+  Sweet: 0,
 });
 
 interface MealNutritionVisualizerProps {
@@ -158,33 +157,33 @@ export const MealNutritionVisualizer: React.FC<
     <Card variant="outlined">
       <CardHeader
         title={
-          <Box
-            display="flex"
+          <Stack
+            direction="row"
             justifyContent="space-between"
             alignItems="center"
+            gap={1}
           >
             <Typography variant="h6">
               Nutritional Info for Meal{" "}
               {meal.name ? `"${meal.name}"` : `(ID: ${meal.id})`}
             </Typography>
-            <Tooltip
-              enterTouchDelay={0}
-              title="Calculate nutrition values based on ingredients, this may take up to 30 seconds."
+            <InfoTooltip>
+              Calculate nutrition values based on ingredients, this may take up
+              to 30 seconds.
+            </InfoTooltip>
+            <Button
+              variant="outlined"
+              onClick={handleCategorize}
+              disabled={isCategorizing || isSaving} // Disable if categorizing OR saving
+              startIcon={
+                isCategorizing ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : null
+              }
             >
-              <Button
-                variant="outlined"
-                onClick={handleCategorize}
-                disabled={isCategorizing || isSaving} // Disable if categorizing OR saving
-                startIcon={
-                  isCategorizing ? (
-                    <CircularProgress size={20} color="inherit" />
-                  ) : null
-                }
-              >
-                {isCategorizing ? "Calculating..." : "Calculate Nutrition"}
-              </Button>
-            </Tooltip>
-          </Box>
+              {isCategorizing ? "Calculating..." : "Calculate Nutrition"}
+            </Button>
+          </Stack>
         }
       />
       <CardContent>
@@ -200,9 +199,33 @@ export const MealNutritionVisualizer: React.FC<
                 {" "}
                 {/* Add some padding */}
                 <ListItemText
-                  primary={key}
+                  primary={nutritionCategoriesInfo[key].title}
                   sx={{ flexShrink: 0, mr: 2, minWidth: "100px" }}
-                />{" "}
+                />
+                <InfoTooltip>
+                  <Typography variant="body2">
+                    <Typography
+                      variant="subtitle2"
+                      component="span"
+                      fontWeight="bold"
+                    >
+                      Examples
+                    </Typography>
+                    <br />
+                    {nutritionCategoriesInfo[key].examples}
+                    <br />
+                    <br />
+                    <Typography
+                      variant="subtitle2"
+                      component="span"
+                      fontWeight="bold"
+                    >
+                      Advice
+                    </Typography>
+                    <br />
+                    {nutritionCategoriesInfo[key].advice}
+                  </Typography>
+                </InfoTooltip>
                 {/* Adjust width */}
                 <TextField
                   type="number"
@@ -217,7 +240,7 @@ export const MealNutritionVisualizer: React.FC<
                     step: "0.1",
                     min: "0", // Prevent negative numbers
                   }}
-                  sx={{ maxWidth: "150px" }} // Limit max width
+                  sx={{ maxWidth: "150px", ml: 1 }} // Limit max width
                 />
                 <Typography
                   variant="body2"
