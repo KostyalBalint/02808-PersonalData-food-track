@@ -7,7 +7,7 @@ import { MealDataSchema } from "./meal.types.js";
 import { mergeDQQ_backend } from "../helpers/mergeDQQ.js";
 import { dqqQuestions } from "../helpers/dqqQuestions.js";
 import { calculatePercentage } from "../helpers/calculatePyramidData.js";
-import { NutritionalData } from "../constants.js";
+import { NutritionalData, RecommendationFlowOutput } from "../constants.js";
 
 const AimedFoodGroupSchema = z.object({
   min: z.number().optional(),
@@ -34,69 +34,6 @@ export const MealHistoryInputSchema = z.object({
   userNutritionSettings: UserNutritionSettingsSchema,
 });
 
-const ingredientToEat = z.object({
-  name: z.string().describe("Name of the ingredient"),
-});
-
-export const RecommendationFlowOutput = z.object({
-  categoriesToEat: z
-    .object({
-      wholeGrain: z
-        .array(ingredientToEat)
-        .describe(
-          "Whole grains (like brown rice, whole wheat bread, whole grain cereal)",
-        )
-        .optional(),
-      pulses: z
-        .array(ingredientToEat)
-        .describe("Pulses (beans, peas, lentils)")
-        .optional(),
-
-      vitaminAVegetable: z
-        .array(ingredientToEat)
-        .describe(
-          "Vitamin A-rich orange vegetables (like carrots, pumpkin, orange sweet potatoes)",
-        )
-        .optional(),
-      darkGreenVegetable: z
-        .array(ingredientToEat)
-        .describe(
-          "Dark green leafy vegetables (like spinach, kale, local greens)",
-        )
-        .optional(),
-      otherVegetable: z
-        .array(ingredientToEat)
-        .describe("Other vegetables (like tomatoes, onions, eggplant)")
-        .optional(),
-
-      vitaminAFruit: z
-        .array(ingredientToEat)
-        .describe("Vitamin A-rich fruits (like ripe mangoes, papayas)")
-        .optional(),
-      citrusFruit: z
-        .array(ingredientToEat)
-        .describe("Citrus fruits (like oranges, lemons, tangerines)")
-        .optional(),
-      otherFruit: z
-        .array(ingredientToEat)
-        .describe("Other fruits (like apples, bananas, grapes)")
-        .optional(),
-
-      protein: z
-        .array(ingredientToEat)
-        .describe("Any kind of meat, fish, or even eggs")
-        .optional(),
-      dairy: z
-        .array(ingredientToEat)
-        .describe("Cheese, Yogurt (including yogurt drinks), Milk")
-        .optional(),
-
-      nutsSeeds: z.array(ingredientToEat).describe("Nuts or Seeds").optional(),
-    })
-    .describe(
-      "Food categories that would benefit the user's diet. Each category is optional, only include them if the user should consume food from that category",
-    ),
-});
 // --- Decoupled AI Flow ---
 // This flow now focuses *only* on AI generation based on provided history.
 export const generateRecommendationsFlow = ai.defineFlow(

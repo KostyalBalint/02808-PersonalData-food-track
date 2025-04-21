@@ -9,8 +9,7 @@
     "generate-meta-tag": "node ./node_modules/react-cache-buster/dist/generate-meta-tag.js",
     "serve": "PORT=4433 serve dist",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "postinstall": "cd functions && yarn install --frozen-lockfile --ignore-scripts --prefer-offline --no-progress"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -42,7 +41,8 @@
     "recharts": "^2.15.2",
     "tailwindcss": "^4.0.14",
     "uuid": "^11.1.0",
-    "yarn": "^1.22.22"
+    "yarn": "^1.22.22",
+    "zod": "^3.24.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
