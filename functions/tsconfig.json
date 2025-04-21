@@ -9,14 +9,12 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2017", // Or newer
-    "rootDir": "src",   // Make sure this points to your functions source
-    "baseUrl": "src"    // Often used with rootDir
+    "rootDir": "src", // Make sure this points to your functions source
+    "baseUrl": "src" // Often used with rootDir
   },
   "compileOnSave": true,
   "include": [
-    "src/**/*"         // Only include files within functions/src
+    "src/**/*" // Only include files within functions/src
   ],
-  "exclude": [
-    "node_modules"
-  ],
+  "exclude": ["node_modules"]
 }

@@ -16,6 +16,8 @@ export const MealFoodPyramid: FC<MealFoodPyramidProps> = (props) => {
   const { userProfile } = useAuth();
   const completedNutritionFacts = userProfile?.nutritionSettings !== undefined;
 
+  console.log({ numberOfSelectedDays });
+
   useEffect(() => {
     if (!props.meals) {
       setSortedMeals(null);
@@ -36,8 +38,8 @@ export const MealFoodPyramid: FC<MealFoodPyramidProps> = (props) => {
         sorted[0].createdAt.seconds -
           sorted[sorted.length - 1].createdAt.seconds,
       );
-      const diffInDays = Math.floor(diffInSec / (60 * 60 * 24));
-      setNumberOfSelectedDays(diffInDays + 1);
+      const diffInDays = Math.ceil(diffInSec / (60 * 60 * 24));
+      setNumberOfSelectedDays(diffInDays);
     }
   }, [props.meals]);
 
@@ -113,8 +115,6 @@ export const MealFoodPyramid: FC<MealFoodPyramidProps> = (props) => {
       }
       return prev;
     }, defaultNutritionData) ?? defaultNutritionData;
-
-  console.log(consumedByCategory);
 
   // --- Render Logic ---
 

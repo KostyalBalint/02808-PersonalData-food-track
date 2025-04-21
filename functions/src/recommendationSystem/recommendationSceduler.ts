@@ -1,8 +1,8 @@
 import * as functions from "firebase-functions/v2";
 import * as logger from "firebase-functions/logger";
 import admin from "firebase-admin";
-import { generateAndStoreRecommendations } from "./recommendationFlow.js"; // Import the helper
 import { https } from "firebase-functions";
+import { generateAndStoreRecommendations } from "./generateAndStoreRecommendations.js";
 // Import setGlobalOptions from v2/options
 
 // Set global options like region and secrets (if needed)
@@ -60,9 +60,9 @@ const generateRecommendationsForAllUsers = async () => {
     // Find users with recent activity (e.g., meals in the last 7 days)
     // This query might be inefficient for very large user bases.
     // Consider maintaining a separate list/collection of active users.
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const cutoffTimestamp = admin.firestore.Timestamp.fromDate(sevenDaysAgo);
+    const NdaysAgo = new Date();
+    NdaysAgo.setDate(NdaysAgo.getDate() - 3);
+    const cutoffTimestamp = admin.firestore.Timestamp.fromDate(NdaysAgo);
 
     const recentMealsSnapshot = await db
       .collection("meals")
@@ -80,7 +80,10 @@ const generateRecommendationsForAllUsers = async () => {
         logger.info(`Queueing recommendation generation for user: ${userId}`);
         // Run generation in parallel (with caution for quotas)
         // Consider using Task Queues for more robust scaling if many users
-        await generateAndStoreRecommendations(userId);
+        await generateAndStoreRecommendations({
+          userId: userId,
+          historyDays: 3,
+        });
         count++;
       }
     }

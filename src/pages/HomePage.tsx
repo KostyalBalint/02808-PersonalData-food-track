@@ -51,7 +51,7 @@ export const HomePage = () => {
         <ProtectedComponent allowedRoles={["SUBJECT", "ADMIN"]}>
           <Grid size={{ xs: 12 }}>
             <FeatureFlagGuard flagKey="food-pyramid">
-              <UserFoodPyramid />
+              <UserFoodPyramid daysToShowInPast={3} />
             </FeatureFlagGuard>
           </Grid>
         </ProtectedComponent>

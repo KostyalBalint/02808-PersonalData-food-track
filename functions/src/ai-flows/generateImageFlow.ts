@@ -1,8 +1,9 @@
 // Initialize Genkit and configure the Vertex AI plugin
-import { genkit, z } from "genkit";
-import { vertexAI, imagen3Fast } from "@genkit-ai/vertexai";
+import { z } from "genkit";
+import { imagen3Fast } from "@genkit-ai/vertexai";
 
-const ai = genkit({ plugins: [vertexAI()] });
+import { ai } from "./ai.js";
+
 // Define a Genkit Flow for image generation
 export const generateImageFlow = ai.defineFlow(
   {
