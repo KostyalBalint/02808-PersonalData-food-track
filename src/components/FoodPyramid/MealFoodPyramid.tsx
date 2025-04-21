@@ -16,8 +16,6 @@ export const MealFoodPyramid: FC<MealFoodPyramidProps> = (props) => {
   const { userProfile } = useAuth();
   const completedNutritionFacts = userProfile?.nutritionSettings !== undefined;
 
-  console.log({ numberOfSelectedDays });
-
   useEffect(() => {
     if (!props.meals) {
       setSortedMeals(null);
