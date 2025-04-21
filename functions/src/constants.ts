@@ -1,4 +1,6 @@
 import { Timestamp } from "firebase/firestore";
+import { z } from "genkit";
+import { RecommendationFlowOutput } from "./ai-flows/index.js";
 
 export const units = ["Pcs", "grams", "ml"];
 
@@ -40,9 +42,8 @@ export interface Suggestion {
   // foodGroups?: string[]; // Uncomment if added
 }
 
-export interface RecommendationDoc {
+export type RecommendationDoc = {
   id: string; // Firestore document ID
   userId: string;
   createdAt: Timestamp; // Firestore Timestamp
-  suggestions: Suggestion[];
-}
+} & z.infer<typeof RecommendationFlowOutput>;

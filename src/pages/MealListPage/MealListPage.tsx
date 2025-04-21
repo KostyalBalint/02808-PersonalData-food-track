@@ -317,6 +317,15 @@ export const MealListPage = () => {
     }
   };
 
+  useEffect(() => {
+    if (meals) {
+      console.log("Meals slice");
+      console.log(meals.slice(0, 10));
+      console.log("User nutritions");
+      console.log(userProfile?.nutritionSettings);
+    }
+  }, [meals]);
+
   return (
     <Container maxWidth="xl">
       <Backdrop

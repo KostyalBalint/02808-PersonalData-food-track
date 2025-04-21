@@ -23,6 +23,10 @@ export const UserFoodPyramid: FC<{ daysToShowInPast?: number }> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filteredMeals, setFilteredMeals] = useState<MealData[] | null>(null);
 
+  useEffect(() => {
+    console.log(filteredMeals);
+  }, [filteredMeals]);
+
   // --- Fetch All Meals Data ---
   useEffect(() => {
     if (!userProfile) {

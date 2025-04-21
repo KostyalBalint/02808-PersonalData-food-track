@@ -1,11 +1,9 @@
-import { genkit, z } from "genkit";
-import { gemini20Flash, googleAI } from "@genkit-ai/googleai";
+import { z } from "genkit";
+import { gemini20Flash } from "@genkit-ai/googleai";
 import * as math from "mathjs";
 import Fuse from "fuse.js";
 
-// Initialize Genkit with the Google AI plugin
-// Pass API key during plugin init for cleaner setup, if desired
-const ai = genkit({ plugins: [googleAI()] });
+import { ai } from "./ai.js";
 
 // ----- Tool Definition: fetchIngredientDetails -----
 
@@ -317,27 +315,29 @@ const calculatorTool = ai.defineTool(
 const categorizeIngredientsFlowOutputSchema = z.object({
   Vegetables: z
     .number()
-    .describe("Total estimated amount of Vegetables, salad and fruit"),
+    .describe("Total estimated amount of Vegetables, salad and fruit in grams"),
   Grains: z
     .number()
     .describe(
-      "Total estimated amount of Grains (eg. Wholemeal cereals and breads, potatoes, pasta and rice)",
+      "Total estimated amount of Grains (eg. Wholemeal cereals and breads, potatoes, pasta and rice) in grams",
     ),
   Dairy: z
     .number()
-    .describe("Total estimated amount of Dairy (eg. Milk, yogurt and cheese)"),
+    .describe(
+      "Total estimated amount of Dairy (eg. Milk, yogurt and cheese) in grams",
+    ),
   Meat: z
     .number()
     .describe(
-      "Total estimated amount of Meat, poultry, fish, eggs, beans and nuts",
+      "Total estimated amount of Meat, poultry, fish, eggs, beans and nuts in grams",
     ),
   FatsOils: z
     .number()
-    .describe("Total estimated amount of Fats, spreads and oils"),
+    .describe("Total estimated amount of Fats, spreads and oils in grams"),
   Sweet: z
     .number()
     .describe(
-      "Total estimated amount of Foods and drinks high in fat, sugar and salt",
+      "Total estimated amount of Foods and drinks high in fat, sugar and salt in grams",
     ),
 });
 
@@ -387,7 +387,7 @@ Advice: Choose lean meat, poultry (without skin) and fish. Eat oily fish up to t
 
 *FatsOils:* Fats, spreads and oils
 Examples: Cooking oil, mayonnaise, light spread tub, portioned spread.
-Advice: Use as little as possible. Choose mono or polyunsaturated reduced-fat or light spreads. Choose rapeseed, olive, canola, sunflower or corn oils. Limit mayonnaise, coleslaw and salad dressings as they also contain oil. Always cook with as little fat or oil as possible – grilling, oven-baking, steaming, boiling or stir-frying.
+Advice: Don't extract the oli from meat and dairy. Only count Cooking Oil, Butter, and oil Deep-fried stuff. Generally speaking when cooking a small amount of oil is used, but not more than a few grams.  
 
 *Sweet:* Foods and drinks high in fat, sugar and salt
 Examples: Cola, chocolate, biscuits/crackers, cupcake, sweets/candies, crisps/chips.
