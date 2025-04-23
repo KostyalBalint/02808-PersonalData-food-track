@@ -76,6 +76,7 @@ export const FoodPyramidWrapper: FC<FoodPyramidWrapperProps> = ({
   aimedAmountsByCategory,
 }) => {
   const target = useRef(null);
+  // @ts-ignore
   const [pyramidContainer] = useSize(target);
   const pyramidWidth = Math.min(pyramidContainer - 100, 500);
 
