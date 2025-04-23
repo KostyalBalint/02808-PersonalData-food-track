@@ -13,7 +13,14 @@ import {
   initialAnswersState,
   initialDemographicsState,
 } from "../../components/DqqCalculator/dqqQuestions.ts";
-import { Container, Grid, Paper, Stack, Typography } from "@mui/material";
+import {
+  Container,
+  Divider,
+  Grid,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
 import {
   collection,
   onSnapshot,
@@ -158,6 +165,14 @@ export const AnalyzePage = () => {
     [dailyDqq],
   );
 
+  const onHover = useCallback(
+    (selected: DqqTimeChartDataPoint | null) => {
+      if (!selected) return;
+      setSelectedResult(dailyDqq[selected.resultId]);
+    },
+    [dailyDqq],
+  );
+
   return (
     <Container sx={{ mt: 2 }}>
       <Grid container spacing={2}>
@@ -216,11 +231,14 @@ export const AnalyzePage = () => {
              */}
           </FeatureFlagGuard>
         </Grid>
+        <Grid size={{ xs: 12 }}>
+          <Divider />
+        </Grid>
         <Grid size={{ xs: 12, md: 8, xl: 6 }}>
           <FeatureFlagGuard flagKey="meal-analysis">
             <Paper sx={{ py: 2, pr: 2 }}>
               <ChartToggleWrapper
-                title="DQQ Scores over time" // Pass title to the wrapper
+                title="DQI Scores over time" // Pass title to the wrapper
                 initialChartType="line" // Optional: set default
                 infoToolTip={
                   <>
@@ -233,14 +251,20 @@ export const AnalyzePage = () => {
                         Definition
                       </Typography>
                       <br />
-                      DDS is used to assess the diversity within food groups
-                      based on a healthy and balanced diet. It assesses whether
-                      a person consumes a sufficient variety of foods across
-                      different food groups. Several studies showed that DDS
-                      could be used for the assessment of dietary diversity as a
-                      useful and practical indicator. It has been shown that a
-                      higher dietary diversity is correlated with improving diet
-                      quality.
+                      The global dietary recommendations (GDR) score has two
+                      components, NCD-Protect and NCD-Risk. It is based on food
+                      consumption from nine health-protective food groups
+                      (NCD-Protect) and eight food groups to limit or avoid
+                      (NCD-Risk) during the previous day or night. The score
+                      ranges from 0 to 18 with higher scores indicating more
+                      recommendations met.
+                      <br />
+                      <br />
+                      <i>
+                        (NCD is an abbreviation for non-communicable diseases,
+                        also known as chronic diseases, such as Stroke, Cancer,
+                        Diabetes.)
+                      </i>
                       <br />
                       <br />
                       <Typography
@@ -268,7 +292,7 @@ export const AnalyzePage = () => {
                       ncdp: true,
                       ncdr: true,
                     }}
-                    onRangeSelect={onRangeSelect}
+                    onHover={onHover}
                     // chartType prop is now provided by ChartToggleWrapper
                     chartType="line" // Only add this bc. TS
                   />
