@@ -40,7 +40,7 @@ export const pages: Page[] = [
     path: "/camera",
     component: CameraPage,
     icon: IoCameraOutline,
-    roles: ["ADMIN", "SUBJECT"],
+    roles: ["ADMIN", "SUBJECT", "CONTROLL"],
   },
   {
     name: "Meals",
