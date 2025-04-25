@@ -209,6 +209,7 @@ export const AnalyzePage = () => {
                     showFeatures={{
                       fgds: true,
                     }}
+                    valueRange={[0, 10]}
                   />
                 ) : (
                   // Display message within the wrapper if no data
@@ -293,6 +294,7 @@ export const AnalyzePage = () => {
                       ncdr: true,
                     }}
                     onHover={onHover}
+                    valueRange={[0, 18]}
                     // chartType prop is now provided by ChartToggleWrapper
                     chartType="line" // Only add this bc. TS
                   />

@@ -36,6 +36,7 @@ interface DqqTimeChartProps {
     gdr?: boolean;
     ncdr?: boolean;
   };
+  valueRange?: [number, number];
   // Add optional prop to control selection color/style
   selectionColor?: string;
 }
@@ -95,6 +96,7 @@ const DqqTimeChart: React.FC<DqqTimeChartProps> = ({
   chartType,
   showFeatures,
   selectionColor = "rgba(136, 132, 216, 0.3)", // Default selection color (semi-transparent ncdp color)
+  valueRange,
 }) => {
   // State to manage the selection process
   const [isSelecting, setIsSelecting] = useState(false);
@@ -248,7 +250,7 @@ const DqqTimeChart: React.FC<DqqTimeChartProps> = ({
       [
         <CartesianGrid key="grid" strokeDasharray="3 3" />,
         <XAxis key="x-axis" dataKey="timestamp" />,
-        <YAxis key="y-axis" />,
+        <YAxis key="y-axis" domain={valueRange} />,
         <Tooltip
           key="tooltip"
           content={<CustomTooltip />}
