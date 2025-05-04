@@ -12,20 +12,18 @@ import {
   MenuItem,
   Typography,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 import { MealData } from "../../../functions/src/constants.ts";
 import { format } from "date-fns";
 import React, { useCallback, useState } from "react";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { ConfirmationModal } from "../../components/ConfirmationModal.tsx";
-import { deleteDoc, updateDoc, doc, Timestamp } from "firebase/firestore";
+import { deleteDoc, doc, Timestamp, updateDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig.ts";
 import { deleteObject, getStorage, ref } from "firebase/storage";
 import { useSnackbar } from "notistack";
 import { MealNameChangingModal } from "../../components/MealNameChangingModal.tsx";
 import { DatePickerModal } from "../../components/DatePickerModal.tsx";
-import { Dayjs } from "dayjs";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 
 export const MealCard = (props: { meal: MealData }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
