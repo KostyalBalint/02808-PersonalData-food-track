@@ -26,6 +26,7 @@ import { useSnackbar } from "notistack";
 import ReindexDashboard from "./Admin/ReindexDashboard.tsx";
 import { FoodPyramidSettingsForm } from "../../components/FoodPyramidSettingsForm.tsx";
 import CalculateNutritionInfoForAll from "./Admin/CalculateNutritionInfo.tsx";
+import FirestoreCollectionExporter from "./Admin/FirebaseDataExporter.tsx";
 
 const ColorButton = styled(Button)<ButtonProps>(({ theme }) => ({
   color: theme.palette.getContrastText(grey[200]),
@@ -109,6 +110,10 @@ export const Settings = () => {
               <ReindexDashboard />
               <Divider />
               <CalculateNutritionInfoForAll />
+              <Divider />
+              <FirestoreCollectionExporter
+                collectionNames={["users", "meals", "recommendations"]}
+              />
             </Stack>
           </CardContent>
         </Card>
