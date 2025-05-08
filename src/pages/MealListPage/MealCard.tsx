@@ -12,24 +12,20 @@ import {
   MenuItem,
   Typography,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 import { MealData } from "../../../functions/src/constants.ts";
 import { format } from "date-fns";
 import React, { useCallback, useState } from "react";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { ConfirmationModal } from "../../components/ConfirmationModal.tsx";
-import { deleteDoc, updateDoc, doc, Timestamp } from "firebase/firestore";
+import { deleteDoc, doc, Timestamp, updateDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig.ts";
 import { deleteObject, getStorage, ref } from "firebase/storage";
 import { useSnackbar } from "notistack";
 import { MealNameChangingModal } from "../../components/MealNameChangingModal.tsx";
 import { DatePickerModal } from "../../components/DatePickerModal.tsx";
-import { Dayjs } from "dayjs";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 
 export const MealCard = (props: { meal: MealData }) => {
-  const navigate = useNavigate();
-
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const storage = getStorage();
@@ -99,7 +95,7 @@ export const MealCard = (props: { meal: MealData }) => {
       }
     }
     setModalOpen(false);
-  }, [props.meal, navigate, storage]);
+  }, [props.meal, storage]);
 
   const handleDeleteClick = () => {
     setModalOpen(true);
@@ -107,77 +103,78 @@ export const MealCard = (props: { meal: MealData }) => {
 
   return (
     <>
-      <Card
-        sx={{ cursor: "pointer" }}
-        onClick={() => navigate(`/meal/${props.meal.id}`)}
-      >
-        <CardHeader
-          title={props.meal.name}
-          action={
-            <>
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevents navigation
-                  setAnchorEl(e.currentTarget);
-                }}
-              >
-                <MoreVertIcon />
-              </IconButton>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={() => setAnchorEl(null)}
-                onClick={(e) => e.stopPropagation()} // Prevent menu clicks from triggering navigation
-              >
-                <MenuItem onClick={() => setEditModalOpen(true)}>
-                  Change meal name
-                </MenuItem>
-                <MenuItem onClick={handleDateModalOpen}>Change time</MenuItem>
-                <MenuItem onClick={handleDeleteClick}>Delete</MenuItem>
-              </Menu>
-            </>
-          }
-        />
-        <Box sx={{ position: "relative" }}>
-          <CardMedia
-            component="img"
-            image={props.meal.imageUrl}
-            alt="Uploaded image"
-            loading="lazy"
-            sx={{ aspectRatio: 1 }}
+      <a href={`/meal/${props.meal.id}`} style={{ textDecoration: "none" }}>
+        <Card sx={{ cursor: "pointer" }}>
+          <CardHeader
+            title={props.meal.name}
+            action={
+              <>
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevents navigation
+                    setAnchorEl(e.currentTarget);
+                  }}
+                >
+                  <MoreVertIcon />
+                </IconButton>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={() => setAnchorEl(null)}
+                  onClick={(e) => e.stopPropagation()} // Prevent menu clicks from triggering navigation
+                >
+                  <MenuItem onClick={() => setEditModalOpen(true)}>
+                    Change meal name
+                  </MenuItem>
+                  <MenuItem onClick={handleDateModalOpen}>Change time</MenuItem>
+                  <MenuItem onClick={handleDeleteClick}>Delete</MenuItem>
+                </Menu>
+              </>
+            }
           />
-          <Chip
-            label={format(props.meal.createdAt.toDate(), "HH:mm")}
-            size="small"
-            color="primary"
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              zIndex: 1,
-              m: 1,
-            }}
-          />
-        </Box>
-        <CardContent>
-          <Typography variant="h6">Ingredients:</Typography>
-          <List>
-            {!props.meal.ingredients && <Typography>No ingredients</Typography>}
-            {props.meal.ingredients?.map((ingredient) => (
-              <ListItem
-                key={ingredient.name}
-                disableGutters
-                disablePadding
-                sx={{ ml: 2 }}
-              >
-                <Typography variant="body1">
-                  - {ingredient.amount} {ingredient.unit} {ingredient.name}
-                </Typography>
-              </ListItem>
-            ))}
-          </List>
-        </CardContent>
-      </Card>
+          <Box sx={{ position: "relative" }}>
+            <CardMedia
+              component="img"
+              image={props.meal.imageUrl}
+              alt="Uploaded image"
+              loading="lazy"
+              sx={{ aspectRatio: 1 }}
+            />
+            <Chip
+              label={format(props.meal.createdAt.toDate(), "HH:mm")}
+              size="small"
+              color="primary"
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                zIndex: 1,
+                m: 1,
+              }}
+            />
+          </Box>
+          <CardContent>
+            <Typography variant="h6">Ingredients:</Typography>
+            <List>
+              {!props.meal.ingredients && (
+                <Typography>No ingredients</Typography>
+              )}
+              {props.meal.ingredients?.map((ingredient) => (
+                <ListItem
+                  key={ingredient.name}
+                  disableGutters
+                  disablePadding
+                  sx={{ ml: 2 }}
+                >
+                  <Typography variant="body1">
+                    - {ingredient.amount} {ingredient.unit} {ingredient.name}
+                  </Typography>
+                </ListItem>
+              ))}
+            </List>
+          </CardContent>
+        </Card>
+      </a>
       <ConfirmationModal
         open={isModalOpen}
         onClose={handleModalClose}
