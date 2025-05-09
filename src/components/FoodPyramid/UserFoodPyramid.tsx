@@ -72,7 +72,7 @@ export const UserFoodPyramid: FC<{ daysToShowInPast?: number }> = ({
       return;
     }
 
-    const now = new Date();
+    const now = new Date("2025-04-30");
     // Calculate the cutoff date by subtracting daysToShowInPast from today.
     // Set time to the very beginning of that day (00:00:00.000)
     const cutoffDate = new Date(now);
